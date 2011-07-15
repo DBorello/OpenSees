@@ -131,6 +131,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\CableMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Cast.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Cast.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete01.cpp">
 			</File>
 			<File

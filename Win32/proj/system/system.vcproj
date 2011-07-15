@@ -431,6 +431,10 @@
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DistributedDiagonalSolver.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="itpack"
+			Filter="">
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
