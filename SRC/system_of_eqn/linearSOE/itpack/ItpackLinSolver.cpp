@@ -173,6 +173,15 @@ ItpackLinSolver::recvSelf(int commitTag, Channel &theChannel,
 }
 
 #ifdef _WIN32
+#define DFAULT dfault_
+#define VFILL  vfill_
+#define JCG    jcg_
+#define JSI    jsi_
+#define SOR    sor_
+#define SSORCG ssorcg_
+#define SSORSI ssorsi_
+#define RSCG   rscg_
+#define RSSI   rssi_
 
 extern "C" int _stdcall DFAULT(int *IPARM, double *RPARM);
 
@@ -206,6 +215,7 @@ extern "C" int _stdcall RSSI(int *N, int *IA, int *JA, double *A, double *RHS,
 			     double *U, int *IWKSP, int *NW, double *WKSP,
 			     int *IPARM, double *RPARM, int *IER);
 
+/* NOT HERE B..A..
 #define DFAULT dfault_
 #define VFILL  vfill_
 #define JCG    jcg_
@@ -215,6 +225,7 @@ extern "C" int _stdcall RSSI(int *N, int *IA, int *JA, double *A, double *RHS,
 #define SSORSI ssorsi_
 #define RSCG   rscg_
 #define RSSI   rssi_
+*/
 
 #else
 
