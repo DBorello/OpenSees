@@ -65,6 +65,7 @@ OPERATING_SYSTEM = LINUX
 
 DEBUG_MODE = NO_DEBUG
 #DEBUG_MODE = DEBUG
+#RELIABILITY = YES_RELIABILITY
 RELIABILITY = NO_RELIABILITY
 
 BASE		= /usr/local
@@ -77,7 +78,7 @@ GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
 AGL_OBJS = $(FE)/renderer/AGL_Device.o
 
 
-HAVE_BLAS = YES
+#HAVE_BLAS = YES
 
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 HAVE_BLAS = NO
@@ -89,6 +90,7 @@ CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
 BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
 CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
 
+
 ifeq ($(HAVE_BLAS), YES) 
 
 BLASdir =
@@ -97,26 +99,31 @@ CBLAS_LIBRARY =
 
 endif
 
+AMDdir    = $(HOME)/OpenSees/OTHER/AMD
 LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
-SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
+#SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_4.1/SRC
+#SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
+SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.5/SRC
 ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir       = $(HOME)/OpenSees/OTHER/METIS
+ITPACKdir       = $(HOME)/OpenSees/OTHER/ITPACK
 SRCdir       = $(HOME)/OpenSees/SRC
 
 DIRS        = $(BLASdir) \
 	$(CBLASdir) \
 	$(LAPACKdir) \
+	$(AMDdir) \
 	$(SUPERLUdir) \
 	$(SUPERLU_DISTdir) \
 	$(ARPACKdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir)
+	$(METISdir) \
+	$(ITPACKdir) 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
-
 
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 DIRS        = $(BLASdir) \
@@ -124,9 +131,11 @@ DIRS        = $(BLASdir) \
 	$(LAPACKdir) \
 	$(SUPERLUdir) \
 	$(ARPACKdir) \
+	$(AMDdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir)
+	$(METISdir) \
+	$(ITPACKdir) 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = 
 
@@ -144,9 +153,11 @@ PROGRAMMING_FLAG = -D_PARALLEL_PROCESSING
 DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
 	      $(ARPACKdir) \
+	      $(AMDdir) \
               $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 
 endif
@@ -164,8 +175,10 @@ DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
+	      $(AMDdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(ITPACKdir) \
 	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 endif
@@ -191,6 +204,7 @@ NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
 MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
 BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
+ITPACK_LIBRARY  = $(HOME)/lib/libItpack.a
 #CLAPACK_LIBRARY  = $(HOME)/OpenSees/OTHER/CLAPACK-3.1.1/lapack_MAC.a
 CLAPACK_LIBRARY  = 
 #CLBLAS_LIBRARY  = $(HOME)/OpenSees/OTHER/CLAPACK-3.1.1/blas_MAC.a
@@ -199,22 +213,31 @@ CLBLAS_LIBRARY  =
 LIBF2C_LIBRARY  = 
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
 ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
+AMD_LIBRARY  = $(HOME)/lib/libAMD.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
 TCL_LIBRARY = -framework Tcl -framework Tk
 
+
+OPTIMIZATION_LIBRARY = 
+RELIABILITY_LIBRARY = 
+
+#OPTIMIZATION_LIBRARY = $(HOME)/lib/libOptimization.a
+#RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 WIPE_LIBS	= $(FE_LIBRARY) \
 		$(NDARRAY_LIBRARY) \
 		$(MATMOD_LIBRARY) \
 		$(LAPACK_LIBRARY) \
+		$(AMD_LIBRARY) \
 		$(BLAS_LIBRARY) \
 		$(CLBLAS_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(ARPACK_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
-	        $(METIS_LIBRARY)
+	        $(METIS_LIBRARY) \
+	        $(ITPACK_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -259,7 +282,7 @@ OS_FLAG = -D_MACOSX
 # modified as optimizaton currently causing problems with Steeln01 code
 ifeq ($(DEBUG_MODE), DEBUG)
 
-C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  $(OS_FLAG) -D_HTTPS \
+C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_AMDn $(OS_FLAG) -D_HTTPS \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
 	$(PROGRAMMING_FLAG) -g -O0 -ffloat-store 
 CFLAGS          = -Wall -O0 -g
@@ -272,9 +295,9 @@ LINKFLAGS       = -g -pg
 
 else
 
-C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_MACOSX -D_HTTPS \
+C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_AMDn -D_MACOSX -D_HTTPS \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
-	$(PROGRAMMING_FLAG) -O3 -ffloat-store 
+	$(PROGRAMMING_FLAG) -O3 -ffloat-store -D_NO_PARALLEL_FILESYSTEM
 CFLAGS          = -Wall -O2
 FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore
 
@@ -417,12 +440,16 @@ MACHINE_NUMERICAL_LIBS  =  \
 		$(ARPACK_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
+	        $(AMD_LIBRARY) \
+	        $(ITPACK_LIBRARY) \
 	        $(LAPACK_LIBRARY) \
 	        $(CLAPACK_LIBRARY) \
 	        $(CLBLAS_LIBRARY) \
 		$(BLAS_LIBRARY) \
 		$(CBLAS_LIBRARY) \
 		$(GRAPHIC_LIBRARY)\
+		$(RELIABILITY_LIBRARY)\
+		$(OPTIMIZATION_LIBRARY)\
 		$(FORTO) \
 		$(CUDA_LIB) \
 		-ldl -L/usr/local/lib /usr/local/lib/libgfortran.a
@@ -431,9 +458,10 @@ MACHINE_NUMERICAL_LIBS  =  \
 MACHINE_SPECIFIC_LIBS = $(AGL_OBJS) -lssl
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+	     $(DISTRIBUTED_SUPERLU_LIBRARY) \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
-	$(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
+	$(LAPACK_LIB) $(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
 	-L/usr/local/openmpi-1.2.6/lib -lmpi_cxx -lmpi_f77 -lmpi -lopen-rte -lopen-pal
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
@@ -458,15 +486,19 @@ MACHINE_INCLUDES        = -I/usr/include \
 			  -I/usr/local/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
-			  -I$(HOME)/include -I$(HOME)/blitz \
+			  -I$(HOME)/include \
+			  -I$(HOME)/blitz \
 			  -I$(CUDA_DIR)/include
 else
 MACHINE_INCLUDES        = -I/usr/include \
 			  -I/usr/local/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
-			  -I$(FE)/../OTHER/SuperLU_DIST_2.0/SRC \
-			  -I$(HOME)/include -I$(HOME)/blitz $(MUMPS_INCLUDE) -I$(CUDA_DIR)/include
+			  -I$(SUPERLU_DISTdir) \
+			  -I$(HOME)/include \
+			  -I$(HOME)/blitz \
+			  $(MUMPS_INCLUDE) \
+			  -I$(CUDA_DIR)/include
 endif
 
 # this file contains all the OpenSees/SRC includes
