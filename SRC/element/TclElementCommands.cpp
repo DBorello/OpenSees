@@ -103,6 +103,7 @@ extern void *OPS_BeamEndContact3D(void);
 extern void *OPS_TFP_Bearing(void);
 extern void *OPS_CoupledZeroLength(void);
 extern void *OPS_FourNodeQuad3d(void);
+extern void *OPS_Tri31(void);
 extern void *OPS_SSPquad(void);
 extern void *OPS_SSPquadUP(void);
 
@@ -528,6 +529,16 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"BeamEndContact3d") == 0) || (strcmp(argv[1],"BeamEndContact3D") == 0)) {
     
     void *theEle = OPS_BeamEndContact3D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"Tri31") == 0) || (strcmp(argv[1],"tri31") == 0)) {
+    
+    void *theEle = OPS_Tri31();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {
