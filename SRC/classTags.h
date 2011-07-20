@@ -423,6 +423,7 @@
 #define ELE_TAG_LargeDispBeamColumn3d	 6002
 #define ELE_TAG_FourNodeQuad	 1010
 #define ELE_TAG_FourNodeQuad3d	 1011
+#define ELE_TAG_Tri31	         1012     //Added by Roozbeh Geraili Mikola
 #define ELE_TAG_BeamWithHinges2d  401
 #define ELE_TAG_BeamWithHinges3d  402
 #define ELE_TAG_EightNodeBrick   7001

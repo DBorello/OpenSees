@@ -173,6 +173,7 @@
 #include <ElasticBeam3d.h>
 #include <ForceBeamColumn2d.h>
 #include <ForceBeamColumn3d.h>
+#include <Tri31.h>
 
 #include <Nine_Four_Node_QuadUP.h>
 #include <BrickUP.h>
@@ -521,6 +522,9 @@ FEM_ObjectBrokerAllClasses::getNewElement(int classTag)
 	     
 	case ELE_TAG_FourNodeQuad:  
 	     return new FourNodeQuad(); 	     
+
+	case ELE_TAG_Tri31:  
+	     return new Tri31(); 	     
 	     
 	case ELE_TAG_ElasticBeam2d:
 		return new ElasticBeam2d();

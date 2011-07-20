@@ -608,6 +608,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/twoNodeLink/TwoNodeLink.o \
 	$(FE)/element/pyMacro/PY_Macro2D.o \
 	$(FE)/element/twoNodeLink/TclTwoNodeLinkCommand.o \
+	$(FE)/element/triangle/Tri31.o \
 	$(FE)/element/UWelements/SSPquad.o \
 	$(FE)/element/UWelements/SSPquadUP.o
 
@@ -839,6 +840,8 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/bandSPD/BandSPDLinSolver.o \
 	$(FE)/system_of_eqn/linearSOE/bandSPD/DistributedBandSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.o \
+	$(FE)/system_of_eqn/linearSOE/itpack/ItpackLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/itpack/ItpackLinSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalDirectSolver.o \
