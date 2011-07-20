@@ -1140,6 +1140,16 @@
 				RelativePath="..\..\..\SRC\element\UWelements\SSPquadUP.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="triangle"
+			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\element\triangle\Tri31.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\triangle\Tri31.h">
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\..\SRC\element\NewElement.cpp">
 		</File>
