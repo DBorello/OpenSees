@@ -47,8 +47,8 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
-#PROGRAMMING_MODE = SEQUENTIAL
-PROGRAMMING_MODE = PARALLEL
+PROGRAMMING_MODE = SEQUENTIAL
+#PROGRAMMING_MODE = PARALLEL
 #PROGRAMMING_MODE = PARALLEL_INTERPRETERS
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
@@ -71,11 +71,14 @@ BASE		= /usr/local
 HOME		= /Users/fmk
 FE		= $(HOME)/OpenSees/SRC
 
-GRAPHICS = UsingOpenGL
-GRAPHIC_FLAG = -D_AGL
-GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
-AGL_OBJS = $(FE)/renderer/AGL_Device.o
-
+GRAPHICS = NONE
+#GRAPHIC_FLAG = -D_AGL
+#GRAPHIC_FLAG = -D_AGLX
+#GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
+#AGL_OBJS = $(FE)/renderer/AGL_Device.o
+GRAPHIC_FLAG = -D_NOGRAPHICS
+GRAPHIC_LIBRARY =
+AGL_OBJS = 
 
 #HAVE_BLAS = YES
 
@@ -100,11 +103,12 @@ endif
 
 AMDdir    = $(HOME)/OpenSees/OTHER/AMD
 LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
-SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_4.1/SRC
+SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.5/SRC
 ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir       = $(HOME)/OpenSees/OTHER/METIS
+METISdir       = $(HOME)/OpenSees/OTHER/ITPACK
 SRCdir       = $(HOME)/OpenSees/SRC
 
 DIRS        = $(BLASdir) \
@@ -116,7 +120,8 @@ DIRS        = $(BLASdir) \
 	$(ARPACKdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir) 
+	$(METISdir) \
+	$(ITPACKdir) 
 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
@@ -130,7 +135,8 @@ DIRS        = $(BLASdir) \
 	$(AMDdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir)
+	$(METISdir) \
+	$(ITPACKdir) 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = 
 
@@ -152,6 +158,7 @@ DIRS        = $(SUPERLUdir) \
               $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(ITPACKdir) \
 	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 
@@ -173,6 +180,7 @@ DIRS        = $(SUPERLUdir) \
 	      $(AMDdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(ITPACKdir) \
 	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 endif
@@ -211,6 +219,7 @@ ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 AMD_LIBRARY  = $(HOME)/lib/libAMD.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
+ITPACK_LIBRARY   = $(HOME)/lib/libItpack.a
 TCL_LIBRARY = -framework Tcl -framework Tk
 
 
@@ -225,7 +234,8 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(ARPACK_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
-	        $(METIS_LIBRARY)
+	        $(METIS_LIBRARY) \
+	        $(ITPACK_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -237,8 +247,8 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 
 # Compilers
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
-CC++	= g++
-CC      = gcc
+CC++	= /usr/local/bin/g++
+CC      = /usr/local/bin/gcc
 FC	= /usr/local/bin/gfortran
 LINKER          = $(CC++)
 LINKFLAGS       =  -Wl 
@@ -429,6 +439,7 @@ MACHINE_NUMERICAL_LIBS  =  \
 		$(SUPERLU_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
 	        $(AMD_LIBRARY) \
+	        $(ITPACK_LIBRARY) \
 	        $(LAPACK_LIBRARY) \
 	        $(CLAPACK_LIBRARY) \
 	        $(CLBLAS_LIBRARY) \

@@ -110,8 +110,15 @@ ContactMaterial2D::ContactMaterial2D (int tag, double mu, double G, double c, do
    
 //null constructor
 ContactMaterial2D::ContactMaterial2D () 
+ : NDMaterial(0, ND_TAG_ContactMaterial2D),
+   strain_vec(3),
+   stress_vec(3),
+   tangent_matrix(3,3)
 {
-        ContactMaterial2D::ContactMaterial2D (0, 0.0, 1.0, 0.0, 0.0);
+        frictionCoeff = 0.0;
+        stiffness = 1.0;
+        cohesion  = 0.0;
+	tensileStrength = 0.0;
 }
 
 //destructor

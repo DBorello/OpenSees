@@ -410,6 +410,8 @@ ProfileSPDLinDirectSolver::factor(int n)
 		opserr << ", " << aii << ")\n"; 
 		return(-2);
 	    }		
+	    
+
 	    invD[i] = 1.0/aii; 
 	}
 

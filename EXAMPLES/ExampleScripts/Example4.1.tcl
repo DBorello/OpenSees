@@ -24,7 +24,7 @@ set pid [getPID]
 
 
 # Parameter identifying the number of bays
-set numBay          3
+set numBay          10
 
 # ------------------------------
 # Start of model generation
@@ -32,6 +32,8 @@ set numBay          3
 
 # Create ModelBuilder (with two-dimensions and 3 DOF/node)
 model basic -ndm 2 -ndf 3
+
+set m 10.0
 
 # Create nodes
 # ------------
@@ -47,8 +49,8 @@ for {set i 0} {$i <= $numBay} {incr i 1} {
 
     #             tag             X   Y
     node           $nodeID    $xDim  0
-    node  [expr $nodeID+1]    $xDim 180
-    node  [expr $nodeID+2]    $xDim 324
+    node  [expr $nodeID+1]    $xDim 180 -mass $m $m 0
+    node  [expr $nodeID+2]    $xDim 324 -mass $m $m 0
 
     incr nodeID 3
 }
@@ -306,6 +308,8 @@ if {$displayMode == "displayON"} {
 integrator LoadControl 1.0 4 0.02 2.0
 
 # Perform the analysis
+
+eigen 2
 
 # Perform the pushover analysis
 # Set some parameters

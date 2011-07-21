@@ -131,11 +131,37 @@ ContactMaterial3D::ContactMaterial3D (int tag, double mu, double Gmod, double c,
    
 //null constructor
 ContactMaterial3D::ContactMaterial3D ()
+ : NDMaterial(0, ND_TAG_ContactMaterial3D),
+   s_e_n(2),
+   s_e_nplus1(2),
+   r_nplus1(2),
+   g(2,2),
+   G(2,2),
+   strain_vec(4),
+   stress_vec(4),
+   tangent_matrix(4,4)
 {
 #ifdef DEBUG
         opserr << "ContactMaterial3D::ContactMaterial3D()" << endln;
 #endif
-        ContactMaterial3D::ContactMaterial3D (0, 0.0, 1.0, 0.0, 0.0);
+        frictionCoeff = 0.0;
+        stiffness = 1.0;
+        cohesion  = 0.0;
+	tensileStrength = 0.0;
+	
+	MyTag = 0;
+	
+	if (matCount == 0) {
+	  frictionCoeffx = new double[matCount+20];
+	  stiffnessx = new double[matCount+20];
+	}
+	
+	frictionCoeffx[matCount] = 0.0;
+	stiffnessx[matCount] = 1.0;
+	matN = matCount;
+	matCount++;
+	
+        this->zero();
 }
 
 //destructor

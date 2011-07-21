@@ -37,6 +37,7 @@
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
 
+#include <Parameter.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -866,4 +867,39 @@ CorotTruss::getResponse(int responseID, Information &eleInfo)
     default:
         return 0;
     }
+}
+
+int
+CorotTruss::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  // Cross sectional area of the truss
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(1, this);
+  
+  // Explicit specification of a material parameter
+  if (strstr(argv[0],"material") != 0) {
+    if (argc < 2)
+      return -1;
+    else
+      return theMaterial->setParameter(&argv[1], argc-1, param);
+  } 
+  
+  // Otherwise, send it to the material
+  else
+    return theMaterial->setParameter(argv, argc, param);
+}
+
+int
+CorotTruss::updateParameter (int parameterID, Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    A = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
 }

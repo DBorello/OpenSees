@@ -38,6 +38,8 @@
 #include <FEM_ObjectBroker.h>
 #include <stdlib.h>
 #include <MaterialResponse.h>
+#include <math.h>
+#include <float.h>
 
 #include <OPS_Globals.h>
 
@@ -128,6 +130,9 @@ SeriesMaterial::setTrialStrain(double newStrain, double strainRate)
 {
 	// Using the incremental iterative strain
 	double dv = newStrain-Tstrain;
+	
+	if (fabs(dv) < DBL_EPSILON)
+	  return 0;
 
 	Tstrain = newStrain;
 

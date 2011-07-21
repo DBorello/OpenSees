@@ -100,8 +100,8 @@ class Truss : public Element
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int		   addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
     int setParameter(const char **argv, int argc, Parameter &param);
-    int            updateParameter(int parameterID, Information &info);
-    int            activateParameter(int parameterID);
+    int updateParameter(int parameterID, Information &info);
+    int activateParameter(int parameterID);
     const Vector & getResistingForceSensitivity(int gradNumber);
     const Matrix & getKiSensitivity(int gradNumber);
     const Matrix & getMassSensitivity(int gradNumber);

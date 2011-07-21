@@ -5317,6 +5317,9 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     else if ((strcmp(argv[loc],"SparseGeneral") == 0) || (strcmp(argv[loc],"-SparseGeneral") == 0) 
 	     || (strcmp(argv[loc],"-SuperLU") == 0) || (strcmp(argv[loc],"SuperLU") == 0))
       typeSolver = 7;
+
+    else if ((strcmp(argv[loc],"ProfileSPD") == 0) || (strcmp(argv[loc],"-ProfileSPD") == 0))
+      typeSolver = 8;
     
     else if ((strcmp(argv[loc],"fullGenLapack") == 0) || 
 	     (strcmp(argv[loc],"-fullGenLapack") == 0))
@@ -5428,6 +5431,18 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	
 	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
 	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theAnalysisModel);    
+
+      } else if (typeSolver == 8) {
+	
+	ProfileSPDLinDirectSolver *theLinSolver = new ProfileSPDLinDirectSolver(); 	
+	LinearSOE *theLinSOE = 0;
+#ifdef _PARALLEL_PROCESSING
+	theLinSOE  = new DistributedProfileSPDLinSOE(*theSolver);
+#else
+	theLinSOE = new ProfileSPDLinSOE(*theLinSolver);      
+#endif
+
+	theEigenSOE = new ArpackSOE(*theLinSOE, shift);    
 	
       }  else if (typeSolver == 5) {  
 	

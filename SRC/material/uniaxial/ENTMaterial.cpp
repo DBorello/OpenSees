@@ -69,7 +69,7 @@ ENTMaterial::setTrialStrain(double strain, double strainRate)
 double 
 ENTMaterial::getStrain(void)
 {
-	return trialStrain;
+  return trialStrain;
 }
 
 double 

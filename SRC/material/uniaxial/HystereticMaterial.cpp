@@ -164,6 +164,9 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
 
   Tstrain = strain;
   double dStrain = Tstrain - Cstrain;
+
+  if (fabs(dStrain) < DBL_EPSILON)
+    return 0;
   
   TloadIndicator = CloadIndicator;
   

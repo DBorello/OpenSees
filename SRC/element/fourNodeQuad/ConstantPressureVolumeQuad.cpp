@@ -81,7 +81,7 @@ ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad( ) :
 Element( 0, ELE_TAG_ConstantPressureVolumeQuad ),
 connectedExternalNodes(4), load(0)
 { 
-  for (int i=0; i<9; i++)
+  for (int i=0; i<4; i++)
     materialPointers[i] = 0;
 }
 
@@ -671,8 +671,8 @@ ConstantPressureVolumeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 int
 ConstantPressureVolumeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 {
-  static const int numberGauss = 9 ;
-  static const int numberNodes = 9 ;
+  static const int numberGauss = 4 ;
+  static const int numberNodes = 4 ;
   static const int ndf = 2 ; 
 
   int i;

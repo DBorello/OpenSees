@@ -89,6 +89,9 @@ class CorotTruss : public Element
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
+
   protected:
     
   private:
@@ -100,11 +103,11 @@ class CorotTruss : public Element
     int numDIM;                     // number of dimensions
 
     double Lo;	        // initial length of truss
-    double Ln;		    // current length of truss
-    double d21[3];	    // current displacement offsets in basic system
+    double Ln;		// current length of truss
+    double d21[3];      // current displacement offsets in basic system
     double v21[3];      // current velocity offsets in basic system
     double A; 	        // area of CorotTruss
-    double rho; 	    // mass density per unit length
+    double rho; 	// mass density per unit length
 
     Node *theNodes[2];
 
