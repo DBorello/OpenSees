@@ -1,5 +1,5 @@
 /* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**    Opensees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
 **                                                                    **
@@ -22,7 +22,6 @@
 // $Date: 2010-02-04 01:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/CoupledZeroLengthoupled.cpp,v $
 
-// Written: GLF
 // Created: 12/99
 // Revision: A
 //
@@ -402,7 +401,6 @@ CoupledZeroLength::update(void)
     const Vector& vel2  = theNodes[1]->getTrialVel();
     Vector  diffv = vel2-vel1;
 
-
     if (d0 != 0)
       diff -= *d0;
 
@@ -414,10 +412,15 @@ CoupledZeroLength::update(void)
 
     strainRate = sqrt(dX*dX + dY*dY);
 
-
     dX = diff(dirn1);
     dY = diff(dirn2);
     strain = sqrt(dX*dX + dY*dY);
+
+    // strain neg if to left of X+Y = 0 line
+    if (dX < 0.0 || dY < 0.0) {
+      if (dX + dY < 0.0)
+	strain *= -1.0;
+    }
 
     return theMaterial->setTrialStrain(strain,strainRate);
 }
@@ -439,17 +442,49 @@ CoupledZeroLength::getTangentStiff(void)
     int dirn1b = dirn1+numNodeDof;
     int dirn2b = dirn2+numNodeDof;
 
+    double strain = sqrt(dX*dX + dY*dY);
+    double L = strain;
+
     stiff(dirn1,dirn1)   = E;
     stiff(dirn1b,dirn1b) = E;      
     stiff(dirn1,dirn1b)  = -E;
     stiff(dirn1b,dirn1)  = -E;      
-
+    
     stiff(dirn2,dirn2)   = E;
     stiff(dirn2b,dirn2b) = E;      
     stiff(dirn2,dirn2b)  = -E;
     stiff(dirn2b,dirn2)  = -E;      
+    
+    /*
+    } else {
 
-    return stiff;
+      double cs = dX/L;
+      double sn = dY/L;
+
+      stiff(dirn1,dirn1)  = cs*cs*E;
+      stiff(dirn2,dirn1)  = cs*sn*E;
+      stiff(dirn1b,dirn1) = -cs*cs*E;
+      stiff(dirn2b,dirn1) = -sn*cs*E;
+
+      stiff(dirn1,dirn2)  = cs*sn*E;
+      stiff(dirn2,dirn2)  = sn*sn*E;
+      stiff(dirn1b,dirn2) = -cs*sn*E;
+      stiff(dirn2b,dirn2) = -sn*sn*E;
+
+      stiff(dirn1,dirn1b)  = -cs*cs*E;
+      stiff(dirn2,dirn1b)  = -cs*sn*E;
+      stiff(dirn1b,dirn1b) = cs*cs*E;
+      stiff(dirn2b,dirn1b) = sn*cs*E;
+
+      stiff(dirn1,dirn2b)  = -cs*sn*E;
+      stiff(dirn2,dirn2b)  = -sn*sn*E;
+      stiff(dirn1b,dirn2b) = cs*sn*E;
+      stiff(dirn2b,dirn2b) = sn*sn*E;
+    }
+    */
+    //      opserr << "dX: " << dX << " dY: " << dY << "strain: " << theMaterial->getStrain() << endln;
+    //      opserr << "CoupledZeroLength::getTangentStiff(void): E:" << E << "\n" << stiff;
+  return stiff;
 }
 
 
@@ -556,7 +591,7 @@ CoupledZeroLength::getResistingForce()
 
   double Fx = force;
   double Fy = force;
-
+  
   if (strain != 0.0) {
     Fx *= dX/strain;
     Fy *= dY/strain;
@@ -567,7 +602,7 @@ CoupledZeroLength::getResistingForce()
       Fy *= fY/oldF;
     }
   }
-
+  //  opserr << "strain: " << strain << " dX: " << dX << " dY: " << dY << " Fx: " << Fx << " Fy: "<< Fy << endln;
   int numNodeDof = numDOF/2;
   int dirn1b = dirn1+numNodeDof;
   int dirn2b = dirn2+numNodeDof;
