@@ -369,7 +369,7 @@ const Matrix&  MembranePlateFiberSection::getSectionTangent( )
       tangent(0,1) +=  dd(0,1) ;
       tangent(0,2) +=  dd(0,2) ;      
       tangent(0,3) +=  -z*dd(0,0) ;      
-      tangent(0,3) +=  -z*dd(0,1) ;
+      tangent(0,4) +=  -z*dd(0,1) ;
       tangent(0,5) +=  -z*dd(0,2) ;
       tangent(0,6) +=  root56*dd(0,3) ;
       tangent(0,7) +=  root56*dd(0,4) ;
