@@ -18,7 +18,7 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// Written: Tracey Becker
+// Written: Tracy Becker
 //
 // What: "@(#) TFP_Bearing.C, revA"
 
@@ -53,7 +53,7 @@ OPS_TFP_Bearing()
 {
   // print out a message about who wrote this element & any copyright info wanted
   if (numMyBearing == 0) {
-    opserr << "TFP_Bearing element - Written by Tracey Becker, UC Berkeley Copyright 2011 - Use at your Own Peril\n";
+    opserr << "TFP_Bearing element - Written by Tracy Becker, UC Berkeley Copyright 2011\n";
     numMyBearing++;
   }
 

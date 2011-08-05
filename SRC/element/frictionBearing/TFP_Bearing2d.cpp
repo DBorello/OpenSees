@@ -18,7 +18,7 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// Written: Tracey Becker
+// Written: Tracy Becker
 //
 // What: "@(#) TFP_Bearing2d.C, revA"
 

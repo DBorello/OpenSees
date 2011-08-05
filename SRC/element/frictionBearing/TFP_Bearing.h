@@ -25,7 +25,7 @@
 #ifndef TFP_Bearing_h
 #define TFP_Bearing_h
 
-// Written: Tracey Becker 
+// Written: Tracy Becker 
 // Conversion from matlab to c++: fmk
 //
 // Description: This file contains the interface for the TFP_Bearing class.
