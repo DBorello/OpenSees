@@ -839,7 +839,7 @@ OPS_GetNDM()
   return theModelBuilder->getNDM();
 }
 
-FE_Datastore *OPS_GetDatastore()
+FE_Datastore *OPS_GetFEDatastore()
 {
   return theDatabase;
 }

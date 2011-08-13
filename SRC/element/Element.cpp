@@ -437,8 +437,6 @@ Element::setResponse(const char **argv, int argc, OPS_Stream &output)
 int
 Element::getResponse(int responseID, Information &eleInfo)
 {
-  int loc;
-
   switch (responseID) {
   case 1: // global forces
     return eleInfo.setVector(this->getResistingForce());

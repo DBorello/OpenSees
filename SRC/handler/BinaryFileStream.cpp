@@ -277,9 +277,9 @@ BinaryFileStream::write(Vector &data)
 
   // write data
   for (int i=0; i<maxCount+1; i++) {
-    int fileID = printMapping(0,i);
-    int startLoc = printMapping(1,i);
-    int numData = printMapping(2,i);
+    int fileID = (int)printMapping(0,i);
+    int startLoc = (int)printMapping(1,i);
+    int numData = (int)printMapping(2,i);
     double *data = theData[fileID];
     //    for (int j=0; j<numData; j++)
     theFile.write((char *)(&data[startLoc]), 8*numData);

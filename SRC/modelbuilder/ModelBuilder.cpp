@@ -36,8 +36,8 @@
 
 
 
-#include <modelbuilder/ModelBuilder.h>
-#include <domain/domain/Domain.h>
+#include <ModelBuilder.h>
+#include <Domain.h>
 
 //  ModelBuilderModel(Domain &theDomain);
 //	constructor

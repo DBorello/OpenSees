@@ -167,9 +167,9 @@ SP_Constraint::recvSelf(int cTag, Channel &theChannel,
     }
     
     // if o.k. set the data
-    this->setTag(data(0));
-    nodeTag = data(1);
-    dofNumber = data(2);
+    this->setTag((int)data(0));
+    nodeTag = (int)data(1);
+    dofNumber = (int)data(2);
     valueC = data(3);
 
     if (data(4) == 1.0)
@@ -178,7 +178,7 @@ SP_Constraint::recvSelf(int cTag, Channel &theChannel,
 	isConstant = false;
     valueR = data(5);
     valueC = valueR;
-    this->setLoadPatternTag(data(6));
+    this->setLoadPatternTag((int)data(6));
     return 0;
 }
 

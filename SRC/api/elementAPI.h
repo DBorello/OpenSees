@@ -40,7 +40,6 @@
 #define ISW_SET_RESPONSE 7
 #define ISW_GET_RESPONSE 8
 
-
 #define OPS_UNIAXIAL_MATERIAL_TYPE 1
 #define OPS_SECTION2D_TYPE 2
 #define OPS_SECTION3D_TYPE 3
@@ -48,7 +47,6 @@
 #define OPS_PLANESTRAIN_TYPE 5
 #define OPS_THREEDIMENSIONAL_TYPE 6
 #define OPS_SECTION_TYPE 7
-
 
 struct modState {
   double time;
@@ -112,9 +110,9 @@ typedef struct eleObject eleObj;
 #define OPS_GetDouble ops_getdoubleinput_
 #define OPS_GetString ops_getstring
 #define OPS_GetNDM ops_getndm_
-#define OPS_GetNDF ops_getndf__
+#define OPS_GetNDF ops_getndf_
 #define OPS_GetCrdTransfPtr ops_getcrdtransfptr_
-#define OPS_GetDatastorePtr ops_getdatastorewptr_
+#define OPS_GetFEDatastore ops_getfedatastore_
 #define OPS_GetInterpPWD ops_getinterppwd_
 
 #ifdef __cplusplus
@@ -145,7 +143,6 @@ extern "C" int    OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data);
 
-
 class UniaxialMaterial;
 class NDMaterial;
 class SectionForceDeformation;
@@ -157,12 +154,10 @@ extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
 extern CrdTransf *OPS_GetCrdTransfPtr(int tag);
 
-extern FE_Datastore *OPS_GetDatastore();
+extern FE_Datastore *OPS_GetFEDatastore();
 extern "C" const char *OPS_GetInterpPWD();
 
 #else
-
-
 int     OPS_GetNDF();
 int     OPS_GetNDM();
 

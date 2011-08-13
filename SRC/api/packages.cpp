@@ -126,7 +126,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
     typedef int (_cdecl *OPS_GetIntPtrType)();
 
-    typedef FE_Datastore *(*OPS_GetFE_DatastorePtrType)();
+    typedef FE_Datastore *(*OPS_GetFEDatastorePtrType)();
     typedef const char * (_cdecl *OPS_GetInterpPWD_PtrType)();
     
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
@@ -151,7 +151,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 						     OPS_GetCrdTransfPtrType,
 						     OPS_GetIntPtrType,
 						     OPS_GetIntPtrType,
-						     OPS_GetFE_DatastorePtrType,
+						     OPS_GetFEDatastorePtrType,
 						     OPS_GetInterpPWD_PtrType);
 
     setGlobalPointersFunction funcPtr;
@@ -170,7 +170,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 	      OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc, 
 	      OPS_GetNodeIncrDisp, OPS_GetNodeIncrDeltaDisp,
 	      OPS_GetNumRemainingInputArgs, OPS_GetString, OPS_GetStringCopy, OPS_GetCrdTransfPtr, OPS_GetNDM, OPS_GetNDF,
-	      OPS_GetDatastore, OPS_GetInterpPWD);
+	      OPS_GetFEDatastore, OPS_GetInterpPWD);
 
    LocalInitPtrType initPtr;
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
