@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
 // $Revision: 1.3 $
 // $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.h,v $
-                                                                        
-                                                                        
+
+
 #ifndef TrigSeries_h
 #define TrigSeries_h
 
@@ -43,43 +43,45 @@
 
 class TrigSeries : public TimeSeries
 {
-  public:
+public:
     // constructors
     TrigSeries(int tag,
-	       double tStart, 
-	       double tFinish,
-	       double period, 
-	       double shift, 
-	       double cFactor = 1.0);
+        double tStart, 
+        double tFinish,
+        double period, 
+        double phaseShift, 
+        double cFactor = 1.0,
+        double zeroShift = 0.0);
 
     TrigSeries();
 
     // destructor
     ~TrigSeries();
 
-    TimeSeries *getCopy(void); 
-    
+    TimeSeries *getCopy(); 
+
     // method to get load factor
     double getFactor(double pseudoTime);
     double getDuration () {return tFinish-tStart;}
     double getPeakFactor () {return cFactor;}
     double getTimeIncr (double pseudoTime) {return tFinish-tStart;}
-    
+
     // methods for output    
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
+        FEM_ObjectBroker &theBroker);
 
-    void Print(OPS_Stream &s, int flag =0);    
-    
-  protected:
-	
-  private:
-    double tStart;    // start time of the pulse
-	double tFinish;   // finish time of the pulse
-	double period;
-	double shift;
-    double cFactor;   // factor = cFactor*sin for tStart <= t <= tFinish
+    void Print(OPS_Stream &s, int flag = 0);
+
+protected:
+
+private:
+    double tStart;      // start time of time series (sec)
+    double tFinish;     // end time of time series (sec)
+    double period;      // period of trig series (sec)
+    double phaseShift;  // phase shift of trig series (rad)
+    double cFactor;     // amplitude of trig series
+    double zeroShift;   // zero shift of trig series
 };
 
 #endif

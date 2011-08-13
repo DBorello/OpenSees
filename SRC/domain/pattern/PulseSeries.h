@@ -17,11 +17,11 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
 // $Revision: 1.2 $
 // $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PulseSeries.h,v $
-                                                                        
+
 #ifndef PulseSeries_h
 #define PulseSeries_h
 
@@ -44,38 +44,43 @@ class PulseSeries : public TimeSeries
 {
 public:
     // constructors
-    PulseSeries(int tag, double tStart, double tFinish,
-		double period, double pWidth, double shift, double cFactor = 1.0);
+    PulseSeries(int tag,
+        double tStart,
+        double tFinish,
+        double period,
+        double pWidth,
+        double phaseShift,
+        double cFactor = 1.0);
 
     PulseSeries();
-    
+
     // destructor
     ~PulseSeries();
 
-    TimeSeries *getCopy(void);
-    
+    TimeSeries *getCopy();
+
     // method to get load factor
     double getFactor(double pseudoTime);
     double getDuration () {return tFinish-tStart;}
     double getPeakFactor () {return cFactor;}
     double getTimeIncr (double pseudoTime) {return tFinish-tStart;}
-    
+
     // methods for output    
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
+        FEM_ObjectBroker &theBroker);
 
-    void Print(OPS_Stream &s, int flag =0);    
-    
+    void Print(OPS_Stream &s, int flag = 0);
+
 protected:
-	
+
 private:
-    double tStart;    // start time of time series (sec)
-    double tFinish;   // end time of time series (sec)
-    double period;    // period of pulse series (sec)
-    double pWidth;    // width of pulse series [0..1] 
-    double shift;     // phase shift of pulse series (sec)
-    double cFactor;   // amplitude of pulse series
+    double tStart;      // start time of time series (sec)
+    double tFinish;     // end time of time series (sec)
+    double period;      // period of pulse series (sec)
+    double pWidth;      // width of pulse series [0..1] 
+    double phaseShift;  // phase shift of pulse series (sec)
+    double cFactor;     // amplitude of pulse series
 };
 
 #endif
