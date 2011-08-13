@@ -656,23 +656,23 @@
 #define INTEGRATOR_TAGS_CentralDifferenceNoDamping      17
 #define INTEGRATOR_TAGS_NewmarkExplicit                 18
 #define INTEGRATOR_TAGS_NewmarkHSIncrReduct             19
-#define INTEGRATOR_TAGS_NewmarkHSFixedNumIter           20
-#define INTEGRATOR_TAGS_HHTExplicit                     21
-#define INTEGRATOR_TAGS_HHTGeneralized                  22
-#define INTEGRATOR_TAGS_HHTGeneralizedExplicit          23
-#define INTEGRATOR_TAGS_HHTHSIncrReduct                 24
-#define INTEGRATOR_TAGS_HHTHSFixedNumIter               25
-#define INTEGRATOR_TAGS_AlphaOS                         26
-#define INTEGRATOR_TAGS_AlphaOSGeneralized              27
-#define INTEGRATOR_TAGS_Collocation                     28
-#define INTEGRATOR_TAGS_CollocationHSIncrReduct         29
-#define INTEGRATOR_TAGS_CollocationHSFixedNumIter       30
-#define INTEGRATOR_TAGS_TRBDF2                          31
-#define INTEGRATOR_TAGS_NewmarkHybridSimulation         32
-#define INTEGRATOR_TAGS_HHTHybridSimulation             33
-#define INTEGRATOR_TAGS_CollocationHybridSimulation     34
+#define INTEGRATOR_TAGS_NewmarkHSIncrLimit              20
+#define INTEGRATOR_TAGS_NewmarkHSFixedNumIter           21
+#define INTEGRATOR_TAGS_HHTExplicit                     22
+#define INTEGRATOR_TAGS_HHTGeneralized                  23
+#define INTEGRATOR_TAGS_HHTGeneralizedExplicit          24
+#define INTEGRATOR_TAGS_HHTHSIncrReduct                 25
+#define INTEGRATOR_TAGS_HHTHSIncrLimit                  26
+#define INTEGRATOR_TAGS_HHTHSFixedNumIter               27
+#define INTEGRATOR_TAGS_AlphaOS                         28
+#define INTEGRATOR_TAGS_AlphaOSGeneralized              29
+#define INTEGRATOR_TAGS_Collocation                     30
+#define INTEGRATOR_TAGS_CollocationHSIncrReduct         31
+#define INTEGRATOR_TAGS_CollocationHSIncrLimit          32
+#define INTEGRATOR_TAGS_CollocationHSFixedNumIter       33
+#define INTEGRATOR_TAGS_TRBDF2                          34
 #define INTEGRATOR_TAGS_GeneralizedAlpha                35
-#define INTEGRATOR_TAGS_DisplacementPath             36
+#define INTEGRATOR_TAGS_DisplacementPath                36
 
 #define LinSOE_TAGS_FullGenLinSOE		1
 #define LinSOE_TAGS_BandGenLinSOE		2
@@ -753,6 +753,7 @@
 #define OPS_STREAM_TAGS_BinaryFileStream        7
 #define OPS_STREAM_TAGS_TCP_Stream              8
 #define OPS_STREAM_TAGS_ChannelStream           9
+#define OPS_STREAM_TAGS_DataTurbineStream      10
 
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
