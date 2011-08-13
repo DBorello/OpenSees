@@ -19,7 +19,7 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.16 $
-// $Date: 2009-08-25 21:57:03 $
+// $Date: 2009/08/25 21:57:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -643,8 +643,7 @@ Matrix::Invert(Matrix &theInverse) const
 
     return info;
 }
-    
-		    
+
 
 int
 Matrix::addMatrix(double factThis, const Matrix &other, double factOther)
@@ -715,6 +714,81 @@ Matrix::addMatrix(double factThis, const Matrix &other, double factOther)
     return 0;
 }
 
+
+int
+Matrix::addMatrixTranspose(double factThis, const Matrix &other, double factOther)
+{
+    if (factThis == 1.0 && factOther == 0.0)
+      return 0;
+
+#ifdef _G3DEBUG
+    if ((other.numRows != numRows) || (other.numCols != numCols)) {
+      opserr << "Matrix::addMatrixTranspose(): incompatable matrices\n";
+      return -1;
+    }
+#endif
+
+    if (factThis == 1.0) {
+
+      // want: this += other^T * factOther
+      if (factOther == 1.0) {
+    double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++)
+	    *dataPtr++ += (other.data)[j+i*numRows];
+    }
+      } else {
+	double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++)
+	    *dataPtr++ += (other.data)[j+i*numRows] * factOther;
+    }
+      }
+    } 
+
+    else if (factThis == 0.0) {
+
+      // want: this = other^T * factOther
+      if (factOther == 1.0) {
+	double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++)
+	    *dataPtr++ = (other.data)[j+i*numRows];
+    }
+      } else {
+	double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++)
+	    *dataPtr++ = (other.data)[j+i*numRows] * factOther;
+    }
+      }
+    } 
+
+    else {
+
+      // want: this = this * thisFact + other^T * factOther
+      if (factOther == 1.0) {
+	double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++) {
+        double value = *dataPtr * factThis + (other.data)[j+i*numRows];
+	    *dataPtr++ = value;
+      }
+    }
+      } else {
+	double *dataPtr = data;
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++) {
+	    double value = *dataPtr * factThis + (other.data)[j+i*numRows] * factOther;
+	    *dataPtr++ = value;
+      }
+    }
+      }
+    } 
+
+    // successfull
+    return 0;
+}
 
 
 int

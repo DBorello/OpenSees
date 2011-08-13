@@ -19,7 +19,7 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.12 $
-// $Date: 2007-07-16 22:57:03 $
+// $Date: 2007/07/16 22:57:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -73,6 +73,7 @@ class Matrix
     int Invert(Matrix &res) const;
 
     int addMatrix(double factThis, const Matrix &other, double factOther);
+    int addMatrixTranspose(double factThis, const Matrix &other, double factOther);
     int addMatrixProduct(double factThis, const Matrix &A, const Matrix &B, double factOther); // AB
     int addMatrixTransposeProduct(double factThis, const Matrix &A, const Matrix &B, double factOther); // A'B
     int addMatrixTripleProduct(double factThis, const Matrix &A, const Matrix &B, double factOther); // A'BA
