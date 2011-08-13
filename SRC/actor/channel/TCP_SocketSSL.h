@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2010-08-06 21:51:24 $
+// $Revision: 317 $
+// $Date: 2011-06-03 19:18:55 -0700 (Fri, 03 Jun 2011) $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.h,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -112,7 +112,7 @@ protected:
 private:
     SSL *ssl;
     SSL_CTX *ctx;
-    SSL_METHOD *meth;
+    const SSL_METHOD *meth;
     X509 *cert;
 
     socket_type sockfd;
