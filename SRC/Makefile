@@ -1014,16 +1014,19 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/WilsonTheta.o \
 	$(FE)/analysis/integrator/NewmarkExplicit.o \
 	$(FE)/analysis/integrator/NewmarkHSIncrReduct.o \
+    $(FE)/analysis/integrator/NewmarkHSIncrLimit.o \
 	$(FE)/analysis/integrator/NewmarkHSFixedNumIter.o \
 	$(FE)/analysis/integrator/HHTExplicit.o \
 	$(FE)/analysis/integrator/HHTGeneralized.o \
 	$(FE)/analysis/integrator/HHTGeneralizedExplicit.o \
 	$(FE)/analysis/integrator/HHTHSIncrReduct.o \
+    $(FE)/analysis/integrator/HHTHSIncrLimit.o \
 	$(FE)/analysis/integrator/HHTHSFixedNumIter.o \
 	$(FE)/analysis/integrator/AlphaOS.o \
 	$(FE)/analysis/integrator/AlphaOSGeneralized.o \
 	$(FE)/analysis/integrator/Collocation.o \
 	$(FE)/analysis/integrator/CollocationHSIncrReduct.o \
+    $(FE)/analysis/integrator/CollocationHSIncrLimit.o \
 	$(FE)/analysis/integrator/CollocationHSFixedNumIter.o \
 	$(FE)/analysis/model/AnalysisModel.o \
 	$(FE)/analysis/model/FE_EleIter.o \

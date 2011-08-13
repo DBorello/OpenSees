@@ -28,14 +28,17 @@ OBJS       = IncrementalIntegrator.o \
 	NewmarkExplicit.o \
 	NewmarkHSFixedNumIter.o \
 	NewmarkHSIncrReduct.o \
+    NewmarkHSIncrLimit.o \
 	HHTExplicit.o \
 	HHTGeneralized.o \
 	HHTGeneralizedExplicit.o \
 	HHTHSFixedNumIter.o \
 	HHTHSIncrReduct.o \
+    HHTHSIncrLimit.o \
 	Collocation.o \
 	CollocationHSFixedNumIter.o \
 	CollocationHSIncrReduct.o \
+    CollocationHSIncrLimit.o \
 	AlphaOSGeneralized.o \
 	AlphaOS.o 
 
