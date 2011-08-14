@@ -19,7 +19,7 @@
 ** ****************************************************************** */
 
 // $Revision: 1.4 $
-// $Date: 2009-06-02 21:10:45 $
+// $Date: 2009/06/02 21:10:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/Adapter.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -541,23 +541,57 @@ int Adapter::displaySelf(Renderer &theViewer,
     int rValue = 0, i, j;
 
     if (numExternalNodes > 1)  {
-        Vector *v = new Vector [numExternalNodes];
+        if (displayMode >= 0)  {
+            for (i=0; i<numExternalNodes-1; i++)  {
+                const Vector &end1Crd = theNodes[i]->getCrds();
+                const Vector &end2Crd = theNodes[i+1]->getCrds();
 
-        // first determine the end points of the element based on
-        // the display factor (a measure of the distorted image)
-        for (i=0; i<numExternalNodes; i++)  {
-            const Vector &endCrd = theNodes[i]->getCrds();
-            const Vector &endDisp = theNodes[i]->getDisp();
-            int numCrds = endCrd.Size();
-            for (j=0; j<numCrds; i++)
-                v[i](j) = endCrd(j) + endDisp(j)*fact;
+                const Vector &end1Disp = theNodes[i]->getDisp();
+                const Vector &end2Disp = theNodes[i+1]->getDisp();
+
+                int end1NumCrds = end1Crd.Size();
+                int end2NumCrds = end2Crd.Size();
+
+                Vector v1(3), v2(3);
+
+                for (j=0; j<end1NumCrds; j++)
+                    v1(j) = end1Crd(j) + end1Disp(j)*fact;
+                for (j=0; j<end2NumCrds; j++)
+                    v2(j) = end2Crd(j) + end2Disp(j)*fact;
+
+                rValue += theViewer.drawLine (v1, v2, 1.0, 1.0);
+            }
+        } else  {
+            int mode = displayMode * -1;
+            for (i=0; i<numExternalNodes-1; i++)  {
+                const Vector &end1Crd = theNodes[i]->getCrds();
+                const Vector &end2Crd = theNodes[i+1]->getCrds();
+
+                const Matrix &eigen1 = theNodes[i]->getEigenvectors();
+                const Matrix &eigen2 = theNodes[i+1]->getEigenvectors();
+
+                int end1NumCrds = end1Crd.Size();
+                int end2NumCrds = end2Crd.Size();
+
+                Vector v1(3), v2(3);
+
+                if (eigen1.noCols() >= mode)  {
+                    for (j=0; j<end1NumCrds; j++)
+                        v1(j) = end1Crd(j) + eigen1(j,mode-1)*fact;
+                    for (j=0; j<end2NumCrds; j++)
+                        v2(j) = end2Crd(j) + eigen2(j,mode-1)*fact;
+                } else  {
+                    for (j=0; j<end1NumCrds; j++)
+                        v1(j) = end1Crd(j);
+                    for (j=0; j<end2NumCrds; j++)
+                        v2(j) = end2Crd(j);
+                }
+
+                rValue += theViewer.drawLine (v1, v2, 1.0, 1.0);
+            }
         }
-
-        for (i=0; i<numExternalNodes-1; i++)
-            rValue += theViewer.drawLine (v[i], v[i+1], 1.0, 1.0);
-        //rValue += theViewer.drawLine (v[i+1], v[0], 1.0, 1.0);
     }
-    
+
     return rValue;
 }
 
