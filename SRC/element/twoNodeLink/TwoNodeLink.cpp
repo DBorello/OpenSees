@@ -19,7 +19,7 @@
 ** ****************************************************************** */
 
 // $Revision: 1.3 $
-// $Date: 2009-05-18 22:01:11 $
+// $Date: 2009/05/18 22:01:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TwoNodeLink.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -60,11 +60,12 @@ Vector TwoNodeLink::TwoNodeLinkV12(12);
 // by each object and storing the tags of the end nodes.
 TwoNodeLink::TwoNodeLink(int tag, int dim, int Nd1, int Nd2, 
     const ID &direction, UniaxialMaterial **materials,
-    const Vector _y, const Vector _x, Vector Mr, double m)
+    const Vector _y, const Vector _x, const Vector Mr,
+    const Vector sdI, double m)
     : Element(tag, ELE_TAG_TwoNodeLink),
     numDIM(dim), numDOF(0), connectedExternalNodes(2),
     theMaterials(0), numDir(direction.Size()), dir(0), trans(3,3),
-    x(_x), y(_y), Mratio(Mr), mass(m), L(0.0),
+    x(_x), y(_y), Mratio(Mr), shearDistI(sdI), mass(m), L(0.0),
     ub(0), ubdot(0), qb(0), ul(0), Tgl(0,0), Tlb(0,0),
     theMatrix(0), theVector(0), theLoad(0)
 {
@@ -83,7 +84,7 @@ TwoNodeLink::TwoNodeLink(int tag, int dim, int Nd1, int Nd2,
         theNodes[i] = 0;
     
     // check the number of directions
-    if (numDir < 1 || numDir > 12)  {
+    if (numDir < 1 || numDir > 6)  {
         opserr << "TwoNodeLink::TwoNodeLink() - element: "
             << this->getTag() << " wrong number of directions\n";
         exit(-1);
@@ -154,6 +155,22 @@ TwoNodeLink::TwoNodeLink(int tag, int dim, int Nd1, int Nd2,
         }
     }
     
+    // check shear distance ratios
+    if (shearDistI.Size() == 2)  {
+        if (shearDistI(0) < 0.0 || shearDistI(0) > 1.0)  {
+            opserr << "TwoNodeLink::TwoNodeLink() - "
+                << "incorrect shear distance ratio:\n shearDistIy = "
+                << shearDistI(0) << " < 0.0 or > 1.0\n";
+            exit(-1);
+        }
+        if (shearDistI(1) < 0.0 || shearDistI(1) > 1.0)  {
+            opserr << "TwoNodeLink::TwoNodeLink() - "
+                << "incorrect shear distance ratio:\n shearDistIz = "
+                << shearDistI(1) << " < 0.0 or > 1.0\n";
+            exit(-1);
+        }
+    }
+    
     // initialize response vectors in basic system
     ub.resize(numDir);
     ubdot.resize(numDir);
@@ -166,7 +183,7 @@ TwoNodeLink::TwoNodeLink()
     : Element(0, ELE_TAG_TwoNodeLink),     
     numDIM(0), numDOF(0), connectedExternalNodes(2),
     theMaterials(0), numDir(0), dir(0), trans(3,3),
-    x(0), y(0), Mratio(0), mass(0.0), L(0.0),
+    x(0), y(0), Mratio(0), shearDistI(0), mass(0.0), L(0.0),
     ub(0), ubdot(0), qb(0), ul(0), Tgl(0,0), Tlb(0,0),
     theMatrix(0), theVector(0), theLoad(0)
 {
@@ -407,6 +424,8 @@ int TwoNodeLink::update()
     // transform response from the local to the basic system
     ub = Tlb*ul;
     ubdot = Tlb*uldot;
+    //ub = (Tlb*Tgl)*ug;
+    //ubdot = (Tlb*Tgl)*ugdot;
     
     // set trial response for material models
     for (int i=0; i<numDir; i++)
@@ -438,6 +457,9 @@ const Matrix& TwoNodeLink::getTangentStiff()
     
     // transform from local to global system
     theMatrix->addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
+    //static Matrix kg(numDOF,numDOF);
+    //kg.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
+    //theMatrix->addMatrixTranspose(0.5, kg, 0.5);
     
     return *theMatrix;
 }
@@ -460,6 +482,9 @@ const Matrix& TwoNodeLink::getInitialStiff()
     
     // transform from local to global system
     theMatrix->addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
+    //static Matrix kg(numDOF,numDOF);
+    //kg.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
+    //theMatrix->addMatrixTranspose(0.5, kg, 0.5);
     
     return *theMatrix;
 }
@@ -482,6 +507,9 @@ const Matrix& TwoNodeLink::getDamp()
     
     // transform from local to global system
     theMatrix->addMatrixTripleProduct(0.0, Tgl, cl, 1.0);
+    //static Matrix cg(numDOF,numDOF);
+    //cg.addMatrixTripleProduct(0.0, Tgl, cl, 1.0);
+    //theMatrix->addMatrixTranspose(0.5, cg, 0.5);
     
     return *theMatrix;
 }
@@ -741,23 +769,41 @@ int TwoNodeLink::recvSelf(int commitTag, Channel &rChannel,
 
 int TwoNodeLink::displaySelf(Renderer &theViewer,
     int displayMode, float fact)
-{    
+{
     // first determine the end points of the element based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();
-    
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();    
-    
+
     static Vector v1(3);
     static Vector v2(3);
-    
-    for (int i=0; i<numDIM; i++) {
-        v1(i) = end1Crd(i) + end1Disp(i)*fact;
-        v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+
+    if (displayMode >= 0)  {
+        const Vector &end1Disp = theNodes[0]->getDisp();
+        const Vector &end2Disp = theNodes[1]->getDisp();
+
+        for (int i=0; i<numDIM; i++)  {
+            v1(i) = end1Crd(i) + end1Disp(i)*fact;
+            v2(i) = end2Crd(i) + end2Disp(i)*fact;
+        }
+    } else  {
+        int mode = displayMode * -1;
+        const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+        const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+
+        if (eigen1.noCols() >= mode)  {
+            for (int i=0; i<numDIM; i++)  {
+                v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+                v2(i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+            }
+        } else  {
+            for (int i=0; i<numDIM; i++)  {
+                v1(i) = end1Crd(i);
+                v2(i) = end2Crd(i);
+            }
+        }
     }
-    
+
     return theViewer.drawLine (v1, v2, 1.0, 1.0);
 }
 
@@ -923,6 +969,7 @@ void TwoNodeLink::setUp()
     Vector xp = end2Crd - end1Crd;
     L = xp.Norm();
     
+    // setup x and y orientation vectors
     if (L > DBL_EPSILON)  {
         if (x.Size() == 0)  {
             x.resize(3);
@@ -938,7 +985,28 @@ void TwoNodeLink::setUp()
                 << "ignoring nodes and using specified "
                 << "local x vector to determine orientation\n";
         }
+        if (y.Size() == 0)  {
+            y.resize(3);
+            y.Zero();
+            y(0) = -xp(1);
+            if (xp.Size() > 1)
+                y(1) = xp(0);
+            if (xp.Size() > 2)
+                opserr << "WARNING TwoNodeLink::setUp() - " 
+                    << "element: " << this->getTag() << endln
+                    << "no local y vector specified\n";
+        }
+    } else  {
+        if (x.Size() == 0)  {
+            x.resize(3);
+            x(0) = 1.0; x(1) = 0.0; x(2) = 0.0;
+        }
+        if (y.Size() == 0)  {
+            y.resize(3);
+            y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
+        }
     }
+    
     // check that vectors for orientation are of correct size
     if (x.Size() != 3 || y.Size() != 3)  {
         opserr << "TwoNodeLink::setUp() - "
@@ -1048,14 +1116,36 @@ void TwoNodeLink::setTranLocalBasic()
         // switch on dimensionality of element
         switch (elemType)  {
         case D2N6:
-            if (dirID == 1)
-                Tlb(i,2) = Tlb(i,5) = -0.5*L;
+            if (dirID == 1)  {
+                if (shearDistI.Size() == 2)  {
+                    Tlb(i,2) = -shearDistI(0)*L;
+                    Tlb(i,5) = -(1.0 - shearDistI(0))*L;
+                } else  {
+                    Tlb(i,2) = Tlb(i,5) = -0.5*L;
+                }
+            }
             break;
         case D3N12:
-            if (dirID == 1)
-                Tlb(i,5) = Tlb(i,11) = -0.5*L;
-            else if (dirID == 2)
-                Tlb(i,4) = Tlb(i,10) = 0.5*L;
+            if (dirID == 1)  {
+                if (shearDistI.Size() == 2)  {
+                    Tlb(i,5)  = -shearDistI(0)*L;
+                    Tlb(i,11) = -(1.0-shearDistI(0))*L;
+                } else  {
+                    Tlb(i,5)  = Tlb(i,11) = -0.5*L;
+                }
+            }
+            else if (dirID == 2)  {
+                if (shearDistI.Size() == 2)  {
+                    Tlb(i,4)  = shearDistI(1)*L;
+                    Tlb(i,10) = (1.0-shearDistI(1))*L;
+                } else  {
+                    Tlb(i,4)  = Tlb(i,10) = 0.5*L;
+                }
+            }
+            break;
+        default :
+            // do nothing
+            break;
         }
     }
 }
@@ -1144,6 +1234,9 @@ void TwoNodeLink::addPDeltaForces(Vector &pLocal)
                     pLocal(5) += Mratio(2)*MpDelta;
                     pLocal(11) += Mratio(3)*MpDelta;
                 }
+                break;
+            default :
+                // do nothing
                 break;
             }
         }
@@ -1241,6 +1334,9 @@ void TwoNodeLink::addPDeltaStiff(Matrix &kLocal)
                     kLocal(11,1) -= Mratio(3)*N;
                     kLocal(11,7) += Mratio(3)*N;
                 }
+                break;
+            default :
+                // do nothing
                 break;
             }
         }

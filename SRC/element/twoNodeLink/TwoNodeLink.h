@@ -19,7 +19,7 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.2 $
-// $Date: 2009-03-25 22:49:22 $
+// $Date: 2009/03/25 22:49:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TwoNodeLink.h,v $
 
 #ifndef TwoNodeLink_h
@@ -54,8 +54,8 @@ public:
     // constructors
     TwoNodeLink(int tag, int dimension, int Nd1, int Nd2,
         const ID &direction, UniaxialMaterial **theMaterials,
-        const Vector y, const Vector x = 0, Vector Mratio = 0,
-        double mass = 0.0);
+        const Vector y = 0, const Vector x = 0, const Vector Mratio = 0,
+        const Vector shearDistI = 0, double mass = 0.0);
     TwoNodeLink();
     
     // destructor
@@ -125,6 +125,7 @@ private:
     Vector x;           // local x direction
     Vector y;           // local y direction
     Vector Mratio;      // p-delta moment distribution ratios
+    Vector shearDistI;  // shear distance from node I as fraction of length
     double mass;        // total mass
     double L;           // element length
     
