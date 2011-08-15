@@ -75,7 +75,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         if ((argc-eleArgStart) < 12)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
-            opserr << "Want: singleFPBearing eleTag iNode jNode frnMdlTag R h uy -P matTag -Mz matTag <-orient x1 x2 x3 y1 y2 y3> <-mass m> <-iter maxIter tol>\n";
+            opserr << "Want: singleFPBearing eleTag iNode jNode frnMdlTag R h uy -P matTag -Mz matTag <-orient x1 x2 x3 y1 y2 y3> <-shearDist sDratio> <-mass m> <-iter maxIter tol>\n";
             return TCL_ERROR;
         }    
         
@@ -83,9 +83,10 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         int iNode, jNode, frnMdlTag, matTag, argi, i, j;
         int recvMat = 0;
         double R, h, uy;
+        double shearDistI = 0.0;
         double mass = 0.0;
         int maxIter = 20;
-        double tol = 1E-8;
+        double tol = 1E-12;
         
         if (Tcl_GetInt(interp, argv[1+eleArgStart], &tag) != TCL_OK)  {
             opserr << "WARNING invalid singleFPBearing eleTag\n";
@@ -179,6 +180,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                 j = i+1;
                 int numOrient = 0;
                 while (j < argc &&
+                    strcmp(argv[j],"-shearDist") != 0 &&
                     strcmp(argv[j],"-mass") != 0 &&
                     strcmp(argv[j],"-iter") != 0)  {
                     numOrient++;
@@ -220,9 +222,18 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
             }
         }
         for (int i = 8+eleArgStart; i < argc; i++)  {
+            if (i+1 < argc && strcmp(argv[i], "-shearDist") == 0)  {
+                if (Tcl_GetDouble(interp, argv[i+1], &shearDistI) != TCL_OK)  {
+                    opserr << "WARNING invalid -shearDist value\n";
+                    opserr << "singleFPBearing element: " << tag << endln;
+                    return TCL_ERROR;
+                }
+            }
+        }
+        for (int i = 8+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
-                    opserr << "WARNING invalid mass\n";
+                    opserr << "WARNING invalid -mass value\n";
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
@@ -244,7 +255,8 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         }
         
         // now create the singleFPBearing
-        theElement = new SingleFPSimple2d(tag, iNode, jNode, *theFrnMdl, R, h, uy, theMaterials, y, x, mass, maxIter, tol);
+        theElement = new SingleFPSimple2d(tag, iNode, jNode, *theFrnMdl, R, h, uy,
+            theMaterials, y, x, shearDistI, mass, maxIter, tol);
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";
@@ -273,7 +285,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         if ((argc-eleArgStart) < 16)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
-            opserr << "Want: singleFPBearing eleTag iNode jNode frnMdlTag R h uy -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-mass m> <-iter maxIter tol>\n";
+            opserr << "Want: singleFPBearing eleTag iNode jNode frnMdlTag R h uy -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-shearDist sDratio> <-mass m> <-iter maxIter tol>\n";
             return TCL_ERROR;
         }    
         
@@ -281,9 +293,10 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         int iNode, jNode, frnMdlTag, matTag, argi, i, j;
         int recvMat = 0;
         double R, h, uy;
+        double shearDistI = 0.0;
         double mass = 0.0;
         int maxIter = 20;
-        double tol = 1E-8;
+        double tol = 1E-12;
         
         if (Tcl_GetInt(interp, argv[1+eleArgStart], &tag) != TCL_OK)  {
             opserr << "WARNING invalid singleFPBearing eleTag\n";
@@ -410,6 +423,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                 j = i+1;
                 int numOrient = 0;
                 while (j < argc &&
+                    strcmp(argv[j],"-shearDist") != 0 &&
                     strcmp(argv[j],"-mass") != 0 &&
                     strcmp(argv[j],"-iter") != 0)  {
                     numOrient++;
@@ -465,9 +479,18 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
             }
         }
         for (i = 8+eleArgStart; i < argc; i++)  {
+            if (i+1 < argc && strcmp(argv[i], "-shearDist") == 0)  {
+                if (Tcl_GetDouble(interp, argv[i+1], &shearDistI) != TCL_OK)  {
+                    opserr << "WARNING invalid -shearDist value\n";
+                    opserr << "singleFPBearing element: " << tag << endln;
+                    return TCL_ERROR;
+                }
+            }
+        }
+        for (i = 8+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
-                    opserr << "WARNING invalid mass\n";
+                    opserr << "WARNING invalid -mass value\n";
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
@@ -489,7 +512,8 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
         }
         
         // now create the singleFPBearing
-        theElement = new SingleFPSimple3d(tag, iNode, jNode, *theFrnMdl, R, h, uy, theMaterials, y, x, mass, maxIter, tol);
+        theElement = new SingleFPSimple3d(tag, iNode, jNode, *theFrnMdl, R, h, uy,
+            theMaterials, y, x, shearDistI, mass, maxIter, tol);
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";

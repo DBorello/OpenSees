@@ -56,11 +56,12 @@ Vector SingleFPSimple2d::theLoad(6);
 SingleFPSimple2d::SingleFPSimple2d(int tag, int Nd1, int Nd2,
     FrictionModel &thefrnmdl, double r, double _h, double _uy,
     UniaxialMaterial **materials, const Vector _y, const Vector _x,
-    double m, int maxiter, double _tol)
+    double sdI, double m, int maxiter, double _tol)
     : Element(tag, ELE_TAG_SingleFPSimple2d),
     connectedExternalNodes(2), theFrnMdl(0),
-    R(r), h(_h), uy(_uy), x(_x), y(_y), mass(m), maxIter(maxiter),
-    tol(_tol), Reff(0.0), L(0.0), ub(3), ubPlastic(0.0), qb(3),
+    R(r), h(_h), uy(_uy), x(_x), y(_y),
+    shearDistI(sdI), mass(m), maxIter(maxiter), tol(_tol),
+    Reff(0.0), L(0.0), ub(3), ubPlastic(0.0), qb(3),
     kb(3,3), ul(6), Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
 {
     // ensure the connectedExternalNode ID is of correct size & set values
@@ -120,8 +121,9 @@ SingleFPSimple2d::SingleFPSimple2d(int tag, int Nd1, int Nd2,
 SingleFPSimple2d::SingleFPSimple2d()
     : Element(0, ELE_TAG_SingleFPSimple2d),
     connectedExternalNodes(2), theFrnMdl(0),
-    R(0.0), h(0.0), uy(0.0), x(0), y(0), mass(0.0), maxIter(20),
-    tol(1E-8), Reff(0.0), L(0.0), ub(3), ubPlastic(0.0), qb(3),
+    R(0.0), h(0.0), uy(0.0), x(0), y(0),
+    shearDistI(0.0), mass(0.0), maxIter(20), tol(1E-8),
+    Reff(0.0), L(0.0), ub(3), ubPlastic(0.0), qb(3),
     kb(3,3), ul(6), Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
 {	
     // ensure the connectedExternalNode ID is of correct size
@@ -380,7 +382,7 @@ int SingleFPSimple2d::update()
             kb(1,1) = k2;
         }
         iter++;
-    } while ((fabs(qb(1)-qb1Old) >= tol) && (iter <= maxIter));
+    } while ((fabs(qb(1)-qb1Old) >= tol) && (iter < maxIter));
     
     // issue warning if iteration did not converge
     if (iter >= maxIter)  {
@@ -408,10 +410,11 @@ const Matrix& SingleFPSimple2d::getTangentStiff(void)
     kl.addMatrixTripleProduct(0.0, Tlb, kb, 1.0);
     
     // add geometric stiffness to local stiffness
-    kl(2,1) -= 1.0*qb(0);
-    kl(2,4) += 1.0*qb(0);
-    //kl(5,1) -= 0.0*qb(0);
-    //kl(5,4) += 0.0*qb(0);
+    double kGeo = qb(0)*(1.0 - shearDistI)*L;
+    kl(2,1) -= qb(0);
+    kl(2,4) += qb(0);
+    kl(2,5) -= kGeo;
+    kl(5,5) += kGeo;
     
     // transform from local to global system
     theMatrix.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
@@ -511,9 +514,11 @@ const Vector& SingleFPSimple2d::getResistingForce()
     ql = Tlb^qb;
     
     // add P-Delta moments to local forces
-    double MpDelta = qb(0)*(ul(4)-ul(1));
-    ql(2) += 1.0*MpDelta;
-    //ql(5) += 0.0*MpDelta;
+    double MpDelta1 = qb(0)*(ul(4)-ul(1));
+    ql(2) += MpDelta1;
+    double MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(5);
+    ql(2) -= MpDelta2;
+    ql(5) += MpDelta2;
     
     // determine resisting forces in global system
     theVector = Tgl^ql;
@@ -552,16 +557,17 @@ const Vector& SingleFPSimple2d::getResistingForceIncInertia()
 int SingleFPSimple2d::sendSelf(int commitTag, Channel &sChannel)
 {
     // send element parameters
-    static Vector data(9);
+    static Vector data(10);
     data(0) = this->getTag();
     data(1) = R;
     data(2) = h;
     data(3) = uy;
-    data(4) = mass;
-    data(5) = maxIter;
-    data(6) = tol;
-    data(7) = x.Size();
-    data(8) = y.Size();
+    data(4) = shearDistI;
+    data(5) = mass;
+    data(6) = maxIter;
+    data(7) = tol;
+    data(8) = x.Size();
+    data(9) = y.Size();
     sChannel.sendVector(0, commitTag, data);
     
     // send the two end nodes
@@ -604,15 +610,16 @@ int SingleFPSimple2d::recvSelf(int commitTag, Channel &rChannel,
             delete theMaterials[i];
     
     // receive element parameters
-    static Vector data(9);
+    static Vector data(10);
     rChannel.recvVector(0, commitTag, data);
     this->setTag((int)data(0));
     R = data(1);
     h = data(2);
     uy = data(3);
-    mass = data(4);
-    maxIter = (int)data(5);
-    tol = data(6);
+    shearDistI = data(4);
+    mass = data(5);
+    maxIter = (int)data(6);
+    tol = data(7);
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
@@ -646,11 +653,11 @@ int SingleFPSimple2d::recvSelf(int commitTag, Channel &rChannel,
     }
     
     // receive remaining data
-    if ((int)data(7) == 3)  {
+    if ((int)data(8) == 3)  {
         x.resize(3);
         rChannel.recvVector(0, commitTag, x);
     }
-    if ((int)data(8) == 3)  {
+    if ((int)data(9) == 3)  {
         y.resize(3);
         rChannel.recvVector(0, commitTag, y);
     }
@@ -671,23 +678,53 @@ int SingleFPSimple2d::recvSelf(int commitTag, Channel &rChannel,
 int SingleFPSimple2d::displaySelf(Renderer &theViewer,
     int displayMode, float fact)
 {
+    int errCode = 0;
+
     // first determine the end points of the element based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = theNodes[0]->getCrds();
-    const Vector &end2Crd = theNodes[1]->getCrds();	
-    
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();
+    const Vector &end2Crd = theNodes[1]->getCrds();
+    Vector xp = end2Crd - end1Crd;
     
     static Vector v1(3);
     static Vector v2(3);
-    
-    for (int i=0; i<2; i++)  {
-        v1(i) = end1Crd(i) + end1Disp(i)*fact;
-        v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+    static Vector v3(3);
+
+    if (displayMode >= 0)  {
+        const Vector &end1Disp = theNodes[0]->getDisp();
+        const Vector &end2Disp = theNodes[1]->getDisp();
+
+        for (int i=0; i<2; i++)  {
+            v1(i) = end1Crd(i) + end1Disp(i)*fact;
+            v3(i) = end2Crd(i) + end2Disp(i)*fact;
+        }
+        v2(0) = end1Crd(0) + (end2Disp(0) + xp(1)*end2Disp(2))*fact;
+        v2(1) = end1Crd(1) + (end2Disp(1) - xp(0)*end2Disp(2))*fact;
+    } else  {
+        int mode = displayMode * -1;
+        const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+        const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+
+        if (eigen1.noCols() >= mode)  {
+            for (int i=0; i<2; i++)  {
+                v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+                v3(i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+            }
+            v2(0) = end1Crd(0) + (eigen2(0,mode-1) + xp(1)*eigen2(2,mode-1))*fact;
+            v2(1) = end1Crd(1) + (eigen2(1,mode-1) - xp(0)*eigen2(2,mode-1))*fact;
+        } else  {
+            for (int i=0; i<2; i++)  {
+                v1(i) = end1Crd(i);
+                v2(i) = end1Crd(i);
+                v3(i) = end2Crd(i);
+            }
+        }
     }
-    
-    return theViewer.drawLine (v1, v2, 1.0, 1.0);
+
+    errCode += theViewer.drawLine (v1, v2, 1.0, 1.0);
+    errCode += theViewer.drawLine (v2, v3, 1.0, 1.0);
+
+    return errCode;
 }
 
 
@@ -804,7 +841,7 @@ Response* SingleFPSimple2d::setResponse(const char **argv, int argc,
 
 int SingleFPSimple2d::getResponse(int responseID, Information &eleInfo)
 {
-    double MpDelta;
+    double MpDelta1, MpDelta2;
 
 	switch (responseID)  {
 	case 1:  // global forces
@@ -815,10 +852,11 @@ int SingleFPSimple2d::getResponse(int responseID, Information &eleInfo)
         // determine resisting forces in local system
         theVector = Tlb^qb;
         // add P-Delta moments
-        MpDelta = qb(0)*(ul(4)-ul(1));
-        theVector(2) += 1.0*MpDelta;
-        //theVector(5) += 0.0*MpDelta;
-        
+        MpDelta1 = qb(0)*(ul(4)-ul(1));
+        theVector(2) += MpDelta1;
+        MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(5);
+        theVector(2) -= MpDelta2;
+        theVector(5) += MpDelta2;
         return eleInfo.setVector(theVector);
         
 	case 3:  // basic forces
@@ -902,7 +940,8 @@ void SingleFPSimple2d::setUp()
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = -1.0;
     Tlb(0,3) = Tlb(1,4) = Tlb(2,5) = 1.0;
-    Tlb(1,5) = -L;    
+    Tlb(1,2) = -shearDistI*L;
+    Tlb(1,5) = -(1.0 - shearDistI)*L;
 }
 
 

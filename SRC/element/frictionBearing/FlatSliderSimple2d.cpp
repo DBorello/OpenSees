@@ -55,10 +55,12 @@ Vector FlatSliderSimple2d::theLoad(6);
 
 FlatSliderSimple2d::FlatSliderSimple2d(int tag, int Nd1, int Nd2,
     FrictionModel &thefrnmdl, double _uy, UniaxialMaterial **materials,
-    const Vector _y, const Vector _x, double m, int maxiter, double _tol)
+    const Vector _y, const Vector _x, double sdI, double m,
+    int maxiter, double _tol)
     : Element(tag, ELE_TAG_FlatSliderSimple2d),
     connectedExternalNodes(2), theFrnMdl(0),
-    uy(_uy), x(_x), y(_y), mass(m), maxIter(maxiter), tol(_tol),
+    uy(_uy), x(_x), y(_y), shearDistI(sdI),
+    mass(m), maxIter(maxiter), tol(_tol),
     L(0.0), ub(3), ubPlastic(0.0), qb(3), kb(3,3), ul(6),
     Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
 {
@@ -119,7 +121,8 @@ FlatSliderSimple2d::FlatSliderSimple2d(int tag, int Nd1, int Nd2,
 FlatSliderSimple2d::FlatSliderSimple2d()
     : Element(0, ELE_TAG_FlatSliderSimple2d),
     connectedExternalNodes(2), theFrnMdl(0),
-    uy(0.0), x(0), y(0), mass(0.0), maxIter(20), tol(1E-8),
+    uy(0.0), x(0), y(0), shearDistI(0.0),
+    mass(0.0), maxIter(20), tol(1E-8),
     L(0.0), ub(3), ubPlastic(0.0), qb(3), kb(3,3), ul(6),
     Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
 {	
@@ -402,10 +405,11 @@ const Matrix& FlatSliderSimple2d::getTangentStiff()
     kl.addMatrixTripleProduct(0.0, Tlb, kb, 1.0);
     
     // add geometric stiffness to local stiffness
-    kl(2,1) -= 1.0*qb(0);
-    kl(2,4) += 1.0*qb(0);
-    //kl(5,1) -= 0.0*qb(0);
-    //kl(5,4) += 0.0*qb(0);
+    double kGeo = qb(0)*(1.0 - shearDistI)*L;
+    kl(2,1) -= qb(0);
+    kl(2,4) += qb(0);
+    kl(2,5) -= kGeo;
+    kl(5,5) += kGeo;
     
     // transform from local to global system
     theMatrix.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
@@ -505,9 +509,11 @@ const Vector& FlatSliderSimple2d::getResistingForce()
     ql = Tlb^qb;
     
     // add P-Delta moments to local forces
-    double MpDelta = qb(0)*(ul(4)-ul(1));
-    ql(2) += 1.0*MpDelta;
-    //ql(5) += 0.0*MpDelta;
+    double MpDelta1 = qb(0)*(ul(4)-ul(1));
+    ql(2) += MpDelta1;
+    double MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(5);
+    ql(2) -= MpDelta2;
+    ql(5) += MpDelta2;
     
     // determine resisting forces in global system
     theVector = Tgl^ql;
@@ -546,14 +552,15 @@ const Vector& FlatSliderSimple2d::getResistingForceIncInertia()
 int FlatSliderSimple2d::sendSelf(int commitTag, Channel &sChannel)
 {
     // send element parameters
-    static Vector data(7);
+    static Vector data(8);
     data(0) = this->getTag();
     data(1) = uy;
-    data(2) = mass;
-    data(3) = maxIter;
-    data(4) = tol;
-    data(5) = x.Size();
-    data(6) = y.Size();
+    data(2) = shearDistI;
+    data(3) = mass;
+    data(4) = maxIter;
+    data(5) = tol;
+    data(6) = x.Size();
+    data(7) = y.Size();
     sChannel.sendVector(0, commitTag, data);
     
     // send the two end nodes
@@ -596,13 +603,14 @@ int FlatSliderSimple2d::recvSelf(int commitTag, Channel &rChannel,
             delete theMaterials[i];
     
     // receive element parameters
-    static Vector data(7);
+    static Vector data(8);
     rChannel.recvVector(0, commitTag, data);
     this->setTag((int)data(0));
     uy = data(1);
-    mass = data(2);
-    maxIter = (int)data(3);
-    tol = data(4);
+    shearDistI = data(2);
+    mass = data(3);
+    maxIter = (int)data(4);
+    tol = data(5);
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
@@ -636,11 +644,11 @@ int FlatSliderSimple2d::recvSelf(int commitTag, Channel &rChannel,
     }
     
     // receive remaining data
-    if ((int)data(5) == 3)  {
+    if ((int)data(6) == 3)  {
         x.resize(3);
         rChannel.recvVector(0, commitTag, x);
     }
-    if ((int)data(6) == 3)  {
+    if ((int)data(7) == 3)  {
         y.resize(3);
         rChannel.recvVector(0, commitTag, y);
     }
@@ -661,23 +669,50 @@ int FlatSliderSimple2d::recvSelf(int commitTag, Channel &rChannel,
 int FlatSliderSimple2d::displaySelf(Renderer &theViewer,
     int displayMode, float fact)
 {
+    int errCode = 0;
+
     // first determine the end points of the element based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
     
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();
-    
     static Vector v1(3);
     static Vector v2(3);
-    
-    for (int i=0; i<2; i++)  {
-        v1(i) = end1Crd(i) + end1Disp(i)*fact;
-        v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+    static Vector v3(3);
+
+    if (displayMode >= 0)  {
+        const Vector &end1Disp = theNodes[0]->getDisp();
+        const Vector &end2Disp = theNodes[1]->getDisp();
+
+        for (int i=0; i<2; i++)  {
+            v1(i) = end1Crd(i) + end1Disp(i)*fact;
+            v2(i) = end1Crd(i) + (end1Disp(i) + end2Disp(i))*fact;
+            v3(i) = end2Crd(i) + end2Disp(i)*fact;    
+        }
+    } else  {
+        int mode = displayMode * -1;
+        const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+        const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+
+        if (eigen1.noCols() >= mode)  {
+            for (int i=0; i<2; i++)  {
+                v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+                v2(i) = end1Crd(i) + (eigen1(i,mode-1) + eigen2(i,mode-1))*fact;
+                v3(i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+            }
+        } else  {
+            for (int i=0; i<2; i++)  {
+                v1(i) = end1Crd(i);
+                v2(i) = end1Crd(i);
+                v3(i) = end2Crd(i);
+            }
+        }
     }
-    
-    return theViewer.drawLine (v1, v2, 1.0, 1.0);
+
+    errCode += theViewer.drawLine (v1, v2, 1.0, 1.0);
+    errCode += theViewer.drawLine (v2, v3, 1.0, 1.0);
+
+    return errCode;
 }
 
 
@@ -794,7 +829,7 @@ Response* FlatSliderSimple2d::setResponse(const char **argv, int argc,
 
 int FlatSliderSimple2d::getResponse(int responseID, Information &eleInfo)
 {
-    double MpDelta;
+    double MpDelta1, MpDelta2;
 
 	switch (responseID)  {
 	case 1:  // global forces
@@ -805,10 +840,11 @@ int FlatSliderSimple2d::getResponse(int responseID, Information &eleInfo)
         // determine resisting forces in local system
         theVector = Tlb^qb;
         // add P-Delta moments
-        MpDelta = qb(0)*(ul(4)-ul(1));
-        theVector(2) += 1.0*MpDelta;
-        //theVector(5) += 0.0*MpDelta;
-        
+        MpDelta1 = qb(0)*(ul(4)-ul(1));
+        theVector(2) += MpDelta1;
+        MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(5);
+        theVector(2) -= MpDelta2;
+        theVector(5) += MpDelta2;
         return eleInfo.setVector(theVector);
         
 	case 3:  // basic forces
@@ -892,7 +928,8 @@ void FlatSliderSimple2d::setUp()
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = -1.0;
     Tlb(0,3) = Tlb(1,4) = Tlb(2,5) = 1.0;
-    Tlb(1,5) = -L;    
+    Tlb(1,2) = -shearDistI*L;
+    Tlb(1,5) = -(1.0 - shearDistI)*L;
 }
 
 

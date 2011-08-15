@@ -56,11 +56,12 @@ Vector SingleFPSimple3d::theLoad(12);
 SingleFPSimple3d::SingleFPSimple3d(int tag, int Nd1, int Nd2,
     FrictionModel &thefrnmdl, double r, double _h, double _uy,
     UniaxialMaterial **materials, const Vector _y, const Vector _x,
-    double m, int maxiter, double _tol)
+    double sdI, double m, int maxiter, double _tol)
     : Element(tag, ELE_TAG_SingleFPSimple3d),
     connectedExternalNodes(2), theFrnMdl(0),
-    R(r), h(_h), uy(_uy), x(_x), y(_y), mass(m), maxIter(maxiter),
-    tol(_tol), Reff(0.0), L(0.0), ub(6), ubPlastic(2), qb(6),
+    R(r), h(_h), uy(_uy), x(_x), y(_y),
+    shearDistI(sdI), mass(m), maxIter(maxiter), tol(_tol),
+    Reff(0.0), L(0.0), ub(6), ubPlastic(2), qb(6),
     kb(6,6), ul(12), Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
 {
     // ensure the connectedExternalNode ID is of correct size & set values
@@ -123,8 +124,9 @@ SingleFPSimple3d::SingleFPSimple3d(int tag, int Nd1, int Nd2,
 SingleFPSimple3d::SingleFPSimple3d()
     : Element(0, ELE_TAG_SingleFPSimple3d),
     connectedExternalNodes(2), theFrnMdl(0),
-    R(0.0), h(0.0), uy(0.0), x(0), y(0), mass(0.0), maxIter(20),
-    tol(1E-8), Reff(0.0), L(0.0), ub(6), ubPlastic(2), qb(6),
+    R(0.0), h(0.0), uy(0.0), x(0), y(0),
+    shearDistI(0.0), mass(0.0), maxIter(20), tol(1E-8),
+    Reff(0.0), L(0.0), ub(6), ubPlastic(2), qb(6),
     kb(6,6), ul(12), Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
 {	
     // ensure the connectedExternalNode ID is of correct size
@@ -399,12 +401,11 @@ int SingleFPSimple3d::update()
             qb(2) = qYield*qTrial(1)/qTrialNorm + k2z*ub(2) + N*ul(4);
             // set tangent stiffnesses
             kb(1,1) =  qYield*k0*pow(qTrial(1),2)/pow(qTrialNorm,3) + k2y;
-            kb(1,2) = -qYield*k0*qTrial(0)*qTrial(1)/pow(qTrialNorm,3);
-            kb(2,1) = -qYield*k0*qTrial(0)*qTrial(1)/pow(qTrialNorm,3);
+            kb(1,2) = kb(2,1) = -qYield*k0*qTrial(0)*qTrial(1)/pow(qTrialNorm,3);
             kb(2,2) =  qYield*k0*pow(qTrial(0),2)/pow(qTrialNorm,3) + k2z;
         }
         iter++;
-    } while ((sqrt(pow(qb(1)-qbOld(0),2)+pow(qb(2)-qbOld(1),2)) >= tol) && (iter <= maxIter));
+    } while ((sqrt(pow(qb(1)-qbOld(0),2)+pow(qb(2)-qbOld(1),2)) >= tol) && (iter < maxIter));
     
     // issue warning if iteration did not converge
     if (iter >= maxIter)   {
@@ -442,18 +443,25 @@ const Matrix& SingleFPSimple3d::getTangentStiff()
     kl.addMatrixTripleProduct(0.0, Tlb, kb, 1.0);
     
     // add geometric stiffness to local stiffness
-    kl(5,1) -= 1.0*qb(0);
-    kl(5,7) += 1.0*qb(0);
-    //kl(11,1) -= 0.0*qb(0);
-    //kl(11,7) += 0.0*qb(0);
-    kl(4,2) += 1.0*qb(0);
-    kl(4,8) -= 1.0*qb(0);
-    //kl(10,2) += 0.0*qb(0);
-    //kl(10,8) -= 0.0*qb(0);
-    kl(3,1) += qb(2);
-    kl(3,2) -= qb(1);
-    kl(3,7) -= qb(2);
-    kl(3,8) += qb(1);
+    double Ls = (1.0 - shearDistI)*L;
+    // add P-Delta moment stiffness terms
+    kl(5,1)   -= qb(0);
+    kl(5,7)   += qb(0);
+    kl(5,11)  -= qb(0)*Ls;
+    kl(11,11) += qb(0)*Ls;
+    kl(4,2)   += qb(0);
+    kl(4,8)   -= qb(0);
+    kl(4,10)  -= qb(0)*Ls;
+    kl(10,10) += qb(0)*Ls;
+    // add V-Delta torsion stiffness terms
+    kl(3,1)  += qb(2);
+    kl(3,2)  -= qb(1);
+    kl(3,7)  -= qb(2);
+    kl(3,8)  += qb(1);
+    kl(3,10) += qb(1)*Ls;
+    kl(3,11) += qb(2)*Ls;
+    kl(9,10) -= qb(1)*Ls;
+    kl(9,11) -= qb(2)*Ls;
     
     // transform from local to global system
     theMatrix.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
@@ -553,16 +561,23 @@ const Vector& SingleFPSimple3d::getResistingForce()
     ql = Tlb^qb;
     
     // add P-Delta moments to local forces
-    double MpDelta;
-    MpDelta = qb(0)*(ul(7)-ul(1));
-    ql(5)  += 1.0*MpDelta;
-    //ql(11) += 0.0*MpDelta;
-    MpDelta = qb(0)*(ul(8)-ul(2));
-    ql(4)  -= 1.0*MpDelta;
-    //ql(10) -= 0.0*MpDelta;
+    double MpDelta1 = qb(0)*(ul(7)-ul(1));
+    ql(5) += MpDelta1;
+    double MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(11);
+    ql(5) -= MpDelta2;
+    ql(11) += MpDelta2;
+    double MpDelta3 = qb(0)*(ul(8)-ul(2));
+    ql(4) -= MpDelta3;
+    double MpDelta4 = qb(0)*(1.0 - shearDistI)*L*ul(10);
+    ql(4) -= MpDelta4;
+    ql(10) += MpDelta4;
     
     // add V-Delta torsion to local forces
-    ql(3) = qb(1)*(ul(8)-ul(2)) - qb(2)*(ul(7)-ul(1));
+    double Vdelta1 = qb(1)*(ul(8)-ul(2)) - qb(2)*(ul(7)-ul(1));
+    ql(3) += Vdelta1;
+    double Vdelta2 = (1.0 - shearDistI)*L*(qb(1)*ul(10) + qb(2)*ul(11));
+    ql(3) += Vdelta2;
+    ql(9) -= Vdelta2;
     
     // determine resisting forces in global system
     theVector = Tgl^ql;
@@ -601,16 +616,17 @@ const Vector& SingleFPSimple3d::getResistingForceIncInertia()
 int SingleFPSimple3d::sendSelf(int commitTag, Channel &sChannel)
 {
     // send element parameters
-    static Vector data(9);
+    static Vector data(10);
     data(0) = this->getTag();
     data(1) = R;
     data(2) = h;
     data(3) = uy;
-    data(4) = mass;
-    data(5) = maxIter;
-    data(6) = tol;
-    data(7) = x.Size();
-    data(8) = y.Size();
+    data(4) = shearDistI;
+    data(5) = mass;
+    data(6) = maxIter;
+    data(7) = tol;
+    data(8) = x.Size();
+    data(9) = y.Size();
     sChannel.sendVector(0, commitTag, data);
     
     // send the two end nodes
@@ -653,15 +669,16 @@ int SingleFPSimple3d::recvSelf(int commitTag, Channel &rChannel,
             delete theMaterials[i];
     
     // receive element parameters
-    static Vector data(9);
+    static Vector data(10);
     rChannel.recvVector(0, commitTag, data);    
     this->setTag((int)data(0));
     R = data(1);
     h = data(2);
     uy = data(3);
-    mass = data(4);
-    maxIter = (int)data(5);
-    tol = data(6);
+    shearDistI = data(4);
+    mass = data(5);
+    maxIter = (int)data(6);
+    tol = data(7);
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
@@ -695,12 +712,12 @@ int SingleFPSimple3d::recvSelf(int commitTag, Channel &rChannel,
     }
     
     // receive remaining data
-    if ((int)data(7) == 3)  {
+    if ((int)data(8) == 3)  {
         x.resize(3);
         rChannel.recvVector(0, commitTag, x);
     }
     if ((int)data(8) == 3)  {
-        y.resize(3);
+        y.resize(9);
         rChannel.recvVector(0, commitTag, y);
     }
     
@@ -723,23 +740,55 @@ int SingleFPSimple3d::recvSelf(int commitTag, Channel &rChannel,
 int SingleFPSimple3d::displaySelf(Renderer &theViewer,
     int displayMode, float fact)
 {
+    int errCode = 0;
+
     // first determine the end points of the element based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = theNodes[0]->getCrds();
-    const Vector &end2Crd = theNodes[1]->getCrds();	
-    
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();
+    const Vector &end2Crd = theNodes[1]->getCrds();
+    Vector xp = end2Crd - end1Crd;
     
     static Vector v1(3);
     static Vector v2(3);
-    
-    for (int i=0; i<3; i++)  {
-        v1(i) = end1Crd(i) + end1Disp(i)*fact;
-        v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+    static Vector v3(3);
+
+    if (displayMode >= 0)  {
+        const Vector &end1Disp = theNodes[0]->getDisp();
+        const Vector &end2Disp = theNodes[1]->getDisp();
+
+        for (int i=0; i<3; i++)  {
+            v1(i) = end1Crd(i) + end1Disp(i)*fact;
+            v3(i) = end2Crd(i) + end2Disp(i)*fact;    
+        }
+        v2(0) = end1Crd(0) + (end2Disp(0) + xp(1)*end2Disp(5) - xp(2)*end2Disp(4))*fact;
+        v2(1) = end1Crd(1) + (end2Disp(1) - xp(0)*end2Disp(5) + xp(2)*end2Disp(3))*fact;
+        v2(2) = end1Crd(2) + (end2Disp(2) + xp(0)*end2Disp(4) - xp(1)*end2Disp(3))*fact;
+    } else  {
+        int mode = displayMode * -1;
+        const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+        const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+
+        if (eigen1.noCols() >= mode)  {
+            for (int i=0; i<3; i++)  {
+                v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+                v3(i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+            }
+            v2(0) = end1Crd(0) + (eigen2(0,mode-1) + xp(1)*eigen2(5,mode-1) - xp(2)*eigen2(4,mode-1))*fact;
+            v2(1) = end1Crd(1) + (eigen2(1,mode-1) - xp(0)*eigen2(5,mode-1) + xp(2)*eigen2(3,mode-1))*fact;
+            v2(2) = end1Crd(2) + (eigen2(2,mode-1) + xp(0)*eigen2(4,mode-1) - xp(1)*eigen2(3,mode-1))*fact;
+        } else  {
+            for (int i=0; i<3; i++)  {
+                v1(i) = end1Crd(i);
+                v2(i) = end1Crd(i);
+                v3(i) = end2Crd(i);
+            }
+        }
     }
-    
-    return theViewer.drawLine (v1, v2, 1.0, 1.0);
+
+    errCode += theViewer.drawLine (v1, v2, 1.0, 1.0);
+    errCode += theViewer.drawLine (v2, v3, 1.0, 1.0);
+
+    return errCode;
 }
 
 
@@ -882,7 +931,7 @@ Response* SingleFPSimple3d::setResponse(const char **argv, int argc,
 
 int SingleFPSimple3d::getResponse(int responseID, Information &eleInfo)
 {
-    double MpDelta;
+    double MpDelta1, MpDelta2, MpDelta3, MpDelta4, Vdelta1, Vdelta2;
     
     switch (responseID)  {
 	case 1:  // global forces
@@ -893,13 +942,22 @@ int SingleFPSimple3d::getResponse(int responseID, Information &eleInfo)
         // determine resisting forces in local system
         theVector = Tlb^qb;
         // add P-Delta moments
-        MpDelta = qb(0)*(ul(7)-ul(1));
-        theVector(5)  += 1.0*MpDelta;
-        //theVector(11) += 0.0*MpDelta;
-        MpDelta = qb(0)*(ul(8)-ul(2));
-        theVector(4)  -= 1.0*MpDelta;
-        //theVector(10) -= 0.0*MpDelta;
-        
+        MpDelta1 = qb(0)*(ul(7)-ul(1));
+        theVector(5) += MpDelta1;
+        MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(11);
+        theVector(5) -= MpDelta2;
+        theVector(11) += MpDelta2;
+        MpDelta3 = qb(0)*(ul(8)-ul(2));
+        theVector(4) -= MpDelta3;
+        MpDelta4 = qb(0)*(1.0 - shearDistI)*L*ul(10);
+        theVector(4) -= MpDelta4;
+        theVector(10) += MpDelta4;
+        // add V-Delta torsion
+        Vdelta1 = qb(1)*(ul(8)-ul(2)) - qb(2)*(ul(7)-ul(1));
+        theVector(3) += Vdelta1;
+        Vdelta2 = (1.0 - shearDistI)*L*(qb(1)*ul(10) + qb(2)*ul(11));
+        theVector(3) += Vdelta2;
+        theVector(9) -= Vdelta2;
         return eleInfo.setVector(theVector);
         
 	case 3:  // basic forces
@@ -985,8 +1043,10 @@ void SingleFPSimple3d::setUp()
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = Tlb(3,3) = Tlb(4,4) = Tlb(5,5) = -1.0;
     Tlb(0,6) = Tlb(1,7) = Tlb(2,8) = Tlb(3,9) = Tlb(4,10) = Tlb(5,11) = 1.0;
-    Tlb(1,11) = -L;
-    Tlb(2,10) = L;
+    Tlb(1,5) = -shearDistI*L;
+    Tlb(1,11) = -(1.0 - shearDistI)*L;
+    Tlb(2,4) = -Tlb(1,5);
+    Tlb(2,10) = -Tlb(1,11);
 }
 
 

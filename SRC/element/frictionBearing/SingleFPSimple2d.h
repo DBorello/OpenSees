@@ -50,7 +50,8 @@ public:
         FrictionModel &theFrnMdl, double R, double h, double uy,
         UniaxialMaterial **theMaterials,
         const Vector y = 0, const Vector x = 0,
-        double mass = 0.0, int maxIter = 20, double tol = 1E-8);
+        double shearDistI = 0.0, double mass = 0.0,
+        int maxIter = 20, double tol = 1E-12);
     SingleFPSimple2d();
 	
 	// destructor
@@ -112,6 +113,7 @@ private:
     double uy;          // yield displacement
     Vector x;           // local x direction
     Vector y;           // local y direction
+    double shearDistI;  // shear distance from node I as fraction of length
     double mass;        // mass of element
     int maxIter;        // maximum number of iterations
     double tol;         // tolerance for convergence criterion
