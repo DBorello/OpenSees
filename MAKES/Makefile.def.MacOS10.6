@@ -13,11 +13,6 @@
 #
 ############################################################################
 
-# Works on intel machine running Mac OS X.4.10 with XCode 2.4.1 with 
-
-# need to install gFortran from
-# http://www.macresearch.org/xcode_gfortran_plugin_update
-# Now USING hpc.sourceforge.net
 
 # FOR PARALLEL
 #1.  install openmpi (i used  openmpi-v1.2.6.tar.gz, configured with:
@@ -68,19 +63,17 @@ DEBUG_MODE = NO_DEBUG
 RELIABILITY = NO_RELIABILITY
 
 BASE		= /usr/local
-HOME		= /Users/dimitrioslignos/research/opensees_src
+HOME		= /Users/fmk
 FE		= $(HOME)/OpenSees/SRC
 
 GRAPHICS = NONE
+#GRAPHIC_FLAG = -D_AGL
+#GRAPHIC_FLAG = -D_AGLX
+#GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
+#AGL_OBJS = $(FE)/renderer/AGL_Device.o
 GRAPHIC_FLAG = -D_NOGRAPHICS
-#GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
-#AGL_OBJS = $(FE)/renderer/AGL_Device.o
-
-#GRAPHIC_FLAG = -D_GLX
-#GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
-#AGL_OBJS = $(FE)/renderer/AGL_Device.o
-
-
+GRAPHIC_LIBRARY =
+AGL_OBJS = 
 
 #HAVE_BLAS = YES
 
@@ -105,11 +98,12 @@ endif
 
 AMDdir    = $(HOME)/OpenSees/OTHER/AMD
 LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
-SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_4.1/SRC
+SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.5/SRC
 ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir       = $(HOME)/OpenSees/OTHER/METIS
+METISdir       = $(HOME)/OpenSees/OTHER/ITPACK
 SRCdir       = $(HOME)/OpenSees/SRC
 
 DIRS        = $(BLASdir) \
@@ -121,7 +115,8 @@ DIRS        = $(BLASdir) \
 	$(ARPACKdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir) 
+	$(METISdir) \
+	$(ITPACKdir) 
 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
@@ -135,7 +130,8 @@ DIRS        = $(BLASdir) \
 	$(AMDdir) \
 	$(UMFPACKdir) \
 	$(SRCdir) \
-	$(METISdir)
+	$(METISdir) \
+	$(ITPACKdir) 
 
 DISTRIBUTED_SUPERLU_LIBRARY     = 
 
@@ -157,6 +153,7 @@ DIRS        = $(SUPERLUdir) \
               $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(ITPACKdir) \
 	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 
@@ -178,6 +175,7 @@ DIRS        = $(SUPERLUdir) \
 	      $(AMDdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(ITPACKdir) \
 	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 endif
@@ -216,6 +214,7 @@ ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 AMD_LIBRARY  = $(HOME)/lib/libAMD.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
+ITPACK_LIBRARY   = $(HOME)/lib/libItpack.a
 TCL_LIBRARY = -framework Tcl -framework Tk
 
 
@@ -230,7 +229,8 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(ARPACK_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
-	        $(METIS_LIBRARY)
+	        $(METIS_LIBRARY) \
+	        $(ITPACK_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -242,8 +242,8 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 
 # Compilers
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
-CC++	= g++
-CC      = gcc
+CC++	= /usr/local/bin/g++
+CC      = /usr/local/bin/gcc
 FC	= /usr/local/bin/gfortran
 LINKER          = $(CC++)
 LINKFLAGS       =  -Wl 
@@ -277,8 +277,8 @@ ifeq ($(DEBUG_MODE), DEBUG)
 
 C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_AMDn $(OS_FLAG) -D_HTTPS \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
-	$(PROGRAMMING_FLAG) -g -O0 -ffloat-store -arch x86_64
-CFLAGS          = -Wall -O0 -g -arch x86_64
+	$(PROGRAMMING_FLAG) -g -O0 -ffloat-store 
+CFLAGS          = -Wall -O0 -g
 FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore
 
 
@@ -290,12 +290,12 @@ else
 
 C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_AMDn -D_MACOSX -D_HTTPS \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
-	$(PROGRAMMING_FLAG) -O3 -ffloat-store -D_NO_PARALLEL_FILESYSTEM -arch x86_64
-CFLAGS          = -Wall -O2 -arch x86_64
-FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore -m64
+	$(PROGRAMMING_FLAG) -O3 -ffloat-store -D_NO_PARALLEL_FILESYSTEM
+CFLAGS          = -Wall -O2
+FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore
 
 # Linker
-LINKFLAGS       = -arch x86_64
+
 endif
 
 # Misc
@@ -434,6 +434,7 @@ MACHINE_NUMERICAL_LIBS  =  \
 		$(SUPERLU_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
 	        $(AMD_LIBRARY) \
+	        $(ITPACK_LIBRARY) \
 	        $(LAPACK_LIBRARY) \
 	        $(CLAPACK_LIBRARY) \
 	        $(CLBLAS_LIBRARY) \
@@ -442,7 +443,7 @@ MACHINE_NUMERICAL_LIBS  =  \
 		$(GRAPHIC_LIBRARY)\
 		$(FORTO) \
 		$(CUDA_LIB) \
-		-ldl -L/usr/local/lib /usr/local/lib/x86_64/libgfortran.a
+		-ldl -L/usr/local/lib /usr/local/lib/libgfortran.a
 
 
 MACHINE_SPECIFIC_LIBS = $(AGL_OBJS) -lssl
