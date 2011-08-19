@@ -74,7 +74,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         if ((argc-eleArgStart) < 11)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
-            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -Mz matTag <-orient x1 x2 x3 y1 y2 y3> <-mass m>\n";
+            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -Mz matTag <-orient x1 x2 x3 y1 y2 y3> <-shearDist sDratio> <-mass m>\n";
             return TCL_ERROR;
         }    
         
@@ -82,6 +82,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         int iNode, jNode, matTag, argi, i, j;
         int recvMat = 0;
         double ke, fy, alpha;
+        double shearDistI = 0.5;
         double mass = 0.0;
         
         if (Tcl_GetInt(interp, argv[1+eleArgStart], &tag) != TCL_OK)  {
@@ -164,6 +165,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                 j = i+1;
                 int numOrient = 0;
                 while (j < argc &&
+                    strcmp(argv[j],"-shearDist") != 0 &&
                     strcmp(argv[j],"-mass") != 0)  {
                     numOrient++;
                     j++;
@@ -204,9 +206,18 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
             }
         }
         for (i = 7+eleArgStart; i < argc; i++)  {
+            if (i+1 < argc && strcmp(argv[i], "-shearDist") == 0)  {
+                if (Tcl_GetDouble(interp, argv[i+1], &shearDistI) != TCL_OK)  {
+                    opserr << "WARNING invalid -shearDist value\n";
+                    opserr << "elastomericBearing element: " << tag << endln;
+                    return TCL_ERROR;
+                }
+            }
+        }
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
-                    opserr << "WARNING invalid mass\n";
+                    opserr << "WARNING invalid -mass value\n";
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
@@ -214,7 +225,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         }
         
         // now create the elastomericBearing
-        theElement = new ElastomericBearing2d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, mass);
+        theElement = new ElastomericBearing2d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, shearDistI, mass);
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";
@@ -243,7 +254,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         if ((argc-eleArgStart) < 15)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
-            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-mass m>\n";
+            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-shearDist sDratio> <-mass m>\n";
             return TCL_ERROR;
         }
         
@@ -251,6 +262,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         int iNode, jNode, matTag, argi, i, j;
         int recvMat = 0;
         double ke, fy, alpha;
+        double shearDistI = 0.5;
         double mass = 0.0;
         
         if (Tcl_GetInt(interp, argv[1+eleArgStart], &tag) != TCL_OK)  {
@@ -366,6 +378,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                 j = i+1;
                 int numOrient = 0;
                 while (j < argc &&
+                    strcmp(argv[j],"-shearDist") != 0 &&
                     strcmp(argv[j],"-mass") != 0)  {
                     numOrient++;
                     j++;
@@ -420,9 +433,18 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
             }
         }
         for (i = 7+eleArgStart; i < argc; i++)  {
+            if (i+1 < argc && strcmp(argv[i], "-shearDist") == 0)  {
+                if (Tcl_GetDouble(interp, argv[i+1], &shearDistI) != TCL_OK)  {
+                    opserr << "WARNING invalid -shearDist value\n";
+                    opserr << "elastomericBearing element: " << tag << endln;
+                    return TCL_ERROR;
+                }
+            }
+        }
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
-                    opserr << "WARNING invalid mass\n";
+                    opserr << "WARNING invalid -mass value\n";
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
@@ -430,7 +452,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         }
         
         // now create the elastomericBearing
-        theElement = new ElastomericBearing3d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, mass);
+        theElement = new ElastomericBearing3d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, shearDistI, mass);
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";

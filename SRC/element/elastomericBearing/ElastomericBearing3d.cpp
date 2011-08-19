@@ -56,11 +56,11 @@ Vector ElastomericBearing3d::theLoad(12);
 
 ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
     double ke, double fy, double alpha, UniaxialMaterial **materials,
-    const Vector _y, const Vector _x, double m)
+    const Vector _y, const Vector _x, double sdI, double m)
     : Element(tag, ELE_TAG_ElastomericBearing3d),
     connectedExternalNodes(2),
-    k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), mass(m),
-    L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(12),
+    k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), shearDistI(sdI),
+    mass(m), L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(12),
     Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
 {
     // ensure the connectedExternalNode ID is of correct size & set values
@@ -120,8 +120,8 @@ ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
 ElastomericBearing3d::ElastomericBearing3d()
     : Element(0, ELE_TAG_ElastomericBearing3d),
     connectedExternalNodes(2),
-    k0(0.0), qYield(0.0), k2(0.0), x(0), y(0), mass(0.0),
-    L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(6),
+    k0(0.0), qYield(0.0), k2(0.0), x(0), y(0), shearDistI(0.5),
+    mass(0.0), L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(6),
     Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
 {	
     // ensure the connectedExternalNode ID is of correct size & set values
@@ -369,14 +369,25 @@ const Matrix& ElastomericBearing3d::getTangentStiff()
     kl.addMatrixTripleProduct(0.0, Tlb, kb, 1.0);
     
     // add geometric stiffness to local stiffness
-    kl(5,1) -= 0.5*qb(0);
-    kl(5,7) += 0.5*qb(0);
-    kl(11,1) -= 0.5*qb(0);
-    kl(11,7) += 0.5*qb(0);
-    kl(4,2) += 0.5*qb(0);
-    kl(4,8) -= 0.5*qb(0);
-    kl(10,2) += 0.5*qb(0);
-    kl(10,8) -= 0.5*qb(0);
+    double kGeo1 = 0.5*qb(0);
+    kl(5,1)   -= kGeo1;
+    kl(5,7)   += kGeo1;
+    kl(11,1)  -= kGeo1;
+    kl(11,7)  += kGeo1;
+    kl(4,2)   += kGeo1;
+    kl(4,8)   -= kGeo1;
+    kl(10,2)  += kGeo1;
+    kl(10,8)  -= kGeo1;
+    double kGeo2 = kGeo1*shearDistI*L;
+    kl(5,5)   += kGeo2;
+    kl(11,5)  -= kGeo2;
+    kl(4,4)   += kGeo2;
+    kl(10,4)  -= kGeo2;
+    double kGeo3 = kGeo1*(1.0 - shearDistI)*L;
+    kl(5,11)  -= kGeo3;
+    kl(11,11) += kGeo3;
+    kl(4,10)  -= kGeo3;
+    kl(10,10) += kGeo3;
     
     // transform from local to global system
     theMatrix.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
@@ -476,13 +487,25 @@ const Vector& ElastomericBearing3d::getResistingForce()
     ql = Tlb^qb;
     
     // add P-Delta moments to local forces
-    double MpDelta;
-    MpDelta = qb(0)*(ul(7)-ul(1));
-    ql(5)  += 0.5*MpDelta;
-    ql(11) += 0.5*MpDelta;
-    MpDelta = qb(0)*(ul(8)-ul(2));
-    ql(4)  -= 0.5*MpDelta;
-    ql(10) -= 0.5*MpDelta;
+    double kGeo1 = 0.5*qb(0);
+    double MpDelta1 = kGeo1*(ul(7)-ul(1));
+    ql(5)  += MpDelta1;
+    ql(11) += MpDelta1;
+    double MpDelta2 = kGeo1*shearDistI*L*ul(5);
+    ql(5)  += MpDelta2;
+    ql(11) -= MpDelta2;
+    double MpDelta3 = kGeo1*(1.0 - shearDistI)*L*ul(11);
+    ql(5)  -= MpDelta3;
+    ql(11) += MpDelta3;
+    double MpDelta4 = kGeo1*(ul(8)-ul(2));
+    ql(4)  -= MpDelta4;
+    ql(10) -= MpDelta4;
+    double MpDelta5 = kGeo1*shearDistI*L*ul(4);
+    ql(4)  += MpDelta5;
+    ql(10) -= MpDelta5;
+    double MpDelta6 = kGeo1*(1.0 - shearDistI)*L*ul(10);
+    ql(4)  -= MpDelta6;
+    ql(10) += MpDelta6;
     
     // determine resisting forces in global system
     theVector = Tgl^ql;
@@ -521,14 +544,15 @@ const Vector& ElastomericBearing3d::getResistingForceIncInertia()
 int ElastomericBearing3d::sendSelf(int commitTag, Channel &sChannel)
 {
     // send element parameters
-    static Vector data(7);
+    static Vector data(8);
     data(0) = this->getTag();
     data(1) = k0;
     data(2) = qYield;
     data(3) = k2;
-    data(4) = mass;
-    data(5) = x.Size();
-    data(6) = y.Size();
+    data(4) = shearDistI;
+    data(5) = mass;
+    data(6) = x.Size();
+    data(7) = y.Size();
     sChannel.sendVector(0, commitTag, data);
     
     // send the two end nodes
@@ -563,13 +587,14 @@ int ElastomericBearing3d::recvSelf(int commitTag, Channel &rChannel,
             delete theMaterials[i];
     
     // receive element parameters
-    static Vector data(7);
+    static Vector data(8);
     rChannel.recvVector(0, commitTag, data);    
     this->setTag((int)data(0));
     k0 = data(1);
     qYield = data(2);
     k2 = data(3);
-    mass = data(4);
+    shearDistI = data(4);
+    mass = data(5);
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
@@ -590,11 +615,11 @@ int ElastomericBearing3d::recvSelf(int commitTag, Channel &rChannel,
     }
     
     // receive remaining data
-    if ((int)data(5) == 3)  {
+    if ((int)data(6) == 3)  {
         x.resize(3);
         rChannel.recvVector(0, commitTag, x);
     }
-    if ((int)data(6) == 3)  {
+    if ((int)data(7) == 3)  {
         y.resize(3);
         rChannel.recvVector(0, commitTag, y);
     }
@@ -621,19 +646,37 @@ int ElastomericBearing3d::displaySelf(Renderer &theViewer,
     // first determine the end points of the element based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = theNodes[0]->getCrds();
-    const Vector &end2Crd = theNodes[1]->getCrds();	
-    
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();
-    
+    const Vector &end2Crd = theNodes[1]->getCrds();
+
     static Vector v1(3);
     static Vector v2(3);
-    
-    for (int i = 0; i < 3; i++)  {
-        v1(i) = end1Crd(i) + end1Disp(i)*fact;
-        v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+
+    if (displayMode >= 0)  {
+        const Vector &end1Disp = theNodes[0]->getDisp();
+        const Vector &end2Disp = theNodes[1]->getDisp();
+
+        for (int i=0; i<3; i++)  {
+            v1(i) = end1Crd(i) + end1Disp(i)*fact;
+            v2(i) = end2Crd(i) + end2Disp(i)*fact;
+        }
+    } else  {
+        int mode = displayMode * -1;
+        const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+        const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+
+        if (eigen1.noCols() >= mode)  {
+            for (int i=0; i<3; i++)  {
+                v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+                v2(i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+            }
+        } else  {
+            for (int i=0; i<3; i++)  {
+                v1(i) = end1Crd(i);
+                v2(i) = end2Crd(i);
+            }
+        }
     }
-    
+
     return theViewer.drawLine (v1, v2, 1.0, 1.0);
 }
 
@@ -650,7 +693,7 @@ void ElastomericBearing3d::Print(OPS_Stream &s, int flag)
         s << "  Material rx: " << theMaterials[1]->getTag() << endln;
         s << "  Material ry: " << theMaterials[2]->getTag() << endln;
         s << "  Material rz: " << theMaterials[3]->getTag() << endln;
-        s << "  mass: " << mass << endln;
+        s << "  shearDistI: " << shearDistI << "  mass: " << mass << endln;
         // determine resisting forces in global system
         s << "  resisting force: " << this->getResistingForce() << endln;
     } else if (flag == 1)  {
@@ -769,7 +812,7 @@ Response* ElastomericBearing3d::setResponse(const char **argv, int argc,
 
 int ElastomericBearing3d::getResponse(int responseID, Information &eleInfo)
 {
-    double MpDelta;
+    double kGeo1, MpDelta1, MpDelta2, MpDelta3, MpDelta4, MpDelta5, MpDelta6;
     
     switch (responseID)  {
 	case 1:  // global forces
@@ -780,13 +823,25 @@ int ElastomericBearing3d::getResponse(int responseID, Information &eleInfo)
         // determine resisting forces in local system
         theVector = Tlb^qb;
         // add P-Delta moments
-        MpDelta = qb(0)*(ul(7)-ul(1));
-        theVector(5)  += 0.5*MpDelta;
-        theVector(11) += 0.5*MpDelta;
-        MpDelta = qb(0)*(ul(8)-ul(2));
-        theVector(4)  -= 0.5*MpDelta;
-        theVector(10) -= 0.5*MpDelta;
-        
+        kGeo1 = 0.5*qb(0);
+        MpDelta1 = kGeo1*(ul(7)-ul(1));
+        theVector(5)  += MpDelta1;
+        theVector(11) += MpDelta1;
+        MpDelta2 = kGeo1*shearDistI*L*ul(5);
+        theVector(5)  += MpDelta2;
+        theVector(11) -= MpDelta2;
+        MpDelta3 = kGeo1*(1.0 - shearDistI)*L*ul(11);
+        theVector(5)  -= MpDelta3;
+        theVector(11) += MpDelta3;
+        MpDelta4 = kGeo1*(ul(8)-ul(2));
+        theVector(4)  -= MpDelta4;
+        theVector(10) -= MpDelta4;
+        MpDelta5 = kGeo1*shearDistI*L*ul(4);
+        theVector(4)  += MpDelta5;
+        theVector(10) -= MpDelta5;
+        MpDelta6 = kGeo1*(1.0 - shearDistI)*L*ul(10);
+        theVector(4)  -= MpDelta6;
+        theVector(10) += MpDelta6;
         return eleInfo.setVector(theVector);
         
 	case 3:  // basic forces
@@ -872,8 +927,10 @@ void ElastomericBearing3d::setUp()
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = Tlb(3,3) = Tlb(4,4) = Tlb(5,5) = -1.0;
     Tlb(0,6) = Tlb(1,7) = Tlb(2,8) = Tlb(3,9) = Tlb(4,10) = Tlb(5,11) = 1.0;
-    Tlb(1,5) = Tlb(1,11) = -0.5*L;
-    Tlb(2,4) = Tlb(2,10) = 0.5*L;
+    Tlb(1,5) = -shearDistI*L;
+    Tlb(1,11) = -(1.0 - shearDistI)*L;
+    Tlb(2,4) = -Tlb(1,5);
+    Tlb(2,10) = -Tlb(1,11);
 }
 
 

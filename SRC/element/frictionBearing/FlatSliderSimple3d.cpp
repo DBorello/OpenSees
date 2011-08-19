@@ -441,14 +441,14 @@ const Matrix& FlatSliderSimple3d::getTangentStiff()
     kl(4,10)  -= qb(0)*Ls;
     kl(10,10) += qb(0)*Ls;
     // add V-Delta torsion stiffness terms
-    kl(3,1)  += qb(2);
-    kl(3,2)  -= qb(1);
-    kl(3,7)  -= qb(2);
-    kl(3,8)  += qb(1);
-    kl(3,10) += qb(1)*Ls;
-    kl(3,11) += qb(2)*Ls;
-    kl(9,10) -= qb(1)*Ls;
-    kl(9,11) -= qb(2)*Ls;
+    kl(3,1)   += qb(2);
+    kl(3,2)   -= qb(1);
+    kl(3,7)   -= qb(2);
+    kl(3,8)   += qb(1);
+    kl(3,10)  += qb(1)*Ls;
+    kl(3,11)  += qb(2)*Ls;
+    kl(9,10)  -= qb(1)*Ls;
+    kl(9,11)  -= qb(2)*Ls;
     
     // transform from local to global system
     theMatrix.addMatrixTripleProduct(0.0, Tgl, kl, 1.0);
@@ -549,14 +549,14 @@ const Vector& FlatSliderSimple3d::getResistingForce()
     
     // add P-Delta moments to local forces
     double MpDelta1 = qb(0)*(ul(7)-ul(1));
-    ql(5) += MpDelta1;
+    ql(5)  += MpDelta1;
     double MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(11);
-    ql(5) -= MpDelta2;
+    ql(5)  -= MpDelta2;
     ql(11) += MpDelta2;
     double MpDelta3 = qb(0)*(ul(8)-ul(2));
-    ql(4) -= MpDelta3;
+    ql(4)  -= MpDelta3;
     double MpDelta4 = qb(0)*(1.0 - shearDistI)*L*ul(10);
-    ql(4) -= MpDelta4;
+    ql(4)  -= MpDelta4;
     ql(10) += MpDelta4;
     
     // add V-Delta torsion to local forces
@@ -783,7 +783,8 @@ void FlatSliderSimple3d::Print(OPS_Stream &s, int flag)
         s << "  Material rx: " << theMaterials[1]->getTag() << endln;
         s << "  Material ry: " << theMaterials[2]->getTag() << endln;
         s << "  Material rz: " << theMaterials[3]->getTag() << endln;
-        s << "  mass: " << mass << "  maxIter: " << maxIter << "  tol: " << tol << endln;
+        s << "  shearDistI: " << shearDistI << "  mass: " << mass << endln;
+        s << "  maxIter: " << maxIter << "  tol: " << tol << endln;
         // determine resisting forces in global system
         s << "  resisting force: " << this->getResistingForce() << endln;
     } else if (flag == 1)  {
@@ -921,21 +922,21 @@ int FlatSliderSimple3d::getResponse(int responseID, Information &eleInfo)
         theVector = Tlb^qb;
         // add P-Delta moments
         MpDelta1 = qb(0)*(ul(7)-ul(1));
-        theVector(5) += MpDelta1;
+        theVector(5)  += MpDelta1;
         MpDelta2 = qb(0)*(1.0 - shearDistI)*L*ul(11);
-        theVector(5) -= MpDelta2;
+        theVector(5)  -= MpDelta2;
         theVector(11) += MpDelta2;
         MpDelta3 = qb(0)*(ul(8)-ul(2));
-        theVector(4) -= MpDelta3;
+        theVector(4)  -= MpDelta3;
         MpDelta4 = qb(0)*(1.0 - shearDistI)*L*ul(10);
-        theVector(4) -= MpDelta4;
+        theVector(4)  -= MpDelta4;
         theVector(10) += MpDelta4;
         // add V-Delta torsion
         Vdelta1 = qb(1)*(ul(8)-ul(2)) - qb(2)*(ul(7)-ul(1));
-        theVector(3) += Vdelta1;
+        theVector(3)  += Vdelta1;
         Vdelta2 = (1.0 - shearDistI)*L*(qb(1)*ul(10) + qb(2)*ul(11));
-        theVector(3) += Vdelta2;
-        theVector(9) -= Vdelta2;
+        theVector(3)  += Vdelta2;
+        theVector(9)  -= Vdelta2;
         return eleInfo.setVector(theVector);
         
 	case 3:  // basic forces

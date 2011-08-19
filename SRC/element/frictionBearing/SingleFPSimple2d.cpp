@@ -739,7 +739,8 @@ void SingleFPSimple2d::Print(OPS_Stream &s, int flag)
         s << "  R: " << R << "  h: " << h << "  uy: " << uy << endln;
         s << "  Material ux: " << theMaterials[0]->getTag() << endln;
         s << "  Material rz: " << theMaterials[1]->getTag() << endln;
-        s << "  mass: " << mass << "  maxIter: " << maxIter << "  tol: " << tol << endln;
+        s << "  shearDistI: " << shearDistI << "  mass: " << mass << endln;
+        s << "  maxIter: " << maxIter << "  tol: " << tol << endln;
         // determine resisting forces in global system
         s << "  resisting force: " << this->getResistingForce() << endln;
     } else if (flag == 1)  {

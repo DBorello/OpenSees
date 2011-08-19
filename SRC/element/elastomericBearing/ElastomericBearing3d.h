@@ -53,7 +53,7 @@ public:
         double ke, double fy, double alpha,
         UniaxialMaterial **theMaterials,
         const Vector y, const Vector x = 0,
-        double mass = 0.0);
+        double shearDistI = 0.5, double mass = 0.0);
     ElastomericBearing3d();
 	
 	// destructor
@@ -115,6 +115,7 @@ private:
     double k2;          // stiffness of elastic component
     Vector x;           // local x direction
     Vector y;           // local y direction
+    double shearDistI;  // shear distance from node I as fraction of length
     double mass;        // mass of element
     double L;           // element length
 	
