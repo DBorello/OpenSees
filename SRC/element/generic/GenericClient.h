@@ -19,7 +19,7 @@
 ** ****************************************************************** */
 
 // $Revision: 1.6 $
-// $Date: 2009-06-02 21:09:50 $
+// $Date: 2009/06/02 21:09:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.h,v $
 
 #ifndef GenericClient_h
@@ -156,9 +156,6 @@ private:
     Vector dbCtrl;      // ctrl displacements in basic system
     Vector vbCtrl;      // ctrl velocities in basic system
     Vector abCtrl;      // ctrl accelerations in basic system
-    
-    Vector dbPast;      // past displacements in basic system
-    double tPast;       // past time
     
     bool initStiffFlag;
     bool massFlag;
