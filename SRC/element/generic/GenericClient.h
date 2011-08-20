@@ -63,7 +63,7 @@ public:
     // constructors
     GenericClient(int tag, ID nodes, ID *dof,
 		  int port, char *machineInetAddr = 0,
-		  int ssl = 0, int dataSize = 256);
+		  int ssl = 0, int udp = 0, int dataSize = 256);
     GenericClient();    
     
     // destructor
@@ -131,6 +131,7 @@ private:
     int port;                   // ipPort
     char *machineInetAddr;      // ipAddress
     int ssl;                    // secure socket layer flag
+    int udp;                    // udp socket flag
     int dataSize;               // data size of send/recv vectors
     
     static Matrix theMatrix;        // objects matrix

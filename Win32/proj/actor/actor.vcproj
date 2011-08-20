@@ -170,6 +170,12 @@
 		<File
 			RelativePath="..\..\..\SRC\actor\channel\TCP_Socket.h">
 		</File>
+		<File
+			RelativePath="..\..\..\SRC\actor\channel\UDP_Socket.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\actor\channel\UDP_Socket.h">
+		</File>        
 	</Files>
 	<Globals>
 	</Globals>

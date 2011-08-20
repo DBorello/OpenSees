@@ -39,6 +39,7 @@
 #include <Information.h>
 #include <ElementResponse.h>
 #include <TCP_Socket.h>
+#include <UDP_Socket.h>
 #ifdef SSL
     #include <TCP_SocketSSL.h>
 #endif
@@ -58,12 +59,12 @@ Vector GenericClient::theLoad(1);
 
 // responsible for allocating the necessary space needed
 // by each object and storing the tags of the end nodes.
-GenericClient::GenericClient(int tag, ID nodes, ID *dof,
-    int _port, char *machineinetaddr, int _ssl, int datasize)
+GenericClient::GenericClient(int tag, ID nodes, ID *dof, int _port,
+    char *machineinetaddr, int _ssl, int _udp, int datasize)
     : Element(tag, ELE_TAG_GenericClient),
     connectedExternalNodes(nodes), basicDOF(1),
-    numExternalNodes(0), numDOF(0), numBasicDOF(0),
-    port(_port), machineInetAddr(0), ssl(_ssl), dataSize(datasize),
+    numExternalNodes(0), numDOF(0), numBasicDOF(0), port(_port),
+    machineInetAddr(0), ssl(_ssl), udp(_udp), dataSize(datasize),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
     db(0), vb(0), ab(0), t(0), qDaq(0), rMatrix(0),
     dbCtrl(1), vbCtrl(1), abCtrl(1),
@@ -117,7 +118,7 @@ GenericClient::GenericClient()
     : Element(0, ELE_TAG_GenericClient),
     connectedExternalNodes(1), basicDOF(1),
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
-    port(0), machineInetAddr(0), ssl(0), dataSize(0),
+    port(0), machineInetAddr(0), ssl(0), udp(0), dataSize(0),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
     db(0), vb(0), ab(0), t(0), qDaq(0), rMatrix(0),
     dbCtrl(1), vbCtrl(1), abCtrl(1),
@@ -531,13 +532,14 @@ const Vector& GenericClient::getBasicAccel()
 int GenericClient::sendSelf(int commitTag, Channel &sChannel)
 {
     // send element parameters
-    static ID idData(6);
+    static ID idData(7);
     idData(0) = this->getTag();
     idData(1) = numExternalNodes;
     idData(2) = port;
     idData(3) = strlen(machineInetAddr);
     idData(4) = ssl;
-    idData(5) = dataSize;
+    idData(5) = udp;
+    idData(6) = dataSize;
     sChannel.sendID(0, commitTag, idData);
 
     // send the end nodes and dofs
@@ -565,14 +567,15 @@ int GenericClient::recvSelf(int commitTag, Channel &rChannel,
         delete [] machineInetAddr;
     
     // receive element parameters
-    static ID idData(6);
+    static ID idData(7);
     rChannel.recvID(0, commitTag, idData);    
     this->setTag(idData(0));
     numExternalNodes = idData(1);
     port = idData(2);
     machineInetAddr = new char [idData(3) + 1];
     ssl = idData(4);
-    dataSize = idData(5);
+    udp = idData(5);
+    dataSize = idData(6);
     
     // initialize nodes and receive them
     connectedExternalNodes.resize(numExternalNodes);
@@ -879,27 +882,33 @@ int GenericClient::getResponse(int responseID, Information &eleInfo)
 int GenericClient::setupConnection()
 {
     // setup the connection
-    if (!ssl)  {
+    if (udp)  {
         if (machineInetAddr == 0)
-            theChannel = new TCP_Socket(port, "127.0.0.1");
+            theChannel = new UDP_Socket(port, "127.0.0.1");
         else
-            theChannel = new TCP_Socket(port, machineInetAddr);
+            theChannel = new UDP_Socket(port, machineInetAddr);
     }
 #ifdef SSL
-    else  {
+    else if (ssl)  {
         if (machineInetAddr == 0)
             theChannel = new TCP_SocketSSL(port, "127.0.0.1");
         else
             theChannel = new TCP_SocketSSL(port, machineInetAddr);
     }
 #endif
+    else  {
+        if (machineInetAddr == 0)
+            theChannel = new TCP_Socket(port, "127.0.0.1");
+        else
+            theChannel = new TCP_Socket(port, machineInetAddr);
+    }
     if (!theChannel)  {
-        opserr << "GenericClient::GenericClient() "
+        opserr << "GenericClient::setupConnection() "
             << "- failed to create channel\n";
         return -1;
     }
     if (theChannel->setUpConnection() != 0)  {
-        opserr << "GenericClient::GenericClient() "
+        opserr << "GenericClient::setupConnection() "
             << "- failed to setup connection\n";
         return -2;
     }

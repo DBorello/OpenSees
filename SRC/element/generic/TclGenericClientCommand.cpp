@@ -54,7 +54,7 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
 	if ((argc-eleArgStart) < 8)  {
 		opserr << "WARNING insufficient arguments\n";
 		printCommand(argc, argv);
-		opserr << "Want: element genericClient eleTag -node Ndi Ndj ... -dof dofNdi -dof dofNdj ... -server ipPort <ipAddr> <-ssl> <-dataSize size>\n";
+		opserr << "Want: element genericClient eleTag -node Ndi Ndj ... -dof dofNdi -dof dofNdj ... -server ipPort <ipAddr> <-ssl> <-udp> <-dataSize size>\n";
 		return TCL_ERROR;
 	}
 
@@ -65,7 +65,7 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
     int tag, node, dof, ipPort, argi, i, j;
     int numNodes = 0, numDOFj = 0, numDOF = 0;
     char *ipAddr = 0;
-    int ssl = 0;
+    int ssl = 0, udp = 0;
     int dataSize = 256;
 
 	if (Tcl_GetInt(interp, argv[1+eleArgStart], &tag) != TCL_OK)  {
@@ -145,8 +145,10 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
 	        return TCL_ERROR;
         }
         argi++;
-        if (argi < argc && strcmp(argv[argi], "-dataSize") != 0
-            && strcmp(argv[argi], "-ssl") != 0)  {
+        if (argi < argc &&
+            strcmp(argv[argi], "-dataSize") != 0 &&
+            strcmp(argv[argi], "-ssl") != 0 &&
+            strcmp(argv[argi], "-udp") != 0)  {
             ipAddr = new char [strlen(argv[argi])+1];
             strcpy(ipAddr,argv[argi]);
             argi++;
@@ -156,8 +158,12 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
             strcpy(ipAddr,"127.0.0.1");
         }
         for (i = argi; i < argc; i++)  {
-            if (strcmp(argv[i], "-ssl") == 0)
-                ssl = 1;
+            if (strcmp(argv[i], "-ssl") == 0)  {
+                ssl = 1; udp = 0;
+            }
+            else if (strcmp(argv[i], "-udp") == 0)  {
+                udp = 1; ssl = 0;
+            }
             else if (strcmp(argv[i], "-dataSize") == 0)  {
                 if (Tcl_GetInt(interp, argv[i+1], &dataSize) != TCL_OK)  {
 		            opserr << "WARNING invalid dataSize\n";
@@ -175,7 +181,7 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
     }
     
 	// now create the GenericClient
-    theElement = new GenericClient(tag, nodes, dofs, ipPort, ipAddr, ssl, dataSize);
+    theElement = new GenericClient(tag, nodes, dofs, ipPort, ipAddr, ssl, udp, dataSize);
     
     // cleanup dynamic memory
     if (dofs != 0)

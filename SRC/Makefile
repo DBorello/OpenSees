@@ -855,7 +855,7 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
-        $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
+    $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
 	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o \
@@ -966,7 +966,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/Broyden.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/BFGS.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/KrylovNewton.o \
-        $(FE)/analysis/algorithm/equiSolnAlgo/PeriodicNewton.o \
+    $(FE)/analysis/algorithm/equiSolnAlgo/PeriodicNewton.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/LineSearch.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/BisectionLineSearch.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/SecantLineSearch.o \
@@ -1052,6 +1052,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 
 ACTOR_LIBS = $(FE)/actor/channel/Channel.o \
 	$(FE)/actor/channel/TCP_Socket.o \
+    $(FE)/actor/channel/UDP_Socket.o \
 	$(FE)/actor/channel/Socket.o \
 	$(FE)/actor/channel/HTTP.o \
 	$(FE)/actor/message/Message.o \
