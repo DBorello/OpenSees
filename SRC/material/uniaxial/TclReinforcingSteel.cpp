@@ -50,7 +50,7 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
     opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <-GABuck?> <-DMBuck?> <-CMFatigue?> <-MPCurveParams?> <-IsoHard?>" << endln;
 	return TCL_ERROR;
   }
-  
+
   int tag;
   double fy, fu, Es, Esh, esh, eult;
   double slen = 0.0;
@@ -108,6 +108,7 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_ERROR;	
   }
   int argLoc = 9;
+
   while (argc > argLoc) {
 	  if (strcmp(argv[argLoc],"-GABuck") == 0) {
 	    if (argc < ++argLoc+4)  {
@@ -249,8 +250,12 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
   // Parsing was successful, allocate the material
   theMaterial = new ReinforcingSteel(tag, fy, fu, Es, Esh, esh, eult, buckModel, slen, beta, r, gama, Cf, alpha, Cd, RC1, RC2, RC3, a1, hardLim);
 
-  if (theMaterial != 0) 
-    return OPS_addUniaxialMaterial(theMaterial);
-  else
-    return -1;
+  if (theMaterial != 0)  {
+    if (OPS_addUniaxialMaterial(theMaterial) == true)
+      return 0;
+    else
+      return -1;
+  }
+
+  return -1;
 }
