@@ -2864,6 +2864,7 @@ ForceBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
     double dxLdh  = dptsdh[i];    
 
     Vector ds(workArea, order);
+    ds.Zero();
 
     // Add sensitivity wrt element loads
     if (numEleLoads > 0) {
