@@ -103,9 +103,9 @@ InitStressMaterial::InitStressMaterial(int tag,
     theMaterial->setTrialStrain(tStrain);
     tStress = theMaterial->getStress();
     dSig = sigInit-tStress;
-  } while ((abs(tStress-sigInit) > tol) && (count <= 100));
+  } while ((fabs(tStress-sigInit) > tol) && (count <= 100));
 
-  if ((abs(tStress-sigInit) < tol)) 
+  if ((fabs(tStress-sigInit) < tol)) 
     theMaterial->setTrialStrain(epsInit);
   else {
     opserr << "WARNING: InitStressMaterial - could not find initStrain to within tol for material: " << tag;
