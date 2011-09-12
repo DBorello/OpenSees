@@ -47,15 +47,6 @@
 #include <elementAPI.h>
 #include <OPS_Globals.h>
 
-#ifndef fmin
-#define fmin(a,b) (a<b)?a:b;
-#endif
-
-#ifndef fmax
-#define fmax(a,b) (a>b)?a:b;
-#endif
-
-
 #ifdef _USRDLL
 #define OPS_Export extern "C" _declspec(dllexport)
 #elif _MACOSX
@@ -66,48 +57,50 @@
 
 static int numCastMaterials = 0;
 
-void * OPS_Cast() {
-  if (numCastMaterials == 0) {
-    numCastMaterials++;
-    OPS_Error("Cast Fuse uniaxial material - Written by Dimitrios G. Lignos, Ph.D.\n", 1);
-  }
-  
-  // Pointer to a uniaxial material that will be returned
-  UniaxialMaterial *theMaterial = 0;
-  
-  int    iData[1];
-  double dData[14];
-  int numData = 1;
-  // Check Tag and number of Fingers
-  if (OPS_GetIntInput(&numData, iData) != 0) {
-    opserr << "WARNING invalid uniaxialMaterial  Cast Fuse tag" << endln;
-    return 0;
-  }
-  
-  numData = 14;
-  if (OPS_GetDoubleInput(&numData, dData) != 0) {
-    opserr << "Invalid Args want: uniaxialMaterial CastFuse tag? NLegs? bo? h? Fy? E? L? b? R0? cR1? cR2? a1? a2? a3? a4?";
-    return 0;	
-  }
-  
-  // Parsing was successful, allocate the material
-  theMaterial = new Cast(iData[0], dData[0],
-			 dData[1], dData[2], dData[3], dData[4], dData[5], 
-			 dData[6], dData[7], dData[8], dData[9], dData[10],
-			 dData[11], dData[12], dData[13]);
-  
-  if (theMaterial == 0) {
-    opserr << "WARNING could not create uniaxialMaterial of type Cast Material\n";
-    return 0;
-  }
-  
-  return theMaterial;
+OPS_Export void *
+OPS_Cast()
+{
+	if (numCastMaterials == 0) {
+		numCastMaterials++;
+		OPS_Error("Cast Fuse uniaxial material - Written by Dimitrios G. Lignos, Ph.D.\n", 1);
+	}
+	
+	// Pointer to a uniaxial material that will be returned
+	UniaxialMaterial *theMaterial = 0;
+	
+	int    iData[1];
+	double dData[14];
+	int numData = 1;
+	// Check Tag and number of Fingers
+	if (OPS_GetIntInput(&numData, iData) != 0) {
+		opserr << "WARNING invalid uniaxialMaterial  Cast Fuse tag" << endln;
+		return 0;
+	}
+	
+	numData = 14;
+	if (OPS_GetDoubleInput(&numData, dData) != 0) {
+		opserr << "Invalid Args want: uniaxialMaterial CastFuse tag? NLegs? bo? h? Fy? E? L? b? R0? cR1? cR2? a1? a2? a3? a4?";
+		return 0;	
+	}
+	
+	// Parsing was successful, allocate the material
+	theMaterial = new Cast(iData[0], dData[0],
+							   dData[1], dData[2], dData[3], dData[4], dData[5], 
+							   dData[6], dData[7], dData[8], dData[9], dData[10],
+						       dData[11], dData[12], dData[13]);
+	
+	if (theMaterial == 0) {
+		opserr << "WARNING could not create uniaxialMaterial of type Cast Material\n";
+		return 0;
+	}
+	
+	return theMaterial;
 }
 
 Cast::Cast(int tag, double NLegs, double _BO, double H, double _Fy,
-	   double E, double L, double _b,
-	   double _R0, double _cR1, double _cR2,
-	   double _a1, double _a2, double _a3, double _a4):
+		 double E, double L, double _b,
+		 double _R0, double _cR1, double _cR2,
+		 double _a1, double _a2, double _a3, double _a4):
   UniaxialMaterial(tag, MAT_TAG_Cast),
   nLegs(NLegs), bo(_BO), h(H), fy(_Fy), eo(E), l(L), b(_b), R0(_R0), 
   cR1(_cR1), cR2(_cR2), a1(_a1), a2(_a2), a3(_a3), a4(_a4)
@@ -115,7 +108,7 @@ Cast::Cast(int tag, double NLegs, double _BO, double H, double _Fy,
   
   kp = (1.0/6.0) * nLegs * bo * eo * pow((h/l),3.0); // Initial Stiffness of Cast Fuse
   Pp = nLegs * bo * pow(h,2.0) * fy/(4.0*l);   // Yield strength of Cast Fuse (Monotonic Backbone)
-  
+
   konP = 0;
   kon = 0;
   eP = kp;
@@ -336,7 +329,7 @@ Cast::setTrialStrain(double trialStrain, double strainRate)
   sig = sig*(sigs0-sigr);
   
   if (fabs(eps)>fabs(epsy)) {
-	  sig = sig/cos(2.0*eps/l) + sigr;
+	  sig = sig/cos(1.5*eps/l) + sigr;
   }else
 	  sig = sig + sigr;
   
