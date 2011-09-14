@@ -11,6 +11,13 @@ C
 C  This subroutine determines the cyclic stress history of reinforcing steel 
 C  given the tensile skeleton curve properties and the strain history as 
 C  described by Chapter 2 of this thesis.
+C
+C (C) Copyright 2011, The Regents of the University of California    
+C All Rights Reserved.                                               
+C
+C Commercial use of this program without express permission of the  
+C University of California, Berkeley, is strictly prohibited.  Contact
+C J. Retrepo UCSD.
 C==============================================================================
 C
 C
@@ -20,59 +27,65 @@ C
       Integer LMR   ! Last Major Reversal direction. Value of "s" after reversal
       Integer BFlag(2) ! Strain hardening (0) or Bauschinger (1) curve 
 C
-      Real Epa(2)   ! Strain at end of linear branch (1=tension, 2=compression)
-      Real EpaM(2)  ! Major reversal Epa
-      Real Epo(2)   ! Maximum "natural" shift (1=compression, 2=tension)
-      Real EpoMax   ! The maximum magnitude of Epo(1) and Epo(2)
-      Real Eps      ! Natural strain
-      Real Epr(2)   ! Reversal strain (1=tension, 2=compression)
-      Real EprM(2)  ! Major reversal strain (1=tension, 2=compression)
-      Real EpSH     ! Natural coordinate strain hardening strain
-      Real EpsLast  ! Natural strain at last increment
-      Real EpsOld   ! Natural strain at second to last increment
-      Real Epsu     ! Natural coordinate "ultimate" strain
-      Real EpsuSh(2)! Shifted "ultimate" strain value (1=tension, 2=compression)
-      Real Epy      ! The yield strain, Fy/Youngs (a positive value)
-      Real Es       ! Engineering Strain
-      Real Fpa(2)   ! Stress at end of linear branch (1=tension, 2=compression)
-      Real FpaM(2)  ! Major reversal Fpa
-      Real Fpr(2)   ! Reversal stress (1=tension, 2=compression)
-      Real FprM(2)  ! Major reversal stress (1=tension, 2=compression)
-      Real Fps      ! True coordinates stress
-      Real FpsLast  ! True stress at last increment
-      Real Fpsu     ! True coordinate "ultimate" stress (slope at ultimate)
-      Real Fs       ! Engineering Stress
-      Real Fy       ! Yield Stress
-      Real OmegFac  ! Multiplication factor for Omega
-      Real Power(2) ! Exponent in normalised Bauschinger eq. (1=tens., 2=comp.)
-      Real PowerM(2)! Major reversal Power
-      Real SHPower  ! Exponent which governs the strain-hardening curve
-      Real Youngs   ! Youngs modulus
-      Real YTan     ! Tangential modulus
-      Real YpTan    ! True coordinates tangential modulus
-      Real YpTanM(2)! Tangential modulus at major reversals (1=tens, 2=comp)
-      Real YpTanLast! Tangential modulus at last increment
-      Real YoungsUn ! Unloading modulus
+      Real*8 Epa(2)   ! Strain at end of linear branch (1=tension, 2=compression)
+      Real*8 EpaM(2)  ! Major reversal Epa
+      Real*8 Epo(2)   ! Maximum "natural" shift (1=compression, 2=tension)
+      Real*8 EpoMax   ! The maximum magnitude of Epo(1) and Epo(2)
+      Real*8 Eps      ! Natural strain
+      Real*8 Epr(2)   ! Reversal strain (1=tension, 2=compression)
+      Real*8 EprM(2)              ! Major reversal strain (1=tension, 2=compression)
+      Real*8 EpSH     ! Natural coordinate strain hardening strain
+      Real*8 EpsLast  ! Natural strain at last increment
+      Real*8 EpsOld   ! Natural strain at second to last increment
+      Real*8 Epsu     ! Natural coordinate "ultimate" strain
+      Real*8 EpsuSh(2)! Shifted "ultimate" strain value (1=tension, 2=compression)
+      Real*8 Epy      ! The yield strain, Fy/Youngs (a positive value)
+      Real*8 Es       ! Engineering Strain
+      Real*8 Fpa(2)   ! Stress at end of linear branch (1=tension, 2=compression)
+      Real*8 FpaM(2)  ! Major reversal Fpa
+      Real*8 Fpr(2)   ! Reversal stress (1=tension, 2=compression)
+      Real*8 FprM(2)  ! Major reversal stress (1=tension, 2=compression)
+      Real*8 Fps      ! True coordinates stress
+      Real*8 FpsLast  ! True stress at last increment
+      Real*8 Fpsu     ! True coordinate "ultimate" stress (slope at ultimate)
+      Real*8 Fs       ! Engineering Stress
+      Real*8 Fy       ! Yield Stress
+      Real*8 OmegFac  ! Multiplication factor for Omega
+      Real*8 Power(2) ! Exponent in normalised Bauschinger eq. (1=tens., 2=comp.)
+      Real*8 PowerM(2)! Major reversal Power
+      Real*8 SHPower  ! Exponent which governs the strain-hardening curve
+      Real*8 Youngs   ! Youngs modulus
+      Real*8 YTan     ! Tangential modulus
+      Real*8 YpTan    ! True coordinates tangential modulus
+      Real*8 YpTanM(2)! Tangential modulus at major reversals (1=tens, 2=comp)
+      Real*8 YpTanLast! Tangential modulus at last increment
+      Real*8 YoungsUn ! Unloading modulus
 C
 C INTERNAL VARIABLES
 C
-      Real a        !
-      Real C1       ! Temporary constant
-      Real C2       ! Temporary constant
-      Real Delta    ! Strain change from previous increment
-      Real Epp      ! Abs((Epsush(K) - Epa(M))/Epsu)
-      Real FNorm    ! Abs(Fpp/Fpt)
-      Real Fpp      ! Fpsu*(s*1.-EpsuSh(K)+Epa(M)) - Fpa(M)
-      Real Fpt      ! Fpsu*(2-EpsuSh(1)+EpsuSh(2))
-      Real FpSH     ! Strain hardening natural strain (Fy*(1+Epsh))
-      Real Omega    ! Percent area term for Bauschinger curve
+      Real*8 a        !
+      Real*8 C1       ! Temporary constant
+      Real*8 C2       ! Temporary constant
+      Real*8 Delta    ! Strain change from previous increment
+      Real*8 Epp      ! Abs((Epsush(K) - Epa(M))/Epsu)
+      Real*8 FNorm    ! Abs(Fpp/Fpt)
+      Real*8 Fpp      ! Fpsu*(s*1.-EpsuSh(K)+Epa(M)) - Fpa(M)
+      Real*8 Fpt      ! Fpsu*(2-EpsuSh(1)+EpsuSh(2))
+      Real*8 FpSH     ! Strain hardening natural strain (Fy*(1+Epsh))
+      Real*8 Omega    ! Percent area term for Bauschinger curve
       Integer MaxFlag ! Flag to tell if reversal point is a new max 0-no,1-yes
       Integer S     ! Straining direction: -1 for compressing, 1 for tensioning
       Integer K     ! Index value           2                  1
       Integer M     ! Index value           1                  2
       Integer L     ! Index value: K for LMR*s.NE.-1,  M otherwise
+
+
+C      write(*,*)"INPUT"
+C      write(*,*)Es, EpsLast, FpsLast, YpTanLast, EpsOld, Fy, Epy
+C      write(*,*)EpSH, Epsu, Fpsu, Youngs, SHPower
+
 C
-      Eps = log(1+Es)
+      Eps = log(1.0+Es)
       Delta = Eps - EpsLast
       If (Delta.Eq.0) Delta = EpsLast - EpsOld
       If (Delta.Gt.0.0) then                      ! tensioning
@@ -85,6 +98,7 @@ C
          S  = -1
       End If
       If (Eps*s.Gt.EpsuSH(K)*s) then
+         write(*,*) Es,Eps, EpsuSH(K), S
          Fps  = 0.
          Fpsu = 0.
          Write (6,800)
@@ -276,6 +290,11 @@ C
       End If
       Fs   = Fps/(1+Es)
       YTan = (YpTan-fps)*exp(-2*Eps)
+
+
+C      write(*,*)"OUTPUT"
+C      write(*,*)Eps, Fps, Fs,  YpTan, YTan
+
       Return
   800 Format (/' The peak strain has been exceeded, REBAR FRACTURE!'/)
       End
@@ -289,25 +308,25 @@ C
       Integer ITest ! Convergence flag
       Integer I     ! Counter
 
-      Real C1       ! (Fpu-Epu*Slope1)/(Fpu-Epu*F2)
-      Real C2       ! Eps*(Slope1-F2)/(Fpu-F2*Epu)
-      Real C3       ! 1 - Eppn
-      Real C4       ! 1 - C3*C3 = 1-(1-Eppn)^2
-      Real C5       ! C4**Power-C1*Eppn-C2 (function for which Eppn is a root)
-      Real E1       ! Initial strain on Bauschinger curve
-      Real Eppn     ! Normalised Strain in the Bauschinger Branch
-      Real Eppn2    ! New estimate of Eppn
-      Real Eps      ! Natural strain
-      Real E2       ! Final strain on Bauschinger curve
-      Real Epu      ! Strain from linear branch to ultimate (E2 - E1)
-      Real F1       ! Initial stress on Bauschinger curve
-      Real Fps      ! True coordinates stress
-      Real Fpu      ! Stress from linear branch to ultimate (F2 - F1)
-      Real F2       ! Final stress on Bauschinger curve
-      Real Power    ! Exponent in the Normalised Bauschinger equation
-      Real Slope1   ! Initial Slope
-      Real Slope2   ! Final Slope
-      Real YpTan    ! Tangential modulus
+      Real*8 C1       ! (Fpu-Epu*Slope1)/(Fpu-Epu*F2)
+      Real*8 C2       ! Eps*(Slope1-F2)/(Fpu-F2*Epu)
+      Real*8 C3       ! 1 - Eppn
+      Real*8 C4       ! 1 - C3*C3 = 1-(1-Eppn)^2
+      Real*8 C5       ! C4**Power-C1*Eppn-C2 (function for which Eppn is a root)
+      Real*8 E1       ! Initial strain on Bauschinger curve
+      Real*8 Eppn     ! Normalised Strain in the Bauschinger Branch
+      Real*8 Eppn2    ! New estimate of Eppn
+      Real*8 Eps      ! Natural strain
+      Real*8 E2       ! Final strain on Bauschinger curve
+      Real*8 Epu      ! Strain from linear branch to ultimate (E2 - E1)
+      Real*8 F1       ! Initial stress on Bauschinger curve
+      Real*8 Fps      ! True coordinates stress
+      Real*8 Fpu      ! Stress from linear branch to ultimate (F2 - F1)
+      Real*8 F2       ! Final stress on Bauschinger curve
+      Real*8 Power    ! Exponent in the Normalised Bauschinger equation
+      Real*8 Slope1   ! Initial Slope
+      Real*8 Slope2   ! Final Slope
+      Real*8 YpTan    ! Tangential modulus
 C
       fpu  = F2 - F1
       Epu  = E2 - E1
@@ -348,18 +367,18 @@ C
       Integer ITest ! Convergence flag
       Integer I     ! counter
 C
-      Real C1       ! (Fpu-Epu*Slope1)/(Fpu-Epu*Slope2)
-      Real C2       ! Eps*(Slope1-Slope2)/(Fpu-Slope2*Epu)
-      Real C3       ! 1 - Eppn
-      Real C4       ! 1 - C3*C3 = 1-(1-Eppn)^2
-      Real C5       ! C4**Power-C1*Eppn-C2 (function for which Eppn is a root)
-      Real C5L      ! Lower bound of C5
-      Real C5U      ! Upper bound of C5
-      Real Eppn     ! Normalised Strain in the Bauschinger Branch
-      Real EppnL    ! Lower bound of Eppn
-      Real EppnU    ! Upper bound of Eppn
-      Real Eps      ! Natural strain
-      Real Power    ! Exponent in the Normalised Bauschinger equation
+      Real*8 C1       ! (Fpu-Epu*Slope1)/(Fpu-Epu*Slope2)
+      Real*8 C2       ! Eps*(Slope1-Slope2)/(Fpu-Slope2*Epu)
+      Real*8 C3       ! 1 - Eppn
+      Real*8 C4       ! 1 - C3*C3 = 1-(1-Eppn)^2
+      Real*8 C5       ! C4**Power-C1*Eppn-C2 (function for which Eppn is a root)
+      Real*8 C5L      ! Lower bound of C5
+      Real*8 C5U      ! Upper bound of C5
+      Real*8 Eppn     ! Normalised Strain in the Bauschinger Branch
+      Real*8 EppnL    ! Lower bound of Eppn
+      Real*8 EppnU    ! Upper bound of Eppn
+      Real*8 Eps      ! Natural strain
+      Real*8 Power    ! Exponent in the Normalised Bauschinger equation
        EppnU = Eppn
        C3    = 1-EppnU
        C4    = 1-C3*C3
