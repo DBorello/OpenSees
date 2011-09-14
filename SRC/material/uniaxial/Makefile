@@ -68,6 +68,7 @@ include ../../../Makefile.def
 	ConfinedConcrete01.o \
 	ConfinedConcrete02.o \
 	pyUCLA.o \
+	Dodd_Restrepo.o DoddRestrepo.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)

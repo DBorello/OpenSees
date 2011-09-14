@@ -41,24 +41,17 @@
 #include <math.h>
 #include <float.h>
 
-
-#ifdef _USRDLL
-#define OPS_Export extern "C" _declspec(dllexport)
-#elif _MACOSX
-#define OPS_Export extern "C" __attribute__((visibility("default")))
-#else
-#define OPS_Export extern "C"
-#endif
-
-OPS_Export void
-localInit() 
-{
-  OPS_Error("Dodd_Restrepo unaxial material - Written by L.L. Dodd & J. Restepo\n", 1);
-}
+#define OPS_Export 
+int static numDoddRestrepo = 0;
 
 OPS_Export void *
 OPS_Dodd_Restrepo()
 {
+  if (numDoddRestrepo == 0) {
+    numDoddRestrepo++;
+    opserr << "Dodd_Restrepo unaxial material - Written by L.L. Dodd & J. Restepo\n";
+  }
+
   // Pointer to a uniaxial material that will be returned
   UniaxialMaterial *theMaterial = 0;
 
@@ -66,13 +59,22 @@ OPS_Dodd_Restrepo()
   double dData[9];
   int numData;
 
+  int numArgs = OPS_GetNumRemainingInputArgs();
+  if (numArgs < 8 || numArgs > 10) {
+    opserr << "WARNING wrong # args: uniaxialMaterial $tag $Fy $Fsu $ESH $ESU $Youngs $ESHI $FSHI <$OmegaFac $Conv>" << endln;
+    return 0;
+  }
+    
   numData = 1;
   if (OPS_GetIntInput(&numData, iData) != 0) {
     opserr << "WARNING invalid uniaxialMaterial ElasticPP tag" << endln;
     return 0;
   }
 
-  numData = 9;
+  numData = numArgs-1;
+  dData[7] = 1.0; // OmegFac = 1.0
+  dData[8] = 1.0; // Conv = 1.0
+
   if (OPS_GetDoubleInput(&numData, dData) != 0) {
     opserr << "WARNING invalid E & ep\n";
     return 0;	
@@ -91,32 +93,51 @@ OPS_Dodd_Restrepo()
 }
 
 
+#ifdef _WIN32
+
+extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
+		       double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
+		       double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
+		       double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
+		       double *YoungsUn, double *Power, int *BFlag, int *LMR, double *EprM, 
+		       double *FprM, double *EpaM, double *FpaM, double *YpTanM, double *PowerM, 
+		       double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
+
+// Add more declarations as needed
+#define steel_	STEEL
+
+#else
+
+extern "C" int  steel_ (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
+			double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
+			double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
+			double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
+			double *YoungsUn, double *Power, int *BFlag, int *LMR, double *EprM, 
+			double *FprM, double *EpaM, double *FpaM, double *YpTanM, double *PowerM, 
+			double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
+
+#endif
+
+
+
 Dodd_Restrepo::Dodd_Restrepo(int tag, 
 			     double fy, 
 			     double fsu, 
-			     double fSH, 
+			     double esh, 
 			     double eSU,
 			     double youngs, 
-			     double eSHI, 
+			     double eshi, 
 			     double fSHI, 
-			     double conv, 
-			     double omegaFac)  
+			     double omegaFac,
+			     double conv)
+
   :UniaxialMaterial(tag,0),
-   Fy(fy), Fsu(fsu), FSH(fSH), ESU(eSU), Youngs(youngs), 
-   ESHI(eSHI), FSHI(fSHI), Conv(conv), OmegaFac(omegaFac)
+   Fy(fy), Fsu(fsu), ESH(esh), ESU(eSU), Youngs(youngs), 
+   ESHI(eshi), FSHI(fSHI), Conv(conv), OmegaFac(omegaFac)
 {
   if (OmegaFac < 0.6 || OmegaFac > 1.3) 
     OmegaFac = 1.0;
   
-  double C1       ; // Temporary constant
-  double EpSHI    ; // Intermediate strain hardening curve natural strain
-  double ESH      ; // Engineering coordinate strain hardening strain
-  double ESHI     ; // Intermediate strain hardening curve engineering strain
-  double Esu      ; // Engineering coordinate "ultimate" strain
-  double FpSH     ; // True stress at initiation of strain hardening curve
-  double FpSHI    ; // Intermediate strain hardening curve true stress
-  double Fsm      ; // Engineering coordinate measured stress
-
   Epy       = Fy/Youngs;
   EpSH      = log(1+ESH/Conv);
   Epsu      = log(1+ESU/Conv);
@@ -145,6 +166,11 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
   // Calculate the power term for the strain hardening branch
   //
 
+  double C1       ; // Temporary constant
+  double EpSHI    ; // Intermediate strain hardening curve natural strain
+  double FpSH     ; // True stress at initiation of strain hardening curve
+  double FpSHI    ; // Intermediate strain hardening curve true stress
+
   EpSHI   = log(1+ESHI/Conv);
   FpSH    = Fy  *(1+ESH/Conv);
   FpSHI   = FSHI*(1+ESHI/Conv);
@@ -154,54 +180,37 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
   tStrain = 0.0;
   tTangent = Youngs;
   tStress = 0.0;
-    
+
+  steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+	  &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
+	  &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
+	  Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
+	  FprM, EpaM, FpaM, YpTanM, PowerM,
+	  &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
+  
   this->commitState();
 }
 
 UniaxialMaterial *
 Dodd_Restrepo::getCopy(void)
 {
-  return new Dodd_Restrepo(this->getTag(), Fy, Fsu, FSH, ESU, Youngs, ESHI, FSHI, Conv, OmegaFac);
+  return new Dodd_Restrepo(this->getTag(), Fy, Fsu, ESH, ESU, Youngs, ESHI, FSHI, OmegaFac, Conv);
 }
-
-#ifdef _WIN32
-
-extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
-		       double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
-		       double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
-		       double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
-		       double *YoungsUn, double *Power, int *BFlag, int *LMR, double *EprM, 
-		       double *FprM, double *EpaM, double *FpaM, double *YpTanM, double *PowerM, 
-		       double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
-
-// Add more declarations as needed
-#define steel_1__	STEEL
-
-#else
-
-extern "C" int  steel_1__ (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
-			   double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
-			   double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
-			   double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
-			   double *YoungsUn, double *Power, int *BFlag, int *LMR, double *EprM, 
-			   double *FprM, double *EpaM, double *FpaM, double *YpTanM, double *PowerM, 
-			   double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
-
-#endif
 
 int
 Dodd_Restrepo::setTrialStrain(double strain, double strainRate)
 {
 
   if (fabs(strain-tStrain) > DBL_EPSILON) {
+
     tStrain = strain;
 
-    return steel_1__ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
-		      &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
-		      &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
-		      Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
-		      FprM, EpaM, FpaM, YpTanM, PowerM,
-		      &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
+    steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+	    &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
+	    &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
+	    Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
+	    FprM, EpaM, FpaM, YpTanM, PowerM,
+	    &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
 
     tStress = Fs;
     tTangent = YTan;
@@ -213,19 +222,21 @@ Dodd_Restrepo::setTrialStrain(double strain, double strainRate)
 int
 Dodd_Restrepo::setTrial(double strain, double &stress, double &stiff, double strainRate)
 {
-
+  opserr << "Dodd_Restrepo::setTrialStrain()2: strain: " << strain << endln;
   
   if (fabs(strain-tStrain) > DBL_EPSILON) {
     // Store the strain
     tStrain = strain;
 
-    return steel_1__ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+    return steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
 		      &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
 		      &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
 		      Epa, Fpa, Epo, &EpoMax, EpsuSh, 
 		      &YoungsUn, Power, BFlag, &LMR, EprM, 
 		      FprM, EpaM, FpaM, YpTanM, PowerM, 
 		      &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
+
+
   }
   return 0;
   tStress = Fs;
@@ -294,10 +305,8 @@ Dodd_Restrepo::revertToStart(void)
   double EpSHI    ; // Intermediate strain hardening curve natural strain
   double ESH      ; // Engineering coordinate strain hardening strain
   double ESHI     ; // Intermediate strain hardening curve engineering strain
-  double Esu      ; // Engineering coordinate "ultimate" strain
   double FpSH     ; // True stress at initiation of strain hardening curve
   double FpSHI    ; // Intermediate strain hardening curve true stress
-  double Fsm      ; // Engineering coordinate measured stress
 
   Epy       = Fy/Youngs;
   EpSH      = log(1+ESH/Conv);

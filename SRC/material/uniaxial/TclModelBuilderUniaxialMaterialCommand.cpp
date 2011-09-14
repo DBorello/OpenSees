@@ -96,6 +96,7 @@ extern void *OPS_NewInitStressMaterial(void);
 extern void *OPS_New_pyUCLA(void);
 extern void *OPS_Maxwell(void);
 extern void *OPS_Cast(void);
+extern void *OPS_Dodd_Restrepo(void);
 
 
 //extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -237,6 +238,16 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     } else if ((strcmp(argv[1],"Cast") == 0) || (strcmp(argv[1],"CastFuse") == 0)) {
       void *theMat = OPS_Cast();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+
+    } else if ((strcmp(argv[1],"Dodd_Restrepo") == 0) || 
+	       (strcmp(argv[1],"DoddRestrepo") == 0) || 
+	       (strcmp(argv[1],"Restrepo") == 0)) {
+
+      void *theMat = OPS_Dodd_Restrepo();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 
