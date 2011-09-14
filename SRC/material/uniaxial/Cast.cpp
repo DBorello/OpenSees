@@ -47,17 +47,9 @@
 #include <elementAPI.h>
 #include <OPS_Globals.h>
 
-#ifdef _USRDLL
-#define OPS_Export extern "C" _declspec(dllexport)
-#elif _MACOSX
-#define OPS_Export extern "C" __attribute__((visibility("default")))
-#else
-#define OPS_Export extern "C"
-#endif
-
 static int numCastMaterials = 0;
 
-OPS_Export void *
+void *
 OPS_Cast()
 {
 	if (numCastMaterials == 0) {
