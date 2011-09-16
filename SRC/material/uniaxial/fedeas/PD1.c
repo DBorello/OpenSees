@@ -601,7 +601,7 @@ int reloading_(double *chleng, double *kp,
     exit(-1);
   }
   resq = -(*peps) + pepsn + ar * (phi - *phib) * *deps;
-  error = abs(resq);
+  error = fabs(resq);
   if (error > *toler) {
     if (iter > *maxitr) {
       fprintf(stderr,"toler = %f\n error = %f\n kp = %f\n", *toler, error, *kp);
@@ -666,7 +666,7 @@ int unloading_(double *d__, double *eps, double *
   yield1_(&index, &cohn[1], &estr, &resf, &temp);
   /*   check the convergence of the damage evolution eqn */
   resq = -(*peps) + pepsn - ar * *deps * resf / cohn[2];
-  error = abs(resq);
+  error = fabs(resq);
   if (error > *toler) {
     if (iter > *maxitr) {
       fprintf(stderr, "toler = %f\nerror = %f\n",*toler, error);
