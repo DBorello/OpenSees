@@ -49,6 +49,15 @@
 
 static int numCastMaterials = 0;
 
+
+
+#ifndef fmin
+using std::min;
+using std::max;
+#define fmin min
+#define fmax max
+#endif
+
 void *
 OPS_Cast()
 {
