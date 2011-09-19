@@ -41,11 +41,11 @@
 #include <math.h>
 #include <float.h>
 
-#define OPS_Export 
+ 
 int static numDoddRestrepo = 0;
 
-OPS_Export void *
-OPS_Dodd_Restrepo()
+void *
+OPS_Dodd_Restrepo(void)
 {
   if (numDoddRestrepo == 0) {
     numDoddRestrepo++;
@@ -95,7 +95,9 @@ OPS_Dodd_Restrepo()
 
 #ifdef _WIN32
 
-extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
+//#define steel STEEL
+
+extern "C" int STEEL(double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
 		       double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
 		       double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
 		       double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
@@ -104,11 +106,12 @@ extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpT
 		       double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
 
 // Add more declarations as needed
-#define steel_	STEEL
 
 #else
 
-extern "C" int  steel_ (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
+#define STEEL steel_
+
+extern "C" int STEEL(double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
 			double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
 			double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
 			double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
@@ -181,7 +184,7 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
   tTangent = Youngs;
   tStress = 0.0;
 
-  steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+  STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
 	  &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
 	  &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
 	  Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
@@ -205,7 +208,7 @@ Dodd_Restrepo::setTrialStrain(double strain, double strainRate)
 
     tStrain = strain;
 
-    steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+    STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
 	    &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
 	    &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
 	    Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
@@ -228,7 +231,7 @@ Dodd_Restrepo::setTrial(double strain, double &stress, double &stiff, double str
     // Store the strain
     tStrain = strain;
 
-    return steel_ (&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+    return STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
 		      &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
 		      &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
 		      Epa, Fpa, Epo, &EpoMax, EpsuSh, 

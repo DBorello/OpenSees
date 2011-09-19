@@ -179,6 +179,9 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\ConfinedConcrete01.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Dodd_Restrepo.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\DrainMaterial.cpp">
 			</File>
 			<File
