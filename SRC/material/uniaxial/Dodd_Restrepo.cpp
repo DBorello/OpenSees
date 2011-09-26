@@ -136,7 +136,8 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
 
   :UniaxialMaterial(tag,0),
    Fy(fy), Fsu(fsu), ESH(esh), ESU(eSU), Youngs(youngs), 
-   ESHI(eshi), FSHI(fSHI), Conv(conv), OmegaFac(omegaFac)
+   ESHI(eshi), FSHI(fSHI), Conv(conv), OmegaFac(omegaFac),
+   tFailed(0), cFailed(0)
 {
   if (OmegaFac < 0.6 || OmegaFac > 1.3) 
     OmegaFac = 1.0;
@@ -204,19 +205,41 @@ int
 Dodd_Restrepo::setTrialStrain(double strain, double strainRate)
 {
 
+  if (cFailed == 1) {
+    tStrain = strain;
+    return 0;
+  }
+
   if (fabs(strain-tStrain) > DBL_EPSILON) {
 
     tStrain = strain;
+    double Eps=log(1.0+tStrain);
+    double delta = Eps-EpsLast;
+    if (tStrain > cStrain) {
+      if (Eps > EpsuSh[0]) {
+	tFailed = 1;
+	tStress = 0;
+	tTangent = 0;	
+      } 
+    } else {
+      if (Eps < EpsuSh[1]) {	
+	tFailed = 1;
+	tStress = 0;
+	tTangent = 0;
+      }
+    }
 
-    STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+    if (tFailed == 0) {
+      STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
 	    &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
 	    &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
 	    Epa, Fpa, Epo, &EpoMax, EpsuSh,&YoungsUn, Power, BFlag, &LMR, EprM,
 	    FprM, EpaM, FpaM, YpTanM, PowerM,
 	    &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
-
-    tStress = Fs;
-    tTangent = YTan;
+    
+      tStress = Fs;
+      tTangent = YTan;
+    }
   }
 
   return 0;
@@ -225,29 +248,48 @@ Dodd_Restrepo::setTrialStrain(double strain, double strainRate)
 int
 Dodd_Restrepo::setTrial(double strain, double &stress, double &stiff, double strainRate)
 {
-  opserr << "Dodd_Restrepo::setTrialStrain()2: strain: " << strain << endln;
+  if (cFailed == 1) {
+    stress = 0;
+    stiff = 0;
+    return 0;
+  }
   
   if (fabs(strain-tStrain) > DBL_EPSILON) {
-    // Store the strain
+
     tStrain = strain;
+    double Eps=log(1.0+tStrain);
+    double delta = Eps-EpsLast;
+    if (tStrain > cStrain) {
+      if (Eps > EpsuSh[0]) {
+	tFailed = 1;
+	tStress = 0;
+	tTangent = 0;	
+      } 
+    } else {
+      if (Eps < EpsuSh[1]) {	
+	tFailed = 1;
+	tStress = 0;
+	tTangent = 0;
+      }
+    }
 
-    return STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
-		      &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
-		      &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
-		      Epa, Fpa, Epo, &EpoMax, EpsuSh, 
-		      &YoungsUn, Power, BFlag, &LMR, EprM, 
-		      FprM, EpaM, FpaM, YpTanM, PowerM, 
-		      &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
+    if (tFailed == 0) {
 
+      return STEEL(&tStrain, &EpsLast, &FpsLast, &YpTanLast, 
+		   &EpsOld, &Fy, &Epy,  &EpSH, &Epsu, 
+		   &Fpsu, &Youngs, &SHPower, Epr, Fpr, 
+		   Epa, Fpa, Epo, &EpoMax, EpsuSh, 
+		   &YoungsUn, Power, BFlag, &LMR, EprM, 
+		   FprM, EpaM, FpaM, YpTanM, PowerM, 
+		   &Eps, &Fps, &Fs, &YpTan, &YTan, &OmegaFac);
 
+      tStress = Fs;
+      tTangent = YTan;
+
+    }
   }
-  return 0;
-  tStress = Fs;
-  tTangent = YTan;
-    
   stress = tStress;;
   stiff = tTangent;
-  
   return 0;
 }
 
@@ -287,7 +329,8 @@ Dodd_Restrepo::commitState(void)
   cStrain = tStrain;
   cStress = tStress;
   cTangent = tTangent;
-  
+  cFailed = tFailed;
+
   return 0;
 }
 
@@ -297,6 +340,7 @@ Dodd_Restrepo::revertToLastCommit(void)
   tStrain = cStrain;
   tStress = cStress;
   tTangent = cTangent;
+  tFailed = cFailed;
 
   return 0;
 }
@@ -348,7 +392,8 @@ Dodd_Restrepo::revertToStart(void)
   tStrain = 0.0;
   tTangent = Youngs;
   tStress = 0.0;
-    
+  tFailed = 0;
+
   this->commitState();
 
   return 0;

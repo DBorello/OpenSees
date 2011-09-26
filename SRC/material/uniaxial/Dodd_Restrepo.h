@@ -131,7 +131,10 @@
   double cStrain;
   double cTangent;
   double cStress;
-			 
+
+  double cFailed;
+  double tFailed;
+
  private:
 };
 
