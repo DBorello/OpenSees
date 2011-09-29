@@ -221,6 +221,12 @@ sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 int 
 sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
+int 
+sectionLocation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+sectionWeight(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
 // added: Chris McGann, U.Washington for initial state analysis of nDMaterials
 int
 InitialStateAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

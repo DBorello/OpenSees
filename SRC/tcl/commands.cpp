@@ -800,6 +800,10 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
     Tcl_CreateCommand(interp, "sectionDeformation", &sectionDeformation, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "sectionLocation", &sectionLocation, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "sectionWeight", &sectionWeight, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
 	// command added for initial state analysis for nDMaterials
 	// Chris McGann, U.Washington
@@ -7082,6 +7086,125 @@ sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char
 
   char buffer[40];
   sprintf(buffer,"%12.8f",theVec(dof-1));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  delete theResponse;
+
+  return TCL_OK;
+}
+
+
+int 
+sectionLocation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 3) {
+    interp->result = "WARNING want - sectionLocation eleTag? secNum? \n";
+    return TCL_ERROR;
+  }    
+  
+  //opserr << "sectionDeformation: ";
+  //for (int i = 0; i < argc; i++) 
+  //  opserr << argv[i] << ' ' ;
+  //opserr << endln;
+
+  int tag, secNum;
+
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING sectionLocation eleTag? secNum? - could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
+    opserr << "WARNING sectionLocation eleTag? secNum? - could not read secNum? \n";
+    return TCL_ERROR;	        
+  }    
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement == 0) {
+    opserr << "WARNING sectionLocation element with tag " << tag << " not found in domain \n";
+    return TCL_ERROR; 
+  }
+
+  int argcc = 1;
+  char a[80] = "integrationPoints";
+  const char *argvv[1];
+  argvv[0] = a;
+
+  DummyStream dummy;
+
+  Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
+  if (theResponse == 0) {
+    Tcl_SetResult(interp, "0.0", TCL_VOLATILE);
+    return TCL_OK;
+  }
+
+  theResponse->getResponse();
+  Information &info = theResponse->getInformation();
+
+  const Vector &theVec = *(info.theVector);
+
+  char buffer[40];
+  sprintf(buffer,"%12.8f",theVec(secNum-1));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  delete theResponse;
+
+  return TCL_OK;
+}
+
+int 
+sectionWeight(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 3) {
+    interp->result = "WARNING want - sectionWeight eleTag? secNum? \n";
+    return TCL_ERROR;
+  }    
+  
+  //opserr << "sectionDeformation: ";
+  //for (int i = 0; i < argc; i++) 
+  //  opserr << argv[i] << ' ' ;
+  //opserr << endln;
+
+  int tag, secNum;
+
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING sectionWeight eleTag? secNum? - could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
+    opserr << "WARNING sectionWeight eleTag? secNum? - could not read secNum? \n";
+    return TCL_ERROR;	        
+  }    
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement == 0) {
+    opserr << "WARNING sectionWeight element with tag " << tag << " not found in domain \n";
+    return TCL_ERROR; 
+  }
+
+  int argcc = 1;
+  char a[80] = "integrationWeights";
+  const char *argvv[1];
+  argvv[0] = a;
+
+  DummyStream dummy;
+
+  Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
+  if (theResponse == 0) {
+    Tcl_SetResult(interp, "0.0", TCL_VOLATILE);
+    return TCL_OK;
+  }
+
+  theResponse->getResponse();
+  Information &info = theResponse->getInformation();
+
+  const Vector &theVec = *(info.theVector);
+
+  char buffer[40];
+  sprintf(buffer,"%12.8f",theVec(secNum-1));
 
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
