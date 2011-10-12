@@ -4,7 +4,9 @@ OBJS       = Brick.o \
 	shp3d.o \
 	TclBrickCommand.o \
 	BbarBrick.o \
-	BbarBrickWithSensitivity.o
+	BbarBrickWithSensitivity.o \
+	Twenty_Node_Brick.o \
+	TclTwenty_Node_Brick.o
 
 
 all:         $(OBJS)
