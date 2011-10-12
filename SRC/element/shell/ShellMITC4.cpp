@@ -18,14 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2009-04-02 22:43:12 $
+// $Revision: 1.10 $
+// $Date: 2011/03/10 22:51:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
-// Ed "C++" Love
+// Written: Leopoldo Tesser, Diego A. Talledo, Véronique Le Corvec
 //
-// B-bar four node shell element with membrane and drill
-//
+// Bathe MITC 4 four node shell element with membrane and drill
+// Ref: Dvorkin,Bathe, A continuum mechanics based four node shell
+//      element for general nonlinear analysis,
+//      Eng.Comput.,1,77-88,1984
 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -46,21 +48,55 @@
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <elementAPI.h>
 
 #define min(a,b) ( (a)<(b) ? (a):(b) )
+
+static int numShellMITC4 = 0;
+
+void *
+OPS_NewShellMITC4(void)
+{
+  if (numShellMITC4 == 0) {
+    opserr << "Using ShellMITC4 - Developed by: Leopoldo Tesser, Diego A. Talledo, Véronique Le Corvec\n";
+    numShellMITC4++;
+  }
+
+  Element *theElement = 0;
+  
+  int numArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numArgs < 6) {
+    opserr << "Want: element ShellMITC4 $tag $iNode $jNoe $kNode $lNode $secTag";
+    return 0;	
+  }
+  
+  int iData[6];
+  int numData = 6;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer tag: element ShellMITC4 \n";
+    return 0;
+  }
+
+  SectionForceDeformation *theSection = OPS_GetSectionForceDeformation(iData[5]);
+
+  if (theSection == 0) {
+    opserr << "ERROR:  element ShellMITC4 " << iData[0] << "section not found\n";
+    return 0;
+  }
+  
+  theElement = new ShellMITC4(iData[0], iData[1], iData[2], iData[3],
+			      iData[4], *theSection);
+
+  return theElement;
+}
+
 
 //static data
 Matrix  ShellMITC4::stiff(24,24) ;
 Vector  ShellMITC4::resid(24) ;
 Matrix  ShellMITC4::mass(24,24) ;
 
-//intialize pointers to zero using intialization list 
-Matrix**  ShellMITC4::GammaB1pointer = 0 ;
-Matrix**  ShellMITC4::GammaD1pointer = 0 ;
-Matrix**  ShellMITC4::GammaA2pointer = 0 ;
-Matrix**  ShellMITC4::GammaC2pointer = 0 ; 
-Matrix**  ShellMITC4::Bhat           = 0 ;
-    
 //quadrature data
 const double  ShellMITC4::root3 = sqrt(3.0) ;
 const double  ShellMITC4::one_over_root3 = 1.0 / root3 ;
@@ -69,20 +105,7 @@ double ShellMITC4::sg[4] ;
 double ShellMITC4::tg[4] ;
 double ShellMITC4::wg[4] ;
 
-/*
-const double  ShellMITC4::sg[] = { -one_over_root3,  
-				one_over_root3, 
-				one_over_root3, 
-	                       -one_over_root3 } ;
-
-const double  ShellMITC4::tg[] = { -one_over_root3, 
-                               -one_over_root3, 
-                                one_over_root3,  
-                                one_over_root3 } ;
-
-const double  ShellMITC4::wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
-*/
-  
+ 
 
 //null constructor
 ShellMITC4::ShellMITC4( ) :
@@ -91,47 +114,6 @@ connectedExternalNodes(4), load(0), Ki(0)
 { 
   for (int i = 0 ;  i < 4; i++ ) 
     materialPointers[i] = 0;
-
-  //shear matrix pointers
-  if ( GammaB1pointer == 0 ) {
-	GammaB1pointer = new Matrix*[4] ;      //four matrix pointers
-	GammaB1pointer[0] = new Matrix(1,3) ;  //
-	GammaB1pointer[1] = new Matrix(1,3) ;  //    four
-	GammaB1pointer[2] = new Matrix(1,3) ;  //  1x3 matrices
-	GammaB1pointer[3] = new Matrix(1,3) ;  //
-  } //end if B1
-
-  if ( GammaD1pointer == 0 ) {
-	GammaD1pointer = new Matrix*[4] ;
-	GammaD1pointer[0] = new Matrix(1,3) ;
-	GammaD1pointer[1] = new Matrix(1,3) ;
-	GammaD1pointer[2] = new Matrix(1,3) ;
-	GammaD1pointer[3] = new Matrix(1,3) ;
-  } //end if D1
-
-  if ( GammaA2pointer == 0 ) {
-	GammaA2pointer = new Matrix*[4] ;
-	GammaA2pointer[0] = new Matrix(1,3) ;
-	GammaA2pointer[1] = new Matrix(1,3) ;
-	GammaA2pointer[2] = new Matrix(1,3) ;
-	GammaA2pointer[3] = new Matrix(1,3) ;
-  } //end if A2
-
-  if ( GammaC2pointer == 0 ) {
-	GammaC2pointer = new Matrix*[4] ;
-	GammaC2pointer[0] = new Matrix(1,3) ;
-	GammaC2pointer[1] = new Matrix(1,3) ;
-	GammaC2pointer[2] = new Matrix(1,3) ;
-	GammaC2pointer[3] = new Matrix(1,3) ;
-  } //end if C2
-
-  if ( Bhat == 0 ) {
-	Bhat = new Matrix*[4] ;
-	Bhat[0] = new Matrix(2,3) ;
-	Bhat[1] = new Matrix(2,3) ;
-	Bhat[2] = new Matrix(2,3) ;
-	Bhat[3] = new Matrix(2,3) ;
-  } //end if Bhat
 
   sg[0] = -one_over_root3;
   sg[1] = one_over_root3;
@@ -155,9 +137,9 @@ connectedExternalNodes(4), load(0), Ki(0)
 ShellMITC4::ShellMITC4(  int tag, 
                          int node1,
                          int node2,
-   	                 int node3,
+   	                     int node3,
                          int node4,
-	                 SectionForceDeformation &theMaterial ) :
+	                     SectionForceDeformation &theMaterial ) :
 Element( tag, ELE_TAG_ShellMITC4 ),
 connectedExternalNodes(4), load(0), Ki(0)
 {
@@ -173,52 +155,10 @@ connectedExternalNodes(4), load(0), Ki(0)
       materialPointers[i] = theMaterial.getCopy( ) ;
 
       if (materialPointers[i] == 0) {
-
-	opserr << "ShellMITC4::constructor - failed to get a material of type: ShellSection\n";
+	      opserr << "ShellMITC4::constructor - failed to get a material of type: ShellSection\n";
       } //end if
       
   } //end for i 
-
-  //shear matrix pointers
-  if ( GammaB1pointer == 0 ) {
-	GammaB1pointer = new Matrix*[4] ;      //four matrix pointers
-	GammaB1pointer[0] = new Matrix(1,3) ;  //
-	GammaB1pointer[1] = new Matrix(1,3) ;  //    four
-	GammaB1pointer[2] = new Matrix(1,3) ;  //  1x3 matrices
-	GammaB1pointer[3] = new Matrix(1,3) ;  //
-  } //end if B1
-
-  if ( GammaD1pointer == 0 ) {
-	GammaD1pointer = new Matrix*[4] ;
-	GammaD1pointer[0] = new Matrix(1,3) ;
-	GammaD1pointer[1] = new Matrix(1,3) ;
-	GammaD1pointer[2] = new Matrix(1,3) ;
-	GammaD1pointer[3] = new Matrix(1,3) ;
-  } //end if D1
-
-  if ( GammaA2pointer == 0 ) {
-	GammaA2pointer = new Matrix*[4] ;
-	GammaA2pointer[0] = new Matrix(1,3) ;
-	GammaA2pointer[1] = new Matrix(1,3) ;
-	GammaA2pointer[2] = new Matrix(1,3) ;
-	GammaA2pointer[3] = new Matrix(1,3) ;
-  } //end if A2
-
-  if ( GammaC2pointer == 0 ) {
-	GammaC2pointer = new Matrix*[4] ;
-	GammaC2pointer[0] = new Matrix(1,3) ;
-	GammaC2pointer[1] = new Matrix(1,3) ;
-	GammaC2pointer[2] = new Matrix(1,3) ;
-	GammaC2pointer[3] = new Matrix(1,3) ;
-  } //end if C2
-
-  if ( Bhat == 0 ) {
-	Bhat = new Matrix*[4] ;
-	Bhat[0] = new Matrix(2,3) ;
-	Bhat[1] = new Matrix(2,3) ;
-	Bhat[2] = new Matrix(2,3) ;
-	Bhat[3] = new Matrix(2,3) ;
-  } //end if Bhat
 
   sg[0] = -one_over_root3;
   sg[1] = one_over_root3;
@@ -235,7 +175,7 @@ connectedExternalNodes(4), load(0), Ki(0)
   wg[2] = 1.0;
   wg[3] = 1.0;
 
-}
+ }
 //******************************************************************
 
 //destructor 
@@ -243,9 +183,8 @@ ShellMITC4::~ShellMITC4( )
 {
   int i ;
   for ( i = 0 ;  i < 4; i++ ) {
-    
-    if (materialPointers[i] != 0)
-      delete materialPointers[i] ;
+
+    delete materialPointers[i] ;
     materialPointers[i] = 0 ; 
 
     nodePointers[i] = 0 ;
@@ -341,7 +280,7 @@ int  ShellMITC4::commitState( )
 
   for (int i = 0; i < 4; i++ ) 
     success += materialPointers[i]->commitState( ) ;
-  
+
   return success ;
 }
  
@@ -377,12 +316,12 @@ void  ShellMITC4::Print( OPS_Stream &s, int flag )
 {
   if (flag == -1) {
     int eleTag = this->getTag();
-    s << "EL_QUAD4\t" << eleTag << "\t";
+    s << "EL_ShellMITC4\t" << eleTag << "\t";
     s << eleTag << "\t" << 1; 
     s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
     s  << "\t" << connectedExternalNodes(2) << "\t" << connectedExternalNodes(3) << "\t0.00";
     s << endln;
-    s << "PROP_2D\t" << eleTag << "\t";
+    s << "PROP_3D\t" << eleTag << "\t";
     s << eleTag << "\t" << 1; 
     s  << "\t" << -1 << "\tSHELL\t1.0\0.0";
     s << endln;
@@ -402,7 +341,7 @@ void  ShellMITC4::Print( OPS_Stream &s, int flag )
 
    } else {
     s << endln ;
-    s << "MITC4 Bbar Non-Locking Four Node Shell \n" ;
+    s << "MITC4 Non-Locking Four Node Shell \n" ;
     s << "Element Number: " << this->getTag() << endln ;
     s << "Node 1 : " << connectedExternalNodes(0) << endln ;
     s << "Node 2 : " << connectedExternalNodes(1) << endln ;
@@ -489,6 +428,34 @@ ShellMITC4::setResponse(const char **argv, int argc, OPS_Stream &output)
     
     theResponse =  new ElementResponse(this, 2, Vector(32));
   }
+  
+  else if (strcmp(argv[0],"strains") ==0) {
+
+    for (int i=0; i<4; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.attr("eta",sg[i]);
+      output.attr("neta",tg[i]);
+      
+      output.tag("SectionForceDeformation");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
+      
+      output.tag("ResponseType","eps11");
+      output.tag("ResponseType","eps22");
+      output.tag("ResponseType","gamma12");
+      output.tag("ResponseType","theta11");
+      output.tag("ResponseType","theta22");
+      output.tag("ResponseType","theta33");
+      output.tag("ResponseType","gamma13");
+      output.tag("ResponseType","gamma23");
+      
+      output.endTag(); // GaussPoint
+      output.endTag(); // NdMaterialOutput
+    }
+    
+    theResponse =  new ElementResponse(this, 3, Vector(32));
+  }
 
   output.endTag();
   return theResponse;
@@ -499,6 +466,7 @@ ShellMITC4::getResponse(int responseID, Information &eleInfo)
 {
   int cnt = 0;
   static Vector stresses(32);
+  static Vector strains(32);
 
   switch (responseID) {
   case 1: // global forces
@@ -522,10 +490,27 @@ ShellMITC4::getResponse(int responseID, Information &eleInfo)
     }
     return eleInfo.setVector(stresses);
     break;
+  case 3: //strain
+    for (int i = 0; i < 4; i++) {
 
+      // Get section deformation
+      const Vector &deformation = materialPointers[i]->getSectionDeformation();
+      strains(cnt) = deformation(0);
+      strains(cnt+1) = deformation(1);
+      strains(cnt+2) = deformation(2);
+      strains(cnt+3) = deformation(3);
+      strains(cnt+4) = deformation(4);
+      strains(cnt+5) = deformation(5);
+      strains(cnt+6) = deformation(6);
+      strains(cnt+7) = deformation(7);
+      cnt += 8;
+    }
+    return eleInfo.setVector(strains);
+    break;
   default:
     return -1;
   }
+  cnt=0;
 }
 
 
@@ -556,7 +541,6 @@ const Matrix&  ShellMITC4::getInitialStiff( )
 
   int i,  j,  k, p, q ;
   int jj, kk ;
-  int node ;
 
   double volume = 0.0 ;
 
@@ -566,7 +550,7 @@ const Matrix&  ShellMITC4::getInitialStiff( )
 
   static double shp[3][numnodes] ;  //shape functions at a gauss point
 
-  static double Shape[3][numnodes][ngauss] ; //all the shape functions
+  //  static double Shape[3][numnodes][ngauss] ; //all the shape functions
 
   static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
 
@@ -606,76 +590,104 @@ const Matrix&  ShellMITC4::getInitialStiff( )
 
   stiff.Zero( ) ;
 
+ 
+  double dx34 = xl[0][2]-xl[0][3];
+  double dy34 = xl[1][2]-xl[1][3];
 
-  //compute basis vectors and local nodal coordinates
-  //computeBasis( ) ;
+  double dx21 = xl[0][1]-xl[0][0];
+  double dy21 = xl[1][1]-xl[1][0];
 
-  //compute Jacobian and inverse at center
-  double L1 = 0.0 ;
-  double L2 = 0.0 ;
-  computeJacobian( L1, L2, xl, J0, J0inv ) ; 
+  double dx32 = xl[0][2]-xl[0][1];
+  double dy32 = xl[1][2]-xl[1][1];
 
-  //compute the gamma's
-  computeGamma( xl, J0 ) ;
+  double dx41 = xl[0][3]-xl[0][0];
+  double dy41 = xl[1][3]-xl[1][0];
 
-  //zero Bhat = \frac{1}{volume} \int{  B - \bar{B} } \diff A
-  for ( node = 0;  node < numnodes;  node++ ) {
-    Bhat[node]->Zero( ) ;
-  }
+  Matrix G(4,12);
+  G.Zero();
+  double one_over_four = 0.25;
+  G(0,0)=-0.5;
+  G(0,1)=-dy41*one_over_four;
+  G(0,2)=dx41*one_over_four;
+  G(0,9)=0.5;
+  G(0,10)=-dy41*one_over_four;
+  G(0,11)=dx41*one_over_four;
+  G(1,0)=-0.5;
+  G(1,1)=-dy21*one_over_four;
+  G(1,2)=dx21*one_over_four;
+  G(1,3)=0.5;
+  G(1,4)=-dy21*one_over_four;
+  G(1,5)=dx21*one_over_four;
+  G(2,3)=-0.5;
+  G(2,4)=-dy32*one_over_four;
+  G(2,5)=dx32*one_over_four;
+  G(2,6)=0.5;
+  G(2,7)=-dy32*one_over_four;
+  G(2,8)=dx32*one_over_four;
+  G(3,6)=0.5;
+  G(3,7)=-dy34*one_over_four;
+  G(3,8)=dx34*one_over_four;
+  G(3,9)=-0.5;
+  G(3,10)=-dy34*one_over_four;
+  G(3,11)=dx34*one_over_four;
 
-  //gauss loop to compute Bhat's 
-  for ( i = 0; i < ngauss; i++ ) {
+  Matrix Ms(2,4);
+  Ms.Zero();
+  Matrix Bsv(2,12);
+  Bsv.Zero();
 
-    //get shape functions    
-    shape2d( sg[i], tg[i], xl, shp, xsj ) ;
+  double Ax = -xl[0][0]+xl[0][1]+xl[0][2]-xl[0][3];
+  double Bx =  xl[0][0]-xl[0][1]+xl[0][2]-xl[0][3];
+  double Cx = -xl[0][0]-xl[0][1]+xl[0][2]+xl[0][3];
 
-    //save shape functions
-    for ( p = 0; p < 3; p++ ) {
-      for ( q = 0; q < numnodes; q++ )
-	  Shape[p][q][i] = shp[p][q] ;
-    } // end for p
+  double Ay = -xl[1][0]+xl[1][1]+xl[1][2]-xl[1][3];
+  double By =  xl[1][0]-xl[1][1]+xl[1][2]-xl[1][3];
+  double Cy = -xl[1][0]-xl[1][1]+xl[1][2]+xl[1][3];
 
-    //volume element to also be saved
-    dvol[i] = wg[i] * xsj ;  
-
-    volume += dvol[i] ;
-
-    for ( node = 0; node < numnodes; node++ ) {
-
-      //compute B shear matrix for this node
-      //Bhat[node] += (  dvol[i] * computeBshear(node,shp)  ) ;
-      Bhat[node]->addMatrix(1.0, 
-			   computeBshear(node,shp),
-			   dvol[i] ) ;
-
-      //compute B-bar shear matrix for this node
-      //Bhat[node] -= ( dvol[i] *
-      //            computeBbarShear( node, sg[i], tg[i], J0inv ) 
-      //                ) ;
-      Bhat[node]->addMatrix(1.0, 
-			   computeBbarShear(node,sg[i],tg[i],J0inv),
-			   -dvol[i] ) ;
-
-    } //end for node   
-
-  } // end for i gauss loop
-
-  //compute Bhat 
-    for ( node = 0;  node < numnodes;  node++ )
-      //(*Bhat[node]) /= volume ;
-      Bhat[node]->operator/=(volume) ;
-    
+  double alph = atan(Ay/Ax);
+  double beta = 3.141592653589793/2-atan(Cx/Cy);
+  Matrix Rot(2,2);
+  Rot.Zero();
+  Rot(0,0)=sin(beta);
+  Rot(0,1)=-sin(alph);
+  Rot(1,0)=-cos(beta);
+  Rot(1,1)=cos(alph);
+  Matrix Bs(2,12);
+  
+  double r1 = 0;
+  double r2 = 0;
+  double r3 = 0;
 
   //gauss loop 
   for ( i = 0; i < ngauss; i++ ) {
+    
+    r1 = Cx + sg[i]*Bx;
+    r3 = Cy + sg[i]*By;
+    r1 = r1*r1 + r3*r3;
+	r1 = sqrt (r1);
+	r2 = Ax + tg[i]*Bx;
+	r3 = Ay + tg[i]*By;
+	r2 = r2*r2 + r3*r3;
+	r2 = sqrt (r2);
 
-    //extract shape functions from saved array
-    for ( p = 0; p < 3; p++ ) {
-       for ( q = 0; q < numnodes; q++ )
-	  shp[p][q]  = Shape[p][q][i] ;
-    } // end for p
+    //get shape functions    
+    shape2d( sg[i], tg[i], xl, shp, xsj ) ;
+    //volume element to also be saved
+    dvol[i] = wg[i] * xsj ;  
+    volume += dvol[i] ;
 
+    Ms(1,0)=1-sg[i];
+	Ms(0,1)=1-tg[i];
+	Ms(1,2)=1+sg[i];
+	Ms(0,3)=1+tg[i];
+	Bsv = Ms*G;
 
+    for ( j = 0; j < 12; j++ ) {
+		Bsv(0,j)=Bsv(0,j)*r1/(8*xsj);
+		Bsv(1,j)=Bsv(1,j)*r2/(8*xsj);
+    }
+    Bs=Rot*Bsv;
+    
     // j-node loop to compute strain 
     for ( j = 0; j < numnodes; j++ )  {
 
@@ -685,25 +697,25 @@ const Matrix&  ShellMITC4::getInitialStiff( )
 
       Bbend = computeBbend( j, shp ) ;
 
-      Bshear = computeBbarShear( j, sg[i], tg[i], J0inv ) ;
-
-      //add Bhat to shear terms 
-      Bshear += (*Bhat[j]) ;
+      for ( p = 0; p < 3; p++) {
+		  Bshear(0,p) = Bs(0,j*3+p);
+		  Bshear(1,p) = Bs(1,j*3+p);
+      }//end for p
 
       BJ = assembleB( Bmembrane, Bbend, Bshear ) ;
 
       //save the B-matrix
       for (p=0; p<nstress; p++) {
-	for (q=0; q<ndf; q++ )
-	  saveB[p][q][j] = BJ(p,q) ;
+	    for (q=0; q<ndf; q++ )
+	      saveB[p][q][j] = BJ(p,q) ;
       }//end for p
 
       //drilling B matrix
       drillPointer = computeBdrill( j, shp ) ;
       for (p=0; p<ndf; p++ ) {
-	//BdrillJ[p] = *drillPointer++ ;
-	BdrillJ[p] = *drillPointer ; //set p-th component
-	drillPointer++ ;             //pointer arithmetic
+	    //BdrillJ[p] = *drillPointer++ ;
+	    BdrillJ[p] = *drillPointer ; //set p-th component
+	    drillPointer++ ;             //pointer arithmetic
       }//end for p
     } // end for j
   
@@ -715,21 +727,6 @@ const Matrix&  ShellMITC4::getInitialStiff( )
 
     jj = 0 ;
     for ( j = 0; j < numnodes; j++ ) {
-
-      //Bmembrane = computeBmembrane( j, shp ) ;
-
-      //Bbend = computeBbend( j, shp ) ;
-
-      //multiply bending terms by (-1.0) for correct statement
-      // of equilibrium  
-      //Bbend *= (-1.0) ;
-
-      //Bshear = computeBbarShear( j, sg[i], tg[i], J0inv ) ;
-
-      //add Bhat to shear terms
-      //Bshear += (*Bhat[j]) ;
-
-      //BJ = assembleB( Bmembrane, Bbend, Bshear ) ;
 
       //extract BJ
       for (p=0; p<nstress; p++) {
@@ -768,16 +765,6 @@ const Matrix&  ShellMITC4::getInitialStiff( )
       kk = 0 ;
       for ( k = 0; k < numnodes; k++ ) {
 
-	//Bmembrane = computeBmembrane( k, shp ) ;
-	
-	//Bbend = computeBbend( k, shp ) ;
-	
-	//Bshear = computeBbarShear( k, sg[i], tg[i], J0inv ) ;
-
-	//Bshear += (*Bhat[k]) ;
-	
-	//BK = assembleB( Bmembrane, Bbend, Bshear ) ;
-	
 	//extract BK
 	for (p=0; p<nstress; p++) {
 	  for (q=0; q<ndf; q++ )
@@ -956,10 +943,6 @@ ShellMITC4::formInertiaTerms( int tangFlag )
   //zero mass 
   mass.Zero( ) ;
 
-  //compute basis vectors and local nodal coordinates
-  //computeBasis( ) ;
-
-
   //gauss loop 
   for ( i = 0; i < numberGauss; i++ ) {
 
@@ -987,7 +970,6 @@ ShellMITC4::formInertiaTerms( int tangFlag )
 
 
     //residual and tangent calculations node loops
-    //jj = 0 ;
     for ( j=0, jj=0; j<numberNodes; j++, jj+=ndf ) {
 
       temp = shp[massIndex][j] * dvol ;
@@ -1002,7 +984,6 @@ ShellMITC4::formInertiaTerms( int tangFlag )
 	 temp *= rhoH ;
 
 	 //node-node translational mass
-         //kk = 0 ;
          for ( k=0, kk=0; k<numberNodes; k++, kk+=ndf ) {
 
 	   massJK = temp * shp[massIndex][k] ;
@@ -1010,14 +991,11 @@ ShellMITC4::formInertiaTerms( int tangFlag )
 	   for ( p = 0; p < 3; p++ ) 
 	      mass( jj+p, kk+p ) +=  massJK ;
             
-	   //kk += ndf ;
           } // end for k loop
 
       } // end if tang_flag 
 
-      //jj += ndf ;
     } // end for j loop
-
 
   } //end for i gauss loop 
 
@@ -1078,7 +1056,6 @@ ShellMITC4::formResidAndTangent( int tang_flag )
 
   int i,  j,  k, p, q ;
   int jj, kk ;
-  int node ;
 
   int success ;
   
@@ -1092,7 +1069,7 @@ ShellMITC4::formResidAndTangent( int tang_flag )
 
   static double shp[3][numnodes] ;  //shape functions at a gauss point
 
-  static double Shape[3][numnodes][ngauss] ; //all the shape functions
+  //  static double Shape[3][numnodes][ngauss] ; //all the shape functions
 
   static Vector residJ(ndf) ; //nodeJ residual 
 
@@ -1136,82 +1113,108 @@ ShellMITC4::formResidAndTangent( int tang_flag )
 
     static double saveB[nstress][ndf][numnodes] ;
 
-  //-------------------------------------------------------
-
-    
+  //------------------------------------------------------- 
 
   //zero stiffness and residual 
   stiff.Zero( ) ;
   resid.Zero( ) ;
 
-  //compute basis vectors and local nodal coordinates
-  //computeBasis( ) ;
+  double dx34 = xl[0][2]-xl[0][3];
+  double dy34 = xl[1][2]-xl[1][3];
 
-  //compute Jacobian and inverse at center
-  double L1 = 0.0 ;
-  double L2 = 0.0 ;
-  computeJacobian( L1, L2, xl, J0, J0inv ) ; 
+  double dx21 = xl[0][1]-xl[0][0];
+  double dy21 = xl[1][1]-xl[1][0];
 
-  //compute the gamma's
-  computeGamma( xl, J0 ) ;
+  double dx32 = xl[0][2]-xl[0][1];
+  double dy32 = xl[1][2]-xl[1][1];
 
-  //zero Bhat = \frac{1}{volume} \int{  B - \bar{B} } \diff A
-  for ( node = 0;  node < numnodes;  node++ ) {
-    Bhat[node]->Zero( ) ;
-  }
+  double dx41 = xl[0][3]-xl[0][0];
+  double dy41 = xl[1][3]-xl[1][0];
 
-  //gauss loop to compute Bhat's 
-  for ( i = 0; i < ngauss; i++ ) {
+  Matrix G(4,12);
+  G.Zero();
+  double one_over_four = 0.25;
+  G(0,0)=-0.5;
+  G(0,1)=-dy41*one_over_four;
+  G(0,2)=dx41*one_over_four;
+  G(0,9)=0.5;
+  G(0,10)=-dy41*one_over_four;
+  G(0,11)=dx41*one_over_four;
+  G(1,0)=-0.5;
+  G(1,1)=-dy21*one_over_four;
+  G(1,2)=dx21*one_over_four;
+  G(1,3)=0.5;
+  G(1,4)=-dy21*one_over_four;
+  G(1,5)=dx21*one_over_four;
+  G(2,3)=-0.5;
+  G(2,4)=-dy32*one_over_four;
+  G(2,5)=dx32*one_over_four;
+  G(2,6)=0.5;
+  G(2,7)=-dy32*one_over_four;
+  G(2,8)=dx32*one_over_four;
+  G(3,6)=0.5;
+  G(3,7)=-dy34*one_over_four;
+  G(3,8)=dx34*one_over_four;
+  G(3,9)=-0.5;
+  G(3,10)=-dy34*one_over_four;
+  G(3,11)=dx34*one_over_four;
 
-    //get shape functions    
-    shape2d( sg[i], tg[i], xl, shp, xsj ) ;
+  Matrix Ms(2,4);
+  Ms.Zero();
+  Matrix Bsv(2,12);
+  Bsv.Zero();
 
-    //save shape functions
-    for ( p = 0; p < 3; p++ ) {
-      for ( q = 0; q < numnodes; q++ )
-	  Shape[p][q][i] = shp[p][q] ;
-    } // end for p
+  double Ax = -xl[0][0]+xl[0][1]+xl[0][2]-xl[0][3];
+  double Bx =  xl[0][0]-xl[0][1]+xl[0][2]-xl[0][3];
+  double Cx = -xl[0][0]-xl[0][1]+xl[0][2]+xl[0][3];
 
-    //volume element to also be saved
-    dvol[i] = wg[i] * xsj ;  
+  double Ay = -xl[1][0]+xl[1][1]+xl[1][2]-xl[1][3];
+  double By =  xl[1][0]-xl[1][1]+xl[1][2]-xl[1][3];
+  double Cy = -xl[1][0]-xl[1][1]+xl[1][2]+xl[1][3];
 
-    volume += dvol[i] ;
-
-    for ( node = 0; node < numnodes; node++ ) {
-
-      //compute B shear matrix for this node
-      //Bhat[node] += (  dvol[i] * computeBshear(node,shp)  ) ;
-      Bhat[node]->addMatrix(1.0, 
-			   computeBshear(node,shp),
-			   dvol[i] ) ;
-
-      //compute B-bar shear matrix for this node
-      //Bhat[node] -= ( dvol[i] *
-      //            computeBbarShear( node, sg[i], tg[i], J0inv ) 
-      //                ) ;
-      Bhat[node]->addMatrix(1.0, 
-			   computeBbarShear(node,sg[i],tg[i],J0inv),
-			   -dvol[i] ) ;
-
-    } //end for node   
-
-  } // end for i gauss loop
-
-  //compute Bhat 
-    for ( node = 0;  node < numnodes;  node++ )
-      //(*Bhat[node]) /= volume ;
-      Bhat[node]->operator/=(volume) ;
-    
+  double alph = atan(Ay/Ax);
+  double beta = 3.141592653589793/2-atan(Cx/Cy);
+  Matrix Rot(2,2);
+  Rot.Zero();
+  Rot(0,0)=sin(beta);
+  Rot(0,1)=-sin(alph);
+  Rot(1,0)=-cos(beta);
+  Rot(1,1)=cos(alph);
+  Matrix Bs(2,12);
+  
+  double r1 = 0;
+  double r2 = 0;
+  double r3 = 0;
 
   //gauss loop 
   for ( i = 0; i < ngauss; i++ ) {
 
-    //extract shape functions from saved array
-    for ( p = 0; p < 3; p++ ) {
-       for ( q = 0; q < numnodes; q++ )
-	  shp[p][q]  = Shape[p][q][i] ;
-    } // end for p
+    r1 = Cx + sg[i]*Bx;
+    r3 = Cy + sg[i]*By;
+    r1 = r1*r1 + r3*r3;
+	r1 = sqrt (r1);
+	r2 = Ax + tg[i]*Bx;
+	r3 = Ay + tg[i]*By;
+	r2 = r2*r2 + r3*r3;
+	r2 = sqrt (r2);
 
+    //get shape functions    
+    shape2d( sg[i], tg[i], xl, shp, xsj ) ;
+    //volume element to also be saved
+    dvol[i] = wg[i] * xsj ;  
+    volume += dvol[i] ;
+
+    Ms(1,0)=1-sg[i];
+	Ms(0,1)=1-tg[i];
+	Ms(1,2)=1+sg[i];
+	Ms(0,3)=1+tg[i];
+	Bsv = Ms*G;
+
+    for ( j = 0; j < 12; j++ ) {
+		Bsv(0,j)=Bsv(0,j)*r1/(8*xsj);
+		Bsv(1,j)=Bsv(1,j)*r2/(8*xsj);
+    }
+    Bs=Rot*Bsv;
 
     //zero the strains
     strain.Zero( ) ;
@@ -1227,10 +1230,10 @@ ShellMITC4::formResidAndTangent( int tang_flag )
 
       Bbend = computeBbend( j, shp ) ;
 
-      Bshear = computeBbarShear( j, sg[i], tg[i], J0inv ) ;
-
-      //add Bhat to shear terms 
-      Bshear += (*Bhat[j]) ;
+      for ( p = 0; p < 3; p++) {
+		  Bshear(0,p) = Bs(0,j*3+p);
+		  Bshear(1,p) = Bs(1,j*3+p);
+      }//end for p
 
       BJ = assembleB( Bmembrane, Bbend, Bshear ) ;
 
@@ -1251,15 +1254,13 @@ ShellMITC4::formResidAndTangent( int tang_flag )
       //drilling B matrix
       drillPointer = computeBdrill( j, shp ) ;
       for (p=0; p<ndf; p++ ) {
-	//BdrillJ[p] = *drillPointer++ ;
-	BdrillJ[p] = *drillPointer ; //set p-th component
-	drillPointer++ ;             //pointer arithmetic
+	      BdrillJ[p] = *drillPointer ; //set p-th component
+	      drillPointer++ ;             //pointer arithmetic
       }//end for p
 
       //drilling "strain" 
       for ( p = 0; p < ndf; p++ )
-	epsDrill +=  BdrillJ[p]*ul(p) ;
-
+	      epsDrill +=  BdrillJ[p]*ul(p) ;
     } // end for j
   
 
@@ -1287,103 +1288,70 @@ ShellMITC4::formResidAndTangent( int tang_flag )
     jj = 0 ;
     for ( j = 0; j < numnodes; j++ ) {
 
-      //Bmembrane = computeBmembrane( j, shp ) ;
-
-      //Bbend = computeBbend( j, shp ) ;
-
-      //multiply bending terms by (-1.0) for correct statement
-      // of equilibrium  
-      //Bbend *= (-1.0) ;
-
-      //Bshear = computeBbarShear( j, sg[i], tg[i], J0inv ) ;
-
-      //add Bhat to shear terms
-      //Bshear += (*Bhat[j]) ;
-
-      //BJ = assembleB( Bmembrane, Bbend, Bshear ) ;
-
       //extract BJ
       for (p=0; p<nstress; p++) {
-	for (q=0; q<ndf; q++ )
-	  BJ(p,q) = saveB[p][q][j]   ;
+	    for (q=0; q<ndf; q++ )
+	      BJ(p,q) = saveB[p][q][j]   ;
       }//end for p
 
       //multiply bending terms by (-1.0) for correct statement
       // of equilibrium  
       for ( p = 3; p < 6; p++ ) {
-	for ( q = 3; q < 6; q++ ) 
-	  BJ(p,q) *= (-1.0) ;
+	    for ( q = 3; q < 6; q++ ) 
+	      BJ(p,q) *= (-1.0) ;
       } //end for p
 
-
       //transpose 
-      //BJtran = transpose( 8, ndf, BJ ) ;
       for (p=0; p<ndf; p++) {
-	for (q=0; q<nstress; q++) 
-	  BJtran(p,q) = BJ(q,p) ;
+	    for (q=0; q<nstress; q++) 
+	      BJtran(p,q) = BJ(q,p) ;
       }//end for p
 
-
-      //residJ = BJtran * stress ;
       residJ.addMatrixVector(0.0, BJtran,stress,1.0 ) ;
 
       //drilling B matrix
       drillPointer = computeBdrill( j, shp ) ;
       for (p=0; p<ndf; p++ ) {
-	BdrillJ[p] = *drillPointer ;
-	drillPointer++ ;
+	    BdrillJ[p] = *drillPointer ;
+	    drillPointer++ ;
       }//end for p
 
       //residual including drill
       for ( p = 0; p < ndf; p++ )
         resid( jj + p ) += ( residJ(p) + BdrillJ[p]*tauDrill ) ;
 
-
       if ( tang_flag == 1 ) {
 
-        //BJtranD = BJtran * dd ;
-	BJtranD.addMatrixProduct(0.0, BJtran,dd,1.0 ) ;
+	    BJtranD.addMatrixProduct(0.0, BJtran,dd,1.0 ) ;
 
-	for (p=0; p<ndf; p++) 
-	  BdrillJ[p] *= ( Ktt*dvol[i] ) ;
+	    for (p=0; p<ndf; p++) 
+	      BdrillJ[p] *= ( Ktt*dvol[i] ) ;
 
         kk = 0 ;
         for ( k = 0; k < numnodes; k++ ) {
 
-          //Bmembrane = computeBmembrane( k, shp ) ;
-
-          //Bbend = computeBbend( k, shp ) ;
-
-          //Bshear = computeBbarShear( k, sg[i], tg[i], J0inv ) ;
-
-          //Bshear += (*Bhat[k]) ;
-
-          //BK = assembleB( Bmembrane, Bbend, Bshear ) ;
-
-	  //extract BK
-	  for (p=0; p<nstress; p++) {
-	    for (q=0; q<ndf; q++ )
-	      BK(p,q) = saveB[p][q][k]   ;
-	  }//end for p
-
+	      //extract BK
+	      for (p=0; p<nstress; p++) {
+	        for (q=0; q<ndf; q++ )
+	          BK(p,q) = saveB[p][q][k]   ;
+	      }//end for p
 	  
-	  //drilling B matrix
-	  drillPointer = computeBdrill( k, shp ) ;
-	  for (p=0; p<ndf; p++ ) {
-	    BdrillK[p] = *drillPointer ;
-	    drillPointer++ ;
-	  }//end for p
-  
+	      //drilling B matrix
+	      drillPointer = computeBdrill( k, shp ) ;
+	      for (p=0; p<ndf; p++ ) {
+	        BdrillK[p] = *drillPointer ;
+	        drillPointer++ ;
+	      }//end for p
  
           //stiffJK = BJtranD * BK  ;
-	  // +  transpose( 1,ndf,BdrillJ ) * BdrillK ; 
-	  stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0 ) ;
+	      // +  transpose( 1,ndf,BdrillJ ) * BdrillK ; 
+	      stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0 ) ;
 
           for ( p = 0; p < ndf; p++ )  {
-	    for ( q = 0; q < ndf; q++ ) {
-	       stiff( jj+p, kk+q ) += stiffJK(p,q) 
+	        for ( q = 0; q < ndf; q++ ) {
+	          stiff( jj+p, kk+q ) += stiffJK(p,q) 
 		                   + ( BdrillJ[p]*BdrillK[q] ) ;
-	    }//end for q
+	        }//end for q
           }//end for p
 
           kk += ndf ;
@@ -1391,12 +1359,10 @@ ShellMITC4::formResidAndTangent( int tang_flag )
 
       } // end if tang_flag 
 
-      jj += ndf ;
+    jj += ndf ;
     } // end for j loop
 
-
   } //end for i gauss loop 
-
   
   return ;
 }
@@ -1445,14 +1411,11 @@ ShellMITC4::computeBasis( )
   v2 -= coor1 ;
   v2 -= coor0 ;
   v2 *= 0.50 ;
-    
-
  
   //normalize v1 
   //double length = LovelyNorm( v1 ) ;
   double length = v1.Norm( ) ;
   v1 /= length ;
-
 
   //Gram-Schmidt process for v2 
 
@@ -1464,16 +1427,13 @@ ShellMITC4::computeBasis( )
   temp *= alpha ;
   v2 -= temp ;
 
-
   //normalize v2 
   //length = LovelyNorm( v2 ) ;
   length = v2.Norm( ) ;
   v2 /= length ;
 
-
   //cross product for v3  
   v3 = LovelyCrossProduct( v1, v2 ) ;
-
   
   //local nodal coordinates in plane of shell
 
@@ -1481,7 +1441,6 @@ ShellMITC4::computeBasis( )
   for ( i = 0; i < 4; i++ ) {
 
        const Vector &coorI = nodePointers[i]->getCrds( ) ;
-
        xl[0][i] = coorI^v1 ;  
        xl[1][i] = coorI^v2 ;
 
@@ -1505,7 +1464,6 @@ ShellMITC4::computeBdrill( int node, const double shp[3][4] )
 
   //static Matrix Bdrill(1,6) ;
   static double Bdrill[6] ;
-
   static double B1 ;
   static double B2 ;
   static double B6 ;
@@ -1546,155 +1504,6 @@ ShellMITC4::computeBdrill( int node, const double shp[3][4] )
 
 }
 
-//*************************************************************************
-//compute the gamma's
-
-void   
-ShellMITC4::computeGamma( const double xl[2][4], const Matrix &J )
-{
-  //static Matrix e1(1,2) ;
-  //static Matrix e2(1,2) ;
-
-  static double Jtran[2][2] ;  // J transpose
-
-  static Matrix e1Jtran(1,2) ; // e1*Jtran 
-
-  static Matrix e2Jtran(1,2) ; // e2*Jtran
-
-  static Matrix Bshear(2,3) ; // shear strain-displacement matrix
-
-  static double shape[3][4] ; // shape functions 
-
-  double xsj ; 
-
-  double L1, L2 ;
-
-  int node ;
-
- /*  
-  e1(0,0) = 1.0 ;
-  e1(0,1) = 0.0 ;
-
-  e2(0,0) = 0.0 ;
-  e2(0,1) = 1.0 ;
- */
-
-  //Jtran = transpose( 2, 2, J ) ;
-  Jtran[0][0] = J(0,0) ;
-  Jtran[1][1] = J(1,1) ;
-  Jtran[0][1] = J(1,0) ;
-  Jtran[1][0] = J(0,1) ;
-
-  //first row of Jtran
-  //e1Jtran = e1*Jtran ; 
-  e1Jtran(0,0) = Jtran[0][0] ;
-  e1Jtran(0,1) = Jtran[0][1] ;
-
-  //second row of Jtran 
-  //e2Jtran = e2*Jtran ;
-  e2Jtran(0,0) = Jtran[1][0] ;
-  e2Jtran(0,1) = Jtran[1][1] ;
-
-
-  //-------------GammaB1--------------------------------
-
-    //set natural coordinate point location
-    L1 =  0.0 ;
-    L2 = -1.0 ;
-
-    //get shape functions    
-    shape2d( L1, L2, xl, shape, xsj ) ;
-
-    for ( node = 0; node < 4; node++ ) {
-
-        //compute shear B        
-        Bshear = computeBshear( node, shape ) ;
-
-        GammaB1pointer[node]->Zero( ) ;
-
-	//( *GammaB1pointer[node] ) = e1Jtran*Bshear ;
-	GammaB1pointer[node]->addMatrixProduct(0.0, e1Jtran,Bshear,1.0 );
-
-    } //end for node
- 
-  //----------------------------------------------------
-
-
-  //-------------GammaD1--------------------------------
-
-    //set natural coordinate point location
-    L1 =  0.0 ;
-    L2 = +1.0 ;
-
-    //get shape functions    
-    shape2d( L1, L2, xl, shape, xsj ) ;
-
-    for ( node = 0; node < 4; node++ ) {
-
-        //compute shear B        
-        Bshear = computeBshear( node, shape ) ;
-
-        GammaD1pointer[node]->Zero( ) ;
-
-        //( *GammaD1pointer[node] ) = e1Jtran*Bshear ;
-	GammaD1pointer[node]->addMatrixProduct(0.0, e1Jtran,Bshear,1.0 );
-
-    } //end for node
- 
-  //----------------------------------------------------    
-
-
-  //-------------GammaA2--------------------------------
-
-    //set natural coordinate point location
-    L1 = -1.0 ;
-    L2 =  0.0 ;
-
-    //get shape functions    
-    shape2d( L1, L2, xl, shape, xsj ) ;
-
-    for ( node = 0; node < 4; node++ ) {
-
-        //compute shear B        
-        Bshear = computeBshear( node, shape ) ;
-
-        GammaA2pointer[node]->Zero( ) ;
-
-        //( *GammaA2pointer[node] ) = e2Jtran*Bshear ;
-	GammaA2pointer[node]->addMatrixProduct(0.0, e2Jtran,Bshear,1.0 );
-		   
-
-    } //end for node
- 
-  //----------------------------------------------------     
-
-
-  //-------------GammaC2--------------------------------
-
-    //set natural coordinate point location
-    L1 = +1.0 ;
-    L2 =  0.0 ;
-
-    //get shape functions    
-    shape2d( L1, L2, xl, shape, xsj ) ;
-
-    for ( node = 0; node < 4; node++ ) {
-
-        //compute shear B        
-        Bshear = computeBshear( node, shape ) ;
-
-        GammaC2pointer[node]->Zero( ) ;
-
-        //( *GammaC2pointer[node] ) = e2Jtran*Bshear ;
-	GammaC2pointer[node]->addMatrixProduct(0.0, e2Jtran,Bshear,1.0 );
-
-    } //end for node
- 
-  //----------------------------------------------------     
-
- return ;
-
-}
 
 //********************************************************************
 //assemble a B matrix
@@ -1883,158 +1692,7 @@ ShellMITC4::computeBbend( int node, const double shp[3][4] )
     return Bbend ;
 }
 
-//***********************************************************************
-//compute Bbar shear matrix
 
-const Matrix&  
-ShellMITC4::computeBbarShear( int node, double L1, double L2,
-			      const Matrix &Jinv ) 
-{
-    static Matrix Bshear(2,3) ;
-    static Matrix BshearNat(2,3) ;
-
-    static Matrix JinvTran(2,2) ;  // J-inverse-transpose
-
-    static Matrix Gamma1(1,3) ;
-    static Matrix Gamma2(1,3) ; 
-
-    static Matrix temp1(1,3) ;
-    static Matrix temp2(1,3) ;
-
-
-    //JinvTran = transpose( 2, 2, Jinv ) ;
-    JinvTran(0,0) = Jinv(0,0) ;
-    JinvTran(1,1) = Jinv(1,1) ;
-    JinvTran(0,1) = Jinv(1,0) ;
-    JinvTran(1,0) = Jinv(0,1) ;
-
-
-    // compute BShear from Bbar interpolation
-    
-    //Gamma1 = ( 1.0 - L2 )*( *GammaB1pointer[node] )  +
-    //         ( 1.0 + L2 )*( *GammaD1pointer[node] )   ;
-    temp1  = *GammaB1pointer[node] ;
-    temp1 *= ( 1.0 - L2 ) ;
-    
-    temp2  = *GammaD1pointer[node] ;
-    temp2 *= ( 1.0 + L2 ) ;
-
-    Gamma1  = temp1 ;
-    Gamma1 += temp2 ;
-
-
-    //Gamma2 = ( 1.0 - L1 )*( *GammaA2pointer[node] )  +
-    //         ( 1.0 + L1 )*( *GammaC2pointer[node] )   ;
-    temp1  = *GammaA2pointer[node] ;
-    temp1 *= ( 1.0 - L1 ) ;
-    
-    temp2  = *GammaC2pointer[node] ;
-    temp2 *= ( 1.0 + L1 ) ;
-
-    Gamma2  = temp1 ;
-    Gamma2 += temp2 ;
-
-    //don't forget the 1/2
-    //Gamma1 *= 0.50 ;
-    //Gamma2 *= 0.50 ;
-
-
-    BshearNat(0,0) = Gamma1(0,0) ;
-    BshearNat(0,1) = Gamma1(0,1) ;
-    BshearNat(0,2) = Gamma1(0,2) ;
-
-    BshearNat(1,0) = Gamma2(0,0) ;
-    BshearNat(1,1) = Gamma2(0,1) ;
-    BshearNat(1,2) = Gamma2(0,2) ;
-
-
-    //strain tensor push on BshearNat
-    //Bshear = ( JinvTran * BshearNat ) ;
-    Bshear.addMatrixProduct(0.0,  JinvTran,BshearNat,0.5 ) ;
-    //note the 1/2 -----------------------------------^
-
-    return Bshear ;
-}
-
-//***********************************************************************
-//compute standard Bshear matrix
-
-const Matrix&  
-ShellMITC4::computeBshear( int node, const double shp[3][4] )
-{
-
-  static Matrix Bshear(2,3) ;
-
-//---Bshear Matrix in standard {1,2,3} mechanics notation------
-//
-//             -                -
-//   Bshear = | +N,1      0    +N |  (2x3)
-//            | +N,2     -N     0 |
-//             -                -  
-//
-//  two(2) shear strains, one(1) displacement and two(2) rotations for plate 
-//-----------------------------------------------------------------------
-
-  Bshear.Zero( ) ;
-
-  Bshear(0,0) =  shp[0][node] ;
-  Bshear(0,2) =  shp[2][node] ;
-  Bshear(1,0) =  shp[1][node] ;
-  Bshear(1,1) = -shp[2][node] ;
-
-  return Bshear ;
-
-}  
-
-//***********************************************************************
-//compute Jacobian matrix and inverse at point {L1,L2} 
-
-void   
-ShellMITC4::computeJacobian( double L1, double L2,
-				    const double x[2][4], 
-                                    Matrix &JJ, 
-                                    Matrix &JJinv )
-{
-  int i, j, k ;
-     
-  static const double s[] = { -0.5,  0.5, 0.5, -0.5 } ;
-  static const double t[] = { -0.5, -0.5, 0.5,  0.5 } ;
-
-  static double shp[2][4] ;
-
-  double ss = L1 ;
-  double tt = L2 ;
-
-  for ( i = 0; i < 4; i++ ) {
-      shp[0][i] = s[i] * ( 0.5 + t[i]*tt ) ;
-      shp[1][i] = t[i] * ( 0.5 + s[i]*ss ) ;
-  } // end for i
-
-  
-  // Construct jacobian and its inverse
-  
-  JJ.Zero( ) ;
-  for ( i = 0; i < 2; i++ ) {
-    for ( j = 0; j < 2; j++ ) {
-
-      for ( k = 0; k < 4; k++ )
-	  JJ(i,j) +=  x[i][k] * shp[j][k] ;
-
-    } //end for j
-  }  // end for i 
-
-  double xsj = JJ(0,0)*JJ(1,1) - JJ(0,1)*JJ(1,0) ;
-
-  //inverse jacobian
-  double jinv = 1.0 / xsj ;
-  JJinv(0,0) =  JJ(1,1) * jinv ;
-  JJinv(1,1) =  JJ(0,0) * jinv ;
-  JJinv(0,1) = -JJ(0,1) * jinv ; 
-  JJinv(1,0) = -JJ(1,0) * jinv ; 
-
-  return ;
-
-}
 
 //************************************************************************
 //shape function routine for four node quads
@@ -2287,55 +1945,62 @@ ShellMITC4::displaySelf(Renderer &theViewer, int displayMode, float fact)
     static Vector P(24) ;
 
     for (int j=0; j<4; j++)
-      values(j) = 0.0;
+		values(j) = 0.0;
 
     if (displayMode >= 0) {
-      const Vector &end1Disp = nodePointers[0]->getDisp();
-      const Vector &end2Disp = nodePointers[1]->getDisp();
-      const Vector &end3Disp = nodePointers[2]->getDisp();
-      const Vector &end4Disp = nodePointers[3]->getDisp();
-      
-      if (displayMode < 8 && displayMode > 0) {
-	for (int i=0; i<4; i++) {
-	  const Vector &stress = materialPointers[i]->getStressResultant();
-	  values(i) = stress(displayMode-1);
+		// Display mode is positive:
+		// display mode = 0 -> plot no contour
+		// display mode = 1-8 -> plot 1-8 stress resultant
+
+		// Get nodal displacements
+		const Vector &end1Disp = nodePointers[0]->getDisp();
+		const Vector &end2Disp = nodePointers[1]->getDisp();
+		const Vector &end3Disp = nodePointers[2]->getDisp();
+		const Vector &end4Disp = nodePointers[3]->getDisp();
+		
+		// Get stress resultants
+        if (displayMode <= 8 && displayMode > 0) {
+			for (int i=0; i<4; i++) {
+				const Vector &stress = materialPointers[i]->getStressResultant();
+				values(i) = stress(displayMode-1);
+			}
+		}
+
+		// Get nodal absolute position = OriginalPosition + (Displacement*factor)
+		for (int i = 0; i < 3; i++) {
+			coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+			coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
+			coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
+			coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
+		}
+	} else {
+		// Display mode is negative.
+		// Plot eigenvectors
+		int mode = displayMode * -1;
+		const Matrix &eigen1 = nodePointers[0]->getEigenvectors();
+		const Matrix &eigen2 = nodePointers[1]->getEigenvectors();
+		const Matrix &eigen3 = nodePointers[2]->getEigenvectors();
+		const Matrix &eigen4 = nodePointers[3]->getEigenvectors();
+		if (eigen1.noCols() >= mode) {
+			for (int i = 0; i < 3; i++) {
+				coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+				coords(1,i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+				coords(2,i) = end3Crd(i) + eigen3(i,mode-1)*fact;
+				coords(3,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
+			}    
+		} else {
+			for (int i = 0; i < 3; i++) {
+				coords(0,i) = end1Crd(i);
+				coords(1,i) = end2Crd(i);
+				coords(2,i) = end3Crd(i);
+				coords(3,i) = end4Crd(i);
+			}
+		}
 	}
-      }
 
-      for (int i = 0; i < 3; i++) {
-	coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-	coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
-	coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
-	coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
-
-      }
-    } else {
-      int mode = displayMode * -1;
-      const Matrix &eigen1 = nodePointers[0]->getEigenvectors();
-      const Matrix &eigen2 = nodePointers[1]->getEigenvectors();
-      const Matrix &eigen3 = nodePointers[2]->getEigenvectors();
-      const Matrix &eigen4 = nodePointers[3]->getEigenvectors();
-      if (eigen1.noCols() >= mode) {
-	for (int i = 0; i < 3; i++) {
-	  coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
-	  coords(1,i) = end2Crd(i) + eigen2(i,mode-1)*fact;
-	  coords(2,i) = end3Crd(i) + eigen3(i,mode-1)*fact;
-	  coords(3,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
-	}    
-      } else {
-	for (int i = 0; i < 3; i++) {
-	  coords(0,i) = end1Crd(i);
-	  coords(1,i) = end2Crd(i);
-	  coords(2,i) = end3Crd(i);
-	  coords(3,i) = end4Crd(i);
-	}    
-      }
-    }
-
-    //opserr << coords;
     int error = 0;
-
-    //error += theViewer.drawPolygon (coords, values);
+	
+	// Draw a poligon with coordinates coords and values (colors) corresponding to values vector
     error += theViewer.drawPolygon (coords, values);
 
     return error;

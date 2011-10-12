@@ -19,13 +19,15 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.10 $
-// $Date: 2007-04-23 19:19:37 $
+// $Date: 2011/03/10 22:51:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
-// Ed "C++" Love
+// Written: Leopoldo Tesser, Diego A. Talledo, Véronique Le Corvec
 //
-// B-bar four node shell element with membrane and drill
-//
+// Bathe MITC 4 four node shell element with membrane and drill
+// Ref: Dvorkin,Bathe, A continuum mechanics based four node shell
+//      element for general nonlinear analysis,
+//      Eng.Comput.,1,77-88,1984
 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -44,15 +46,15 @@ class ShellMITC4 : public Element {
  public:
   
   //null constructor
-  ShellMITC4();
+  ShellMITC4( );
   
   //full constructor
-  ShellMITC4(int tag, 
-	     int node1,
-	     int node2,
-	     int node3,
-	     int node4,
-	     SectionForceDeformation &theMaterial ) ;
+  ShellMITC4( int tag, 
+	          int node1,
+	          int node2,
+			  int node3,
+			  int node4,
+			  SectionForceDeformation &theMaterial ) ;
   
   //destructor 
   virtual ~ShellMITC4( ) ;
@@ -65,7 +67,7 @@ class ShellMITC4 : public Element {
     
     //return connected external nodes
     const ID &getExternalNodes( ) ;
-    Node **getNodePtrs();
+    Node **getNodePtrs( );
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -84,13 +86,13 @@ class ShellMITC4 : public Element {
 	
     //return stiffness matrix 
     const Matrix &getTangentStiff( ) ;
-    const Matrix &getInitialStiff();
-    const Matrix &getMass();
+    const Matrix &getInitialStiff( );
+    const Matrix &getMass( );
 
     // methods for applying loads
-    void zeroLoad(void);	
-    int addLoad(ElementalLoad *theLoad, double loadFactor);
-    int addInertiaLoadToUnbalance(const Vector &accel);
+    void zeroLoad( void );	
+    int addLoad( ElementalLoad *theLoad, double loadFactor );
+    int addInertiaLoadToUnbalance( const Vector &accel );
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -99,16 +101,16 @@ class ShellMITC4 : public Element {
     const Vector &getResistingForceIncInertia( ) ;
 
     // public methods for element output
-    int sendSelf (int commitTag, Channel &theChannel);
-    int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
-		  &theBroker);
+    int sendSelf ( int commitTag, Channel &theChannel );
+    int recvSelf ( int commitTag, Channel &theChannel, FEM_ObjectBroker 
+		           &theBroker );
 
 
-    Response* setResponse(const char **argv, int argc, OPS_Stream &output);
-    int getResponse(int responseID, Information &eleInfo);
+    Response* setResponse( const char **argv, int argc, OPS_Stream &output );
+    int getResponse( int responseID, Information &eleInfo );
       
     //plotting 
-    int displaySelf(Renderer &theViewer, int displayMode, float fact);
+    int displaySelf( Renderer &theViewer, int displayMode, float fact );
 
   private : 
 
@@ -124,15 +126,6 @@ class ShellMITC4 : public Element {
     static double sg[4] ;
     static double tg[4] ;
     static double wg[4] ;
-
-    //B-bar data
-    static Matrix  **GammaB1pointer ;  
-    static Matrix  **GammaD1pointer ;
-    static Matrix  **GammaA2pointer ;
-    static Matrix  **GammaC2pointer ;
-
-    //Bhat data
-    static Matrix **Bhat ;
 
     //node information
     ID connectedExternalNodes ;  //four node numbers
@@ -162,19 +155,13 @@ class ShellMITC4 : public Element {
     //form residual and tangent					  
     void formResidAndTangent( int tang_flag ) ;
 
-    //compute Jacobian matrix and inverse at point {L1,L2}
-    void  computeJacobian( double L1, double L2, 
-			   const double x[2][4], 
-                           Matrix &JJ, 
-                           Matrix &JJinv ) ;
-
     //compute Bdrill matrix
     double* computeBdrill( int node, const double shp[3][4] ) ;
 
     //assemble a B matrix 
     const Matrix& assembleB( const Matrix &Bmembrane,
-			     const Matrix &Bbend, 
-			     const Matrix &Bshear ) ;
+			                 const Matrix &Bbend, 
+			                 const Matrix &Bshear ) ;
   
     //compute Bmembrane matrix
     const Matrix& computeBmembrane( int node, const double shp[3][4] ) ;
@@ -182,25 +169,14 @@ class ShellMITC4 : public Element {
     //compute Bbend matrix
     const Matrix& computeBbend( int node, const double shp[3][4] ) ;
   
-    //compute standard Bshear matrix
-    const Matrix&  computeBshear( int node, const double shp[3][4] ) ;
-
-    //compute Bbar shear matrix
-    const Matrix&  computeBbarShear( int node, double L1, double L2,
-				     const Matrix& Jinv ) ;
-  
-			     
-    //compute the gamma's
-    void  computeGamma( const double xl[2][4], const Matrix &J ) ;
-
     //Matrix transpose
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
 
     //shape function routine for four node quads
     void shape2d( double ss, double tt, 
-		  const double x[2][4], 
-		  double shp[3][4], 
-		  double &xsj ) ;
+		          const double x[2][4], 
+		          double shp[3][4], 
+		          double &xsj ) ;
 
     // vector for applying loads
     Vector *load;
