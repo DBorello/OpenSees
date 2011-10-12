@@ -29,12 +29,9 @@
 // Description: This file contains the implementation of the
 // TclModelBuilder_addSnapMaterial() function. 
 
-//#include <SnapBilinearMaterial.h>
-//#include <SnapCloughMaterial.h>
-//#include <SnapPinchMaterial.h>
-
 #include <Pinching.h>
 #include <Clough.h>
+#include <CloughHenry.h>
 #include <PinchingDamage.h>
 #include <CloughDamage.h>
 #include <Bilinear.h>
@@ -143,30 +140,35 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 		theMaterial = new Bilinear(tag, input, strength, stiffness,capping);
 	} 
 	
-	else if ( strcmp(argv[1],"Clough") == 0 || strcmp(argv[1],"clough") == 0 ) {
-		
-		if ( argc < 19 ) {
-			opserr << "WARNING insufficient arguments\n";
-			printCommand(argc,argv);
-			opserr << "Want: uniaxialMaterial Clough_Damage tag? ..." << endln;
-			return 0;
-		}
-		
-		Vector input(16);
-		double temp;
-		
-		for (int i = 3, j = 0; j < 16; i++, j++) {
-			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				opserr << "WARNING invalid input, data " << i << endln;
-				printCommand(argc, argv);
-				return 0;
-			}
-			input(j) = temp;
-		}
-		
-		theMaterial = new Clough(tag, input);
-	}
-	
+	else if ((strcmp(argv[1],"Clough") == 0) || 
+		 (strcmp(argv[1],"clough") == 0) ||
+		 (strcmp(argv[1],"CloughHenry") == 0)) {
+	    
+	    if ( argc < 19 ) {
+	      opserr << "WARNING insufficient arguments\n";
+	      printCommand(argc,argv);
+	      opserr << "Want: uniaxialMaterial Clough_Damage tag? ..." << endln;
+	      return 0;
+	    }
+	    
+	    Vector input(16);
+	    double temp;
+	    
+	    for (int i = 3, j = 0; j < 16; i++, j++) {
+	      if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
+		opserr << "WARNING invalid input, data " << i << endln;
+		printCommand(argc, argv);
+		return 0;
+	      }
+	      input(j) = temp;
+	    }
+	    
+	    if ((strcmp(argv[1],"Clough") == 0) || (strcmp(argv[1],"clough") == 0))
+	      theMaterial = new Clough(tag, input);
+	    else
+	      theMaterial = new CloughHenry(tag, input);
+	  }
+		 
 	else if ( strcmp(argv[1],"Clough_Damage") == 0 || strcmp(argv[1],"CloughDamage") == 0 ||
 		strcmp(argv[1],"Clough_Damage") == 0 || strcmp(argv[1],"CloughDamage") == 0 ) {
 		if ( argc < 15 ) {

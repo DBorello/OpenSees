@@ -4,6 +4,7 @@ OBJS       = Pinching.o \
 	Bilinear.o \
 	Bilin.o \
 	Clough.o \
+	CloughHenry.o \
 	CloughDamage.o \
 	PinchingDamage.o \
 	Bilin.o \
