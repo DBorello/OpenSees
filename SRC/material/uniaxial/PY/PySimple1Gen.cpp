@@ -1,14 +1,27 @@
-//////////////////////////////////////////////////////////////////////
-//  This file contains the constructor, destructor, and member		//  
-//  functions for the PySimple1Gen class.  The purpose of the		//
-//  class is to create PySimple1 materials associated with			//
-//  pre-defined	zeroLength elements, beam column elements, and		//
-//	nodes.															//
-//																	//
-//  Written by: Scott Brandenberg									//
-//              Graduate Student, UC Davis							//
-//              December 2, 2003									//
-//////////////////////////////////////////////////////////////////////
+/*
+Copyright @ 2002 The Regents of the University of California. All Rights Reserved.
+
+The Regents grants permission, without fee and without a written license agreement, for (a) use, reproduction, modification, and distribution of this software and its documentation by educational, research, and non-profit entities for noncommercial purposes only; and (b) use, reproduction and modification of this software by other entities for internal purposes only. The above copyright notice, this paragraph and the following three paragraphs must appear in all copies and modifications of the software and/or documentation.
+
+Permission to incorporate this software into commercial products may be obtained by contacting the University of California. [ Office of Technology Licensing, 2150 Shattuck Avenue #150 Berkeley, CA 94720-1620, (510) 643-7201]
+
+This software program and documentation are copyrighted by The Regents of the University of California. The software program and documentation are supplied "as is", without any accompanying services from The Regents. The Regents does not warrant that the operation of the program will be uninterrupted or error-free. The end-user understands that the program was developed for research purposes and is advised not to rely exclusively on the program for any reason.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+*/
+
+
+////////////////////////////////////////////////////////////////////////
+//  This file contains the constructor, destructor, and member		  //  
+//  functions for the TzSimple1Gen class.  The purpose of the		  //
+//  class is to create TzSimple1 materials associated with			  //
+//  pre-defined	zeroLength elements, beam column elements, and		  //
+//	nodes.															  //
+//																	  //
+//  Written by: Scott Brandenberg									  //
+//              Graduate Student, UC Davis							  //
+//              December 2, 2003									  //	
+//				Now Associate Professor, UCLA (sjbrandenberg@ucla.edu //
+////////////////////////////////////////////////////////////////////////
 
 #include "PySimple1Gen.h"
 
@@ -947,7 +960,7 @@ double PySimple1Gen::GetPult(const char *type)
 // Member function to return y50
 double PySimple1Gen::GetY50(const char *type)
 {
-	double csigma = sqrt(50/stress);  // correction factor for overburden
+	double csigma = sqrt(stress/50.0);  // correction factor for overburden
 	if(depth == 0)
 		csigma = 1;  // avoid divide by zero stress error
 
