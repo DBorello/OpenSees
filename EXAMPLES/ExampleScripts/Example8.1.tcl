@@ -125,9 +125,7 @@ analysis Transient
 
 # Perform the transient analysis (20 sec)
 #       numSteps  dt
-#analyze 1000 1.0
-puts [eigen -standard 1]
-puts [eigen -standard -fullGenLapack 1]
+analyze 1000 1.0
 
 
 
