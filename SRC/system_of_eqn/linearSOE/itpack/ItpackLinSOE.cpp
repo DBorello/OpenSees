@@ -46,6 +46,8 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+#include <stdlib.h>
+
 ItpackLinSOE::ItpackLinSOE(ItpackLinSolver &the_Solver)
 :LinearSOE(the_Solver, LinSOE_TAGS_ItpackLinSOE),
  size(0), nnz(0), A(0), B(0), X(0), colA(0), rowStartA(0),
