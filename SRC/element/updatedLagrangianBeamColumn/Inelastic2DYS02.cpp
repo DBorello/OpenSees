@@ -1,5 +1,7 @@
 // Inelastic2DYS02.cpp
 //////////////////////////////////////////////////////////////////////
+
+#include <math.h>
  
 #include "Inelastic2DYS02.h"
 #include <CyclicModel.h>
@@ -59,10 +61,10 @@ int Inelastic2DYS02::commitState()
 {	
 	this->InelasticYS2DGNL::commitState();
 
-double dp = fabs(ys1->hModel->getTrialPlasticStrains(0));
-	   dp+= fabs(ys2->hModel->getTrialPlasticStrains(0));
-
-double  x=0;
+	double dp = fabs(ys1->hModel->getTrialPlasticStrains(0));
+	dp+= fabs(ys2->hModel->getTrialPlasticStrains(0));
+	
+	double  x=0;
 	this->getTrialNaturalDisp(disp);
 double displ = -1*disp(2);
 	if(fabs(disp(5)) > fabs(displ))

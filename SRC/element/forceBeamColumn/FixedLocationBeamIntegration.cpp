@@ -29,6 +29,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
+#include <math.h>
 
 FixedLocationBeamIntegration::FixedLocationBeamIntegration(int nIP,
 							   const Vector &pt):

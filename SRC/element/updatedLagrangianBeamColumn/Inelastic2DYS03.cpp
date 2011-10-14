@@ -1,6 +1,7 @@
 // Inelastic2DYS03.cpp
 //////////////////////////////////////////////////////////////////////
 
+#include <math.h>
 #include "Inelastic2DYS03.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -43,11 +44,11 @@ void Inelastic2DYS03::getLocalStiff(Matrix &K)
     opserr << "\a";
 
 	if(ndisp(2)*ndisp(5) < 0  || fabs(ndisp(2)*ndisp(5)) < 1e-10) {	//if single curvature
-		L1 = L;
-		L2 = 0;
-		if(ndisp(2) > 0 || ndisp(5) < 0)
-			I1 = I2 = IzNeg;
-		else I1 = I2 = IzPos;
+	  L1 = L;
+	  L2 = 0;
+	  if(ndisp(2) > 0 || ndisp(5) < 0)
+	    I1 = I2 = IzNeg;
+	  else I1 = I2 = IzPos;
 	} else {		//double curvature
 		
 		if((fabs(ndisp(2)) + fabs(ndisp(5)) < 1e-10))

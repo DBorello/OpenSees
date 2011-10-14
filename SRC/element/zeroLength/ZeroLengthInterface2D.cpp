@@ -33,7 +33,7 @@
 
 #include "ZeroLengthInterface2D.h"
 #include <Information.h>
-
+#define PI 3.141592653589793238462643383279502884197169399
 #include <Domain.h>
 #include <Node.h>
 #include <Channel.h>

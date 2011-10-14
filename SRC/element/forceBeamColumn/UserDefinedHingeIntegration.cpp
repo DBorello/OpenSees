@@ -29,6 +29,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
+#include <math.h>
 
 UserDefinedHingeIntegration::UserDefinedHingeIntegration(int npL,
 							 const Vector &ptL,

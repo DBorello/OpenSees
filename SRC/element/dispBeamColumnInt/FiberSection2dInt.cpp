@@ -12,28 +12,18 @@
 
 // Description: This file contains the class implementation of FiberSection2dInt.Based on FiberSection2d.cpp.
 
-
-
-
-
 #include <stdlib.h>
+#include <math.h>
 
-
+#define PI (3.14159265)
 
 #include <Channel.h>
-
 #include <Vector.h>
-
 #include <Matrix.h>
-
 #include <MatrixUtil.h>
-
 #include <Fiber.h>
-
 #include <classTags.h>
-
 #include "FiberSection2dInt.h"
-
 #include <ID.h>
 
 #include <FEM_ObjectBroker.h>

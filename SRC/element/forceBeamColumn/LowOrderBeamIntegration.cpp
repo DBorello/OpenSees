@@ -30,6 +30,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <math.h>
 
 LowOrderBeamIntegration::LowOrderBeamIntegration(int nIP,
 						 const Vector &pt,

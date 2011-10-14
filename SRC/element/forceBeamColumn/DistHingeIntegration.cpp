@@ -31,6 +31,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <math.h>
 
 DistHingeIntegration::DistHingeIntegration(double lpi,
 					   double lpj,

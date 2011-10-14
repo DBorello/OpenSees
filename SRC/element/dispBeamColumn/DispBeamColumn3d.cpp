@@ -45,6 +45,7 @@
 #include <ElementalLoad.h>
 #include <BeamIntegration.h>
 #include <Parameter.h>
+#include <math.h>
 
 Matrix DispBeamColumn3d::K(12,12);
 Vector DispBeamColumn3d::P(12);

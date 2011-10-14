@@ -76,13 +76,6 @@ FrictionResponse::FrictionResponse(FrictionModel *frn, int id, const Matrix &val
 }
 
 
-FrictionResponse::FrictionResponse(FrictionModel *frn, int id, const Tensor &val)
-    : Response(val), theFriction(frn), responseID(id)
-{
-
-}
-
-
 FrictionResponse::~FrictionResponse()
 {
 

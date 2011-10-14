@@ -32,6 +32,7 @@
 #include <MP_Joint3D.h>
 
 #include <stdlib.h>
+#include <math.h>
 #include <Matrix.h>
 #include <ID.h>
 #include <Channel.h>

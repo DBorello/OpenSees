@@ -39,11 +39,6 @@
 
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
-
-//Zhaohui Yang (UCD)
-#include <EightNodeBrick.h>
-#include <TwentyNodeBrick.h>
-
 #include <CrdTransf.h>
 
 #include <TclModelBuilder.h>
@@ -106,6 +101,8 @@ extern void *OPS_FourNodeQuad3d(void);
 extern void *OPS_Tri31(void);
 extern void *OPS_SSPquad(void);
 extern void *OPS_SSPquadUP(void);
+extern void *OPS_NewShellMITC4(void);
+extern void *OPS_NewShellNL(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -122,11 +119,6 @@ extern int
 TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,
 			 int argc, TCL_Char **argv, Domain*,
 			 TclModelBuilder *, int argStart);
-
-extern int
-TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,
-			      int argc, TCL_Char **argv, Domain*,
-			      TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
@@ -203,50 +195,6 @@ extern int
 TclModelBuilder_addBeamColumnJoint(ClientData, Tcl_Interp *, int, TCL_Char **, Domain*, int);
 
 
-//Boris Jeremic & Zhaohui
-extern int TclModelBuilder_addEightNodeBrick(ClientData,
-                                             Tcl_Interp *,
-					     int,
-					     TCL_Char **,
-					     Domain*,
-					     TclModelBuilder *,
-					     int);
-//Boris Jeremic & Zhaohui
-extern int TclModelBuilder_addTwentyNodeBrick(ClientData,
-                                              Tcl_Interp *,
-					      int,
-					      TCL_Char **,
-					      Domain*,
-					      TclModelBuilder *,
-					      int);
-
-//Boris Jeremic & Xiaoyan 01/07/2002
-extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData,
-                                                   Tcl_Interp *,
-						   int,
-						   TCL_Char **,
-						   Domain*,
-						   TclModelBuilder *,
-						   int);
-//Boris Jeremic & Xiaoyan 01/07/2002
-extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
-                                                    Tcl_Interp *,
-						    int,
-						    TCL_Char **,
-						    Domain*,
-						    TclModelBuilder *,
-						    int);
-
-//Boris Jeremic & Guanzhou Jie 10/30/2003
-extern int TclModelBuilder_addTwentySevenNodeBrick(ClientData,
-                                                   Tcl_Interp *,
-                                                   int,
-                                                   TCL_Char **,
-                                                   Domain*,
-                                                   TclModelBuilder *,
-                                                   int);
-
-
 // Andreas Schellenberg
 extern int
 TclModelBuilder_addGenericClient(ClientData , Tcl_Interp *,  int, TCL_Char **,
@@ -298,27 +246,6 @@ TclModelBuilder_addTwentyEightNodeBrickUP(ClientData, Tcl_Interp *, int, TCL_Cha
 extern int
 TclModelBuilder_addTwentyNodeBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *);
-
-// Boris Jeremic and Zhao Cheng
-extern int
-TclModelBuilder_addTLFD20nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *, int);
-
-// Boris Jeremic and Zhao Cheng
-extern int
-TclModelBuilder_addTLFD8nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
-			       Domain*, TclModelBuilder *, int);
-
-
-// Boris Jeremic and Zhao Cheng
-extern int
-TclModelBuilder_addEightNode_LDBrick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
-					 Domain*, TclModelBuilder *, int);
-
-// Boris Jeremic and Zhao Cheng
-extern int
-TclModelBuilder_addEightNode_Brick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
-				       Domain*, TclModelBuilder *, int);
 
 // Andreas Schellenberg
 extern int
@@ -505,6 +432,28 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
       opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;
     }
+
+  } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
+	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
+    
+    void *theEle = OPS_NewShellMITC4();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }    
+
+  } else if ((strcmp(argv[1],"shellNL") == 0) || (strcmp(argv[1],"ShellNL") == 0)) {
+    
+    void *theEle = OPS_NewShellNL();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }    
+
 
   } else if ((strcmp(argv[1],"CoupledZeroLength") == 0) || (strcmp(argv[1],"ZeroLengthCoupled") == 0)) {
     
@@ -711,17 +660,6 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addBBarBrickUP(clientData, interp, argc, argv,
 						theTclDomain, theTclBuilder);
     return result;
-  } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
-	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
-    
-    
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addShellMITC4(clientData, interp,
-					       argc, argv,
-					       theTclDomain,
-					       theTclBuilder,
-					       eleArgStart);
-    return result;
   }
 
   // Andreas Schellenberg
@@ -739,126 +677,6 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
   }
 
-  //Boris Jeremic & Zhaohui
-  else if (strcmp(argv[1],"Brick8N") == 0) {
-
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addEightNodeBrick(clientData,
-						   interp,
-						   argc,
-						   argv,
-						   theTclDomain,
-						   theTclBuilder,
-						   eleArgStart);
-    return result;
-  }
-
-  //Boris Jeremic & Zhaohui
-  else if (strcmp(argv[1],"Brick20N") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addTwentyNodeBrick(clientData,
-						    interp,
-						    argc,
-						    argv,
-						    theTclDomain,
-						    theTclBuilder,
-						    eleArgStart);
-    return result;
-  }
-
-  //Boris Jeremic & Guanzhou Jie
-  else if (strcmp(argv[1],"Brick27N") == 0)
-    {
-      int eleArgStart = 1;
-      int result = TclModelBuilder_addTwentySevenNodeBrick(clientData,
-                                                           interp,
-                                                           argc,
-                                                           argv,
-                                                           theTclDomain,
-                                                           theTclBuilder,
-                                                           eleArgStart);
-                                                           return result;
-    }
-
-
-  // Boris jeremic & Zhao Cheng
-  else if (strcmp(argv[1],"TLFD20nBrick") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addTLFD20nBrick(clientData,
-						 interp,
-						 argc,
-						 argv,
-						 theTclDomain,
-						 theTclBuilder,
-						 eleArgStart);
-    return result;
-  }
-  
-  // Boris jeremic & Zhao Cheng
-  else if (strcmp(argv[1],"TLFD8nBrick") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addTLFD8nBrick(clientData,
-						interp,
-						argc,
-						argv,
-						theTclDomain,
-						theTclBuilder,
-						eleArgStart);
-    return result;
-  }
-  
-  //Boris Jeremic & Zhaohui
-  else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addEightNodeBrick_u_p_U(clientData,
-							 interp,
-							 argc,
-							 argv,
-							 theTclDomain,
-							 theTclBuilder,
-							 eleArgStart);
-    return result;
-  }
-  //Boris Jeremic & Zhaohui
-  else if (strcmp(argv[1],"Brick20N_u_p_U") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addTwentyNodeBrick_u_p_U(clientData,
-							  interp,
-							  argc,
-							  argv,
-							  theTclDomain,
-							  theTclBuilder,
-							  eleArgStart);
-    return result;
-  }
-
-  // Boris Jeremic & Zhao Cheng
-  else if (strcmp(argv[1],"EightNode_LDBrick_u_p") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addEightNode_LDBrick_u_p(clientData,
-							  interp,
-							  argc,
-							  argv,
-							  theTclDomain,
-							  theTclBuilder,
-							  eleArgStart);
-    return result;
-  }
-  
-  // Boris Jeremic & Zhao Cheng
-  else if (strcmp(argv[1],"EightNode_Brick_u_p") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addEightNode_Brick_u_p(clientData,
-							interp,
-							argc,
-							argv,
-							theTclDomain,
-							theTclBuilder,
-							eleArgStart);
-    return result;
-  }
-  
-  
   else if (strcmp(argv[1],"stdBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,

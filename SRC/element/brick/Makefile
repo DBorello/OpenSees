@@ -1,12 +1,12 @@
 include ../../../Makefile.def
 
 OBJS       = Brick.o \
+	Twenty_Node_Brick.o \
 	shp3d.o \
-	TclBrickCommand.o \
 	BbarBrick.o \
 	BbarBrickWithSensitivity.o \
-	Twenty_Node_Brick.o \
-	TclTwenty_Node_Brick.o
+	TclBrickCommand.o \
+	TclTwenty_Node_BrickCommand.o
 
 
 all:         $(OBJS)

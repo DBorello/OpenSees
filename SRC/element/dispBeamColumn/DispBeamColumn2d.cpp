@@ -43,7 +43,7 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 #include <CompositeResponse.h>
-
+#include <math.h>
 #include <ElementalLoad.h>
 
 Matrix DispBeamColumn2d::K(6,6);

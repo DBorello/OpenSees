@@ -35,6 +35,7 @@ Force-Based Beam-Column Elements." Journal of Structural Engineering,
 #include <HingeRadauTwoBeamIntegration.h>
 #include <ElementalLoad.h>
 
+#include <math.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <Channel.h>

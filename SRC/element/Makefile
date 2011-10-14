@@ -3,6 +3,12 @@ include ../../Makefile.def
 OBJS       = Element.o ElementalLoad.o  Information.o TclElementCommands.o NewElement.o WrapperElement.o
 
 # Compilation control
+#	@$(CD) $(FE)/element/8nbrick; $(MAKE);
+#	@$(CD) $(FE)/element/20nbrick; $(MAKE);
+#	@$(CD) $(FE)/element/27nbrick; $(MAKE);
+#	@$(CD) $(FE)/element/UP_ucdavis; $(MAKE);
+#	@$(CD) $(FE)/element/upU; $(MAKE);
+#	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE);
 
 all:         $(OBJS)
 	@$(CD) $(FE)/element/beam2d; $(MAKE);
@@ -13,13 +19,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE);
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE);
-	@$(CD) $(FE)/element/8nbrick; $(MAKE);
-	@$(CD) $(FE)/element/20nbrick; $(MAKE);
-	@$(CD) $(FE)/element/27nbrick; $(MAKE);
-	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE);
-	@$(CD) $(FE)/element/upU; $(MAKE);
 	@$(CD) $(FE)/element/UP-ucsd; $(MAKE);
-	@$(CD) $(FE)/element/UP_ucdavis; $(MAKE);
 	@$(CD) $(FE)/element/shell; $(MAKE);
 	@$(CD) $(FE)/element/brick; $(MAKE);
 	@$(CD) $(FE)/element/joint; $(MAKE);

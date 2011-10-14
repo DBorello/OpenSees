@@ -32,6 +32,7 @@
 #define RegularizedHingeIntegration_h
 
 #include <BeamIntegration.h>
+#include <math.h>
 
 class Matrix;
 class ElementalLoad;

@@ -46,6 +46,7 @@
 
 #include <UniaxialMaterial.h>
 #include <string.h>
+#include <math.h>
 #include <ElementResponse.h>
 
 // full constructors:

@@ -41,6 +41,8 @@ Force-Based Beam-Column Elements." Journal of Structural Engineering,
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <math.h>
+
 
 HingeEndpointBeamIntegration::HingeEndpointBeamIntegration(double lpi,
 							   double lpj):

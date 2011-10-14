@@ -41,7 +41,6 @@ class FrictionModel;
 class ID;
 class Vector;
 class Matrix;
-class Tensor;
 
 class FrictionResponse : public Response
 {
@@ -52,7 +51,6 @@ public:
     FrictionResponse(FrictionModel *frn, int id, const ID &val);
     FrictionResponse(FrictionModel *frn, int id, const Vector &val);
     FrictionResponse(FrictionModel *frn, int id, const Matrix &val);
-    FrictionResponse(FrictionModel *frn, int id, const Tensor &val);
     ~FrictionResponse();
     
     int getResponse(void);
