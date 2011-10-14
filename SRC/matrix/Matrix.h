@@ -43,9 +43,6 @@ class Vector;
 class ID;
 class Message;
 
-#include <Tensor.h> // cannot use class as Tensor is itself defined in Tensor.h
-
-
 #define MATRIX_VERY_LARGE_VALUE 1.0e213
 
 class Matrix
@@ -85,7 +82,6 @@ class Matrix
     Matrix operator()(const ID &rows, const ID & cols) const;
     
     Matrix &operator=(const Matrix &M);
-    Matrix &operator=(const Tensor &T);
     
     // matrix operations which will preserve the derived type and
     // which can be implemented efficiently without many constructor calls.

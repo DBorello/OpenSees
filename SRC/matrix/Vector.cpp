@@ -34,9 +34,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "ID.h"
-#include <Tensor.h>
 
-#include <stdlib.h>
 #include <math.h>
 
 double Vector::VECTOR_NOT_VALID_ENTRY =0.0;
@@ -113,7 +111,6 @@ Vector::Vector(const Vector &other)
   
   if (theData == 0) {
     opserr << "Vector::Vector(int) - out of memory creating vector of size " << sz << endln;
-    exit(-1);
   }
 
   // copy the component data
@@ -745,58 +742,6 @@ Vector::operator=(const Vector &V)
 
   return *this;
 }
-
-
-
-
-Vector &
-Vector::operator=(const Tensor &V) 
-{
-  int rank = V.rank();
-  if (rank != 2) {
-    opserr << "Vector::operator=() - tensor must be of rank 2\n";
-    return *this;
-  }
-  int dim = V.dim(1);
-  if (dim != V.dim(2)) {
-    opserr << "Vector::operator=() - tensor must have square dimensions\n";
-    return *this;
-  }
-  
-  if (dim != 2 || dim != 3 || dim != 1) {
-    opserr << "Vector::operator=() - tensor must be of dimension 2 or 3\n";
-    return *this;
-  }      
-  
-  if (dim == 1) {
-    if (sz != 1) {
-      opserr << "Vector::operator=() - Vector size must be 1\n"; 
-      return *this;
-    }
-    theData[0] = V.cval(1,1);
-  } else if (dim == 2) {
-    if (sz != 3) {
-      opserr << "Vector::operator=() - Vector size must be 3\n"; 
-      return *this;
-    }
-    theData[0] = V.cval(1,1);
-    theData[1] = V.cval(2,2);
-    theData[2] = V.cval(1,2);
-  } else {
-    if (sz != 6) {
-      opserr << "Vector::operator=() - Vector size must be 6\n"; 
-      return *this;
-    }      
-    theData[0] = V.cval(1,1);
-    theData[1] = V.cval(2,2);
-    theData[2] = V.cval(3,3);
-    theData[3] = V.cval(1,2);
-    theData[4] = V.cval(1,3);
-    theData[5] = V.cval(2,3);
-  }
-  return *this;
-}
-
 
 
 // Vector &operator+=(double fact):
