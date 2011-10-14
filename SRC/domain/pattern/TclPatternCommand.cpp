@@ -30,6 +30,7 @@
 //
 //  Modified:  Nov.    2002,  Zhaohui  Yang and Boris Jeremic added Plastic Bowl
 //  loading (aka Domain Reduction Method) commands
+// Modified: fmk 2011 - removed Plastic Bowl
 //
 // Description: This file contains the function invoked when the user invokes
 // the Pattern command in the interpreter. It is invoked by the
@@ -55,7 +56,6 @@
 #include <GroundMotion.h>
 #include <GroundMotionRecord.h>
 #include <TimeSeriesIntegrator.h>
-#include <PBowlLoading.h>
 
 #include <DRMLoadPatternWrapper.h>
 #include <DRMLoadPattern.h>
@@ -228,10 +228,10 @@ TclPatternCommand(ClientData clientData,
       }
 
       if (dispSeries == 0 && velSeries == 0 && accelSeries == 0) {
-    opserr << "WARNING invalid series, want - pattern UniformExcitation";
-    opserr << "-disp {dispSeries} -vel {velSeries} -accel {accelSeries} ";
-    opserr << "-int {Series Integrator}\n";
-    return TCL_ERROR;
+	opserr << "WARNING invalid series, want - pattern UniformExcitation";
+	opserr << "-disp {dispSeries} -vel {velSeries} -accel {accelSeries} ";
+	opserr << "-int {Series Integrator}\n";
+	return TCL_ERROR;
       }
       
       GroundMotion *theMotion = new GroundMotion(dispSeries, velSeries,
@@ -378,177 +378,6 @@ TclPatternCommand(ClientData clientData,
       commandEndMarker = 2;
   }
 
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
-  else if (strcmp(argv[1],"PBowlLoading") == 0) {
-
-      // First search for file name and time step
-      TCL_Char * PBEleFileName = 0;
-      TCL_Char * accelFileName = 0;
-      TCL_Char * displFileName = 0;
-
-      double dt = 0.02;
-      double cf = 1.00;
-      double xp = 0.0;
-      double xm = 0.0;
-      double yp = 0.0;
-      double ym = 0.0;
-      double zp = 0.0;
-      double zm = 0.0;
-
-      int currentArg = 3;
-
-      while (currentArg < argc-1)
-      {
-    if ((strcmp(argv[currentArg],"-pbele") == 0) ||
-        (strcmp(argv[currentArg],"-PBEle") == 0)) {
-
-      currentArg++;
-      PBEleFileName = argv[currentArg];
-      currentArg++;
-    }
-    else if ((strcmp(argv[currentArg],"-acce") == 0) ||
-        (strcmp(argv[currentArg],"-acceleration") == 0)) {
-
-      currentArg++;
-      accelFileName = argv[currentArg];
-      currentArg++;
-    }
-    else if ((strcmp(argv[currentArg],"-disp") == 0) ||
-         (strcmp(argv[currentArg],"-displacement") == 0)) {
-
-      currentArg++;
-      displFileName = argv[currentArg];
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"-dt") == 0)  {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &dt) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "time interval - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-    else if ((strcmp(argv[currentArg],"-factor") == 0)||
-       (strcmp(argv[currentArg],"-Factor") == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &cf) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "load factor - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-xminus") == 0)||
-       (strcmp(argv[currentArg],"-xm"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &xm) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Left x  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-xplus") == 0)||
-       (strcmp(argv[currentArg],"-xp"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &xp) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Right x  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-yminus") == 0)||
-       (strcmp(argv[currentArg],"-ym"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &ym) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Left y  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-yplus") == 0)||
-       (strcmp(argv[currentArg],"-yp"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &yp) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Right y  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-zminus") == 0)||
-       (strcmp(argv[currentArg],"-zm"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &zm) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Left z  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-    else if ((strcmp(argv[currentArg],"-zplus") == 0)||
-       (strcmp(argv[currentArg],"-zp"   ) == 0 )) {
-
-      currentArg++;
-          if (Tcl_GetDouble(interp, argv[currentArg], &zp) != TCL_OK)
-      {
-        opserr << "WARNING problem reading ground motion "
-           << "Right y  - pattern PBowlLoading: "
-               << patternID << endln;
-        return TCL_ERROR;
-      }
-      currentArg++;
-    }
-
-      } //End of while loop
-
-      //test cout << "Tcl parameters dt " << dt << " xp " << xp << " xm " << xm << " yp " << yp << " ym " << ym << " zm " << zm << " done...\n";
-      thePattern = new PBowlLoading(patternID, PBEleFileName, displFileName, accelFileName, dt, cf, xp, xm, yp, ym, zp, zm);
-      if (thePattern == 0) {
-      opserr << "WARNING ran out of memory creating load pattern - pattern PBowlLoading ";
-      opserr << patternID << endln;
-
-      }
-// Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-      commandEndMarker = currentArg;
-  }
 
   //////// //////// ///////// ////////// /////  // DRMLoadPattern add BEGIN
   else if (strcmp(argv[1],"DRMLoadPattern") == 0) {
