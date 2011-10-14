@@ -46,7 +46,7 @@
 #include <Parameter.h>
 
 #include <OPS_Globals.h>
-#include <elementApi.h>
+#include <elementAPI.h>
 
 void *
 OPS_NewElasticIsotropicMaterial(void)
