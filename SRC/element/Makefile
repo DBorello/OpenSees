@@ -55,13 +55,8 @@ spotless: clean
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE) wipe;
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE) wipe;
-	@$(CD) $(FE)/element/8nbrick; $(MAKE) wipe;
-	@$(CD) $(FE)/element/20nbrick; $(MAKE) wipe;
-	@$(CD) $(FE)/element/27nbrick; $(MAKE) wipe;
-	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/upU; $(MAKE) wipe;
 	@$(CD) $(FE)/element/UP-ucsd; $(MAKE) wipe;
-	@$(CD) $(FE)/element/UP_ucdavis; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 	@$(CD) $(FE)/element/brick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/joint; $(MAKE) wipe;
