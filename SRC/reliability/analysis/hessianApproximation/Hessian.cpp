@@ -37,6 +37,7 @@
 using std::ifstream;
 using std::ofstream;
 using std::ios;
+#include <math.h>
 //using ios::append;
 //using std::setprecision;
 //using std::setiosflags;

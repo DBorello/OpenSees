@@ -36,6 +36,7 @@
 #include <MeritFunctionCheck.h>
 #include <HessianApproximation.h>
 #include <Vector.h>
+#include <math.h>
 
 
 SQPsearchDirectionMeritFunctionAndHessian::SQPsearchDirectionMeritFunctionAndHessian(

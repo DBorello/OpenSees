@@ -32,6 +32,8 @@
 #include <NormalRV.h>
 #include <Vector.h>
 #include <time.h>
+#include <math.h>
+#include <stdlib.h>
 
 GeneralRandGenerator::GeneralRandGenerator(int passedType, int passedSeed)
 :RandomNumberGenerator()

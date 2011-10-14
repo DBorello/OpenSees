@@ -37,6 +37,7 @@
 #include <FindDesignPointAlgorithm.h>
 #include <RandomVariable.h>
 #include <Vector.h>
+#include <math.h>
 
 
 CurvaturesBySearchAlgorithm::CurvaturesBySearchAlgorithm(int passedNumberOfCurvatures,

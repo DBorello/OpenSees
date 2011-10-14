@@ -228,7 +228,7 @@ int DynamicAnalyzer::analyzeMean()
 		theRVP->update(theRV->getMean());
 		if(print){
 			double mean=theRV->getMean();
-			output << " Pos" <<i;
+	
 			output << " Rv" << rvNumber;
 			output << " mean" << mean;
 		}

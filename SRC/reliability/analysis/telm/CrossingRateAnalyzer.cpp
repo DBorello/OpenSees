@@ -3,7 +3,7 @@
 // $Revision: 1.3 $
 // $Date: 2008-08-27 17:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/CrossingRateAnalyzer.cpp,v $
-
+#include <math.h>
 #include <CrossingRateAnalyzer.h>
 CrossingRateAnalyzer::CrossingRateAnalyzer(ReliabilityDomain* passedReliabilityDomain,
 					   FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,

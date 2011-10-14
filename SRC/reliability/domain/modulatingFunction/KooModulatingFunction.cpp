@@ -30,7 +30,7 @@
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
-
+#include <math.h>
 #include <KooModulatingFunction.h>
 #include <ModulatingFunction.h>
 #include <classTags.h>

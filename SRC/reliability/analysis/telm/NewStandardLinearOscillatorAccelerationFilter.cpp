@@ -29,7 +29,7 @@
 #include <NewStandardLinearOscillatorAccelerationFilter.h>
 #include <Filter.h>
 #include <classTags.h>
-
+#include <math.h>
 
 NewStandardLinearOscillatorAccelerationFilter::NewStandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio, double pdtpulse)
 :Filter(tag,FILTER_standardLinearOscillator)

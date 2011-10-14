@@ -33,6 +33,7 @@
 #include "DP_RSM_Sim.h"
 #include <MatrixOperations.h>
 #include <ostream>
+#include <math.h>
 
 
 #ifndef _WIN32

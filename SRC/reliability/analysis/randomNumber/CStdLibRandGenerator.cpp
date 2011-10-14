@@ -35,7 +35,9 @@
 #include <CStdLibRandGenerator.h>
 #include <NormalRV.h>
 #include <Vector.h>
-
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 CStdLibRandGenerator::CStdLibRandGenerator()
 :RandomNumberGenerator()

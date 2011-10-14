@@ -40,12 +40,16 @@
 #include <MatrixOperations.h>
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include <fstream>
 #include <limits.h>
 #include <float.h>
 #include <iomanip>
 #include <iostream>
+#include <math.h>
+
 using std::ifstream;
 using std::ios;
 using std::setw;

@@ -32,6 +32,7 @@
 
 #include "UnivariateDecomposition.h"
 //#include <fstream.h>
+#include <math.h>
 
 UnivariateDecomposition::UnivariateDecomposition( int pNumAxis, /*Vector * pGradient,*/ PrincipalAxis ** pPrincipalAxes, bool pIsTimeVariant)  //  numAxes is the number of principalAxes+1
 {

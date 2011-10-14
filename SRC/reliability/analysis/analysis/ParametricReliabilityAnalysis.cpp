@@ -40,6 +40,7 @@
 #include <NormalRV.h>
 #include <tcl.h>
 #include <LimitStateFunctionIter.h>
+#include <math.h>
 
 #include <fstream>
 #include <iomanip>

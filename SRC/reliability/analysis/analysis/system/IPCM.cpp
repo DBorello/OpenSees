@@ -38,6 +38,7 @@
 #include <CorrelatedStandardNormal.h>
 #include <ReliabilityDomain.h>
 #include <NormalRV.h>
+#include <math.h>
 
 #include <fstream>
 #include <iomanip>

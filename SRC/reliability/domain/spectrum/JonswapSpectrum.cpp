@@ -35,7 +35,7 @@
 #include <Spectrum.h>
 #include <Vector.h>
 #include <classTags.h>
-
+#include <math.h>
 
 JonswapSpectrum::JonswapSpectrum(int tag, double min, double max,
 								 double alp, double w, double gam)

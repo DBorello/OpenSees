@@ -21,7 +21,7 @@
 // $Revision: 1.2 $
 // $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/ThresholdIncInitialPointBuilder.cpp,v $
-
+#include <math.h>
 #include <ThresholdIncInitialPointBuilder.h>
 ThresholdIncInitialPointBuilder::ThresholdIncInitialPointBuilder(ReliabilityDomain *passedReliabilityDomain,
 						GFunEvaluator* passedGFunEvaluator,

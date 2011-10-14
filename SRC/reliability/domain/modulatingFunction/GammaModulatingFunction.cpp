@@ -34,7 +34,7 @@
 #include <GammaModulatingFunction.h>
 #include <ModulatingFunction.h>
 #include <classTags.h>
-
+#include <math.h>
 
 GammaModulatingFunction::GammaModulatingFunction(int tag,
 												 Filter *theFilt,

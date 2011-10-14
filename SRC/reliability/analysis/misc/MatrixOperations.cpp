@@ -36,6 +36,7 @@
 #include <Matrix.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 MatrixOperations::MatrixOperations(Matrix passedMatrix)

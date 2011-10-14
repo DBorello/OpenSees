@@ -34,7 +34,7 @@
 #include <StandardLinearOscillatorAccelerationFilter.h>
 #include <Filter.h>
 #include <classTags.h>
-
+#include <math.h>
 
 StandardLinearOscillatorAccelerationFilter::StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio)
 :Filter(tag,FILTER_standardLinearOscillator)

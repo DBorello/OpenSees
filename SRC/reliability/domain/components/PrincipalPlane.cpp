@@ -31,7 +31,7 @@
 
 #include "PrincipalPlane.h"
 # include "Matrix.h"
- 
+#include <math.h>
 
 PrincipalPlane::PrincipalPlane(int pTag, Vector * pDesignPt, 
 			       Vector * pEigenVector, Matrix * pRotation, 

@@ -31,7 +31,8 @@
  
 
 #include "GridPlane.h"
- 
+#include <math.h>
+
 //////////////////////////////////////////////////////////////////////
   
 GridPlane::GridPlane(int pTag, Vector * pDesignPt, 

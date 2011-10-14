@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
+#include <math.h>
 #include <KooFilter.h>
 #include <Filter.h>
 #include <classTags.h>

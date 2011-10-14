@@ -34,6 +34,7 @@
 #include <FindCurvatures.h>
 #include <LimitStateFunction.h>
 #include <Vector.h>
+#include <math.h>
 
 #include <iostream> 
 using std::ios;

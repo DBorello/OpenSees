@@ -28,7 +28,9 @@
 //
 // Written by  Quan Gu UCSD
 //
- 
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "UniformExperimentalPointRule1D.h"
 

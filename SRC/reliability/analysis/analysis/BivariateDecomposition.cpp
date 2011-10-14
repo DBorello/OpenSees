@@ -29,7 +29,7 @@
 // Written by  Quan Gu UCSD
 //
  
-
+#include <math.h>
 #include "BivariateDecomposition.h"
 //#include <fstream.h>
  

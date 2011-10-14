@@ -40,6 +40,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <tcl.h>
+#include <math.h>
 
 #include <RandomVariableIter.h>
 #include <LimitStateFunctionIter.h>
@@ -48,6 +49,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <math.h>
+
 using std::ifstream;
 using std::ios;
 using std::setw;

@@ -52,6 +52,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <math.h>
 
 using std::ifstream;
 using std::ios;

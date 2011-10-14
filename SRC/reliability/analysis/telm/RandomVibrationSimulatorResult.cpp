@@ -21,7 +21,7 @@
 // $Revision: 1.1 $
 // $Date: 2008-02-29 19:43:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/RandomVibrationSimulatorResult.cpp,v $
-
+#include <math.h>
 #include <RandomVibrationSimulatorResult.h>
 RandomVibrationSimulatorResult::RandomVibrationSimulatorResult
 								(int plsf, int pnumtimepoints,

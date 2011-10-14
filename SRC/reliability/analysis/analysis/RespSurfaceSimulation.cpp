@@ -6,6 +6,7 @@
 #include "RespSurfaceSimulation.h"
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <MatrixOperations.h>
 
 using std::ios;

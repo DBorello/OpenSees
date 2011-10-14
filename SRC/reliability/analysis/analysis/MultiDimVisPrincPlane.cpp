@@ -35,6 +35,7 @@
 #include  "Vector.h"
 #include "MatrixOperations.h"
 #include <ostream>
+#include <math.h>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
