@@ -17,7 +17,7 @@
 #include <ZeroLength.h>
 
 #include <ElasticMaterial.h>
-#include <ElasticIsotropic3D.h>
+#include <ElasticIsotropicThreeDimensional.h>
 
 #include <SP_Constraint.h>
 
