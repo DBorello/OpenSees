@@ -83,10 +83,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-//this is mike's problem
-Tensor MultiaxialCyclicPlasticity :: rank2(2, def_dim_2, 0.0 ) ;
-Tensor MultiaxialCyclicPlasticity :: rank4(2, def_dim_2, 0.0 ) ;
-
 //parameters
 const double MultiaxialCyclicPlasticity :: one3   = 1.0 / 3.0 ;
 const double MultiaxialCyclicPlasticity :: two3   = 2.0 / 3.0 ;
@@ -312,7 +308,7 @@ MultiaxialCyclicPlasticity::MultiaxialCyclicPlasticity(int    tag,
 //elastic constructor
 MultiaxialCyclicPlasticity :: 
 MultiaxialCyclicPlasticity(  int tag, int classTag, 
-						   double rho, double K, double G ) 
+			     double rho, double K, double G ) 
 :NDMaterial(tag, classTag),
 stress(3,3), strain(3,3), stress_n(3,3), strain_n(3,3), 
 backs(3,3), backs_n(3,3), so(3,3), so_n(3,3)

@@ -45,6 +45,7 @@
 #include <Node.h>
 #include <DOF_Group.h>
 #include <ID.h>
+#include <stdlib.h>
 
 DistributedDisplacementControl::DistributedDisplacementControl(int node, int dof, 
 							       double increment, 

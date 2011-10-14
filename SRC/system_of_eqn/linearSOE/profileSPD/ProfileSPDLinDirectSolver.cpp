@@ -23,8 +23,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/ProfileSPD/ProfileSPDLinSOESolver.C
-//
 // Written: fmk 
 // Created: Febuary 1997
 // Revision: A
@@ -40,6 +38,8 @@
 #include <ProfileSPDLinDirectSolver.h>
 #include <ProfileSPDLinSOE.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 

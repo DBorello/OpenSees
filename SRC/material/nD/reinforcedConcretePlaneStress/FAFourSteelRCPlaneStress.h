@@ -19,7 +19,6 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-#include <Tensor.h>
 
 class FAFourSteelRCPlaneStress : public NDMaterial
 {

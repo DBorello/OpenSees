@@ -19,8 +19,6 @@
 #include "SteelZ01.h"
 #include "ConcreteZ01.h"
 
-#include <Tensor.h>
-
 //Vector FAReinforcedConcretePlaneStress :: strain_vec(3);
 //Vector FAReinforcedConcretePlaneStress :: stress_vec(3);
 //Matrix FAReinforcedConcretePlaneStress :: tangent_matrix(3,3);

@@ -41,7 +41,6 @@
 #include <NDMaterial.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <Tensor.h>
 
 class DruckerPrager : public NDMaterial
 {

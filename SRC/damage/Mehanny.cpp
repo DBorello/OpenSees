@@ -33,7 +33,7 @@
 
 #include <Mehanny.h>
 #include <DamageResponse.h>
-
+#include <math.h>
 
 #define DEBG   0
 

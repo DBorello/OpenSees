@@ -16,12 +16,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <Tensor.h>
-
-//Vector FAFourSteelRCPlaneStress :: strain_vec(3);
-//Vector FAFourSteelRCPlaneStress :: stress_vec(3);
-//Matrix FAFourSteelRCPlaneStress :: tangent_matrix(3,3);
-
 #include <DummyStream.h>
 #include <MaterialResponse.h>
 #include <elementAPI.h>

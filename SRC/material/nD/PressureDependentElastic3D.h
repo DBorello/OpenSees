@@ -59,17 +59,6 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     const Vector &getStress (void);
     const Vector &getStrain (void);
 
-    int setTrialStrain (const Tensor &v);
-    int setTrialStrain (const Tensor &v, const Tensor &r);
-    int setTrialStrainIncr (const Tensor &v);
-    int setTrialStrainIncr (const Tensor &v, const Tensor &r);
-    const Tensor &getTangentTensor (void);
-    const stresstensor& getStressTensor (void);
-    const straintensor& getStrainTensor (void);
-    
-    // For elastoplastic material model
-    int setStressTensor(const Tensor& stressIn);
-
     int commitState (void);
     int revertToLastCommit (void);
     int revertToStart (void);
@@ -84,10 +73,6 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
 
     void Print(OPS_Stream &s, int flag =0);
 
-  //Private functions
-  private:
-    const Tensor& ComputeElasticStiffness(void);
-
   protected:
 
   private:
@@ -95,19 +80,13 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     double p_ref;                // Reference pressure, usually atmosphere pressure, i.e. 100kPa
     double p_cutoff;             // Cutoff pressure of this material point
 
-    static stresstensor Stress;  // Stress tensor
-    static Tensor Dt;            // Elastic constants tensor
-    straintensor Strain;         // Strain tensor
-    
-    stresstensor CStrain;
-    stresstensor CStress;
-
     static Vector sigma;
     static Matrix D;
     Vector epsilon;
+    Vector Cepsilon;
 
-    double p_n1; // trial pressure
     double p_n; // committed pressure
+    double p_n1; // trial pressure
 };
 
 #endif

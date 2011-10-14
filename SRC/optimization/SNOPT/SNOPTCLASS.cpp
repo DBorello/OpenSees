@@ -34,8 +34,6 @@
 
 #include "SNOPTCLASS.h"
 
-
-
 using namespace std;
 
 SNOPTCLASS::SNOPTCLASS()   : Optimization(),

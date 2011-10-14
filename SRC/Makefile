@@ -10,7 +10,6 @@ ifeq ($(RELIABILITY), YES_RELIABILITY)
 all:
 	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
 	@$(CD) $(FE)/matrix; $(MAKE);
-	@$(CD) $(FE)/nDarray; $(MAKE);
 	@$(CD) $(FE)/database; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn; $(MAKE);
 	@$(CD) $(FE)/modelbuilder; $(MAKE);
@@ -42,10 +41,6 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FEDEAS_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MODEL_BUILDER_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DOMAIN_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATMOD_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(NDARRAY_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELEMENT_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FINITE_DEFORMATION_BJ_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(PY_SJB_RWB_BJ_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ANALYSIS_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SysOfEqn_LIBS)
@@ -72,7 +67,6 @@ else
 all:
 	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
 	@$(CD) $(FE)/matrix; $(MAKE);
-	@$(CD) $(FE)/nDarray; $(MAKE);
 	@$(CD) $(FE)/database; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn; $(MAKE);
 	@$(CD) $(FE)/modelbuilder; $(MAKE);
@@ -102,10 +96,6 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FEDEAS_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MODEL_BUILDER_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DOMAIN_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATMOD_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(NDARRAY_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELEMENT_BJ_LIBS)
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FINITE_DEFORMATION_BJ_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(PY_SJB_RWB_BJ_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ANALYSIS_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SysOfEqn_LIBS)
@@ -280,118 +270,6 @@ ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/DatabaseStream.o 
 
 
-
-NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
-                  $(FE)/nDarray/nDarray.o \
-                  $(FE)/nDarray/BJmatrix.o \
-                  $(FE)/nDarray/BJvector.o \
-                  $(FE)/nDarray/BJtensor.o \
-                  $(FE)/nDarray/straint.o  \
-                  $(FE)/nDarray/stresst.o
-
-
-MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
-                 $(FE)/material/nD/PressureDependentElastic3D.o \
-                 $(FE)/material/nD/ElasticCrossAnisotropic.o \
-                 $(FE)/material/nD/Template3Dep/MatPoint3D.o \
-                 $(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
-                 $(FE)/material/nD/Template3Dep/Template3Dep.o \
-                 $(FE)/material/nD/Template3Dep/EPState.o \
-                 $(FE)/material/nD/Template3Dep/PS.o \
-                 $(FE)/material/nD/Template3Dep/YS.o \
-                 $(FE)/material/nD/Template3Dep/MD_YS.o  \
-                 $(FE)/material/nD/Template3Dep/MD_PS.o \
-                 $(FE)/material/nD/Template3Dep/CAM_YS.o  \
-                 $(FE)/material/nD/Template3Dep/CAM_PS.o \
-                 $(FE)/material/nD/Template3Dep/DP_YS.o  \
-                 $(FE)/material/nD/Template3Dep/DP_PS.o \
-                 $(FE)/material/nD/Template3Dep/VM_YS.o  \
-                 $(FE)/material/nD/Template3Dep/VM_PS.o  \
-                 $(FE)/material/nD/Template3Dep/EL_T.o   \
-                 $(FE)/material/nD/Template3Dep/EL_S.o   \
-                 $(FE)/material/nD/Template3Dep/EL_NLEijMD.o \
-                 $(FE)/material/nD/Template3Dep/EL_NLEp.o  \
-                 $(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
-                 $(FE)/material/nD/Template3Dep/EL_LEeq.o  \
-                 $(FE)/material/nD/Template3Dep/EL_NLEij.o \
-                 $(FE)/material/nD/Template3Dep/EL_LEij.o \
-                 $(FE)/material/nD/Template3Dep/RMC01.o  \
-                 $(FE)/material/nD/Template3Dep/RMC01_YS.o  \
-                 $(FE)/material/nD/Template3Dep/RMC01_PS.o \
-		 $(FE)/material/nD/NewTemplate3Dep/MaterialParameter.o \
-		 $(FE)/material/nD/NewTemplate3Dep/ElasticState.o \
-		 $(FE)/material/nD/NewTemplate3Dep/Isotropic_Elastic.o \
-		 $(FE)/material/nD/NewTemplate3Dep/elnp_Elastic.o \
-		 $(FE)/material/nD/NewTemplate3Dep/PressureDependent_Elastic.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DM04_Elastic.o \
-		 $(FE)/material/nD/NewTemplate3Dep/YieldFunction.o \
-		 $(FE)/material/nD/NewTemplate3Dep/VM_YF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/RMC_YF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DP_YF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/CC_YF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DM04_YF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/PlasticFlow.o \
-		 $(FE)/material/nD/NewTemplate3Dep/VM_PF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/RMC_PF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DP_PF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/CC_PF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DM04_PF.o \
-		 $(FE)/material/nD/NewTemplate3Dep/ScalarEvolution.o \
-		 $(FE)/material/nD/NewTemplate3Dep/Linear_Eeq.o \
-		 $(FE)/material/nD/NewTemplate3Dep/CC_Ev.o \
-		 $(FE)/material/nD/NewTemplate3Dep/TensorEvolution.o \
-		 $(FE)/material/nD/NewTemplate3Dep/Linear_Eij.o \
-		 $(FE)/material/nD/NewTemplate3Dep/AF_Eij.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DM04_alpha_Eij.o \
-		 $(FE)/material/nD/NewTemplate3Dep/DM04_z_Eij.o \
-		 $(FE)/material/nD/NewTemplate3Dep/NewTemplate3Dep.o \
-		 $(FE)/material/nD/NewTemplate3Dep/TclNewTemplate3Dep.o
-
-
-ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
-                  $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
-                  $(FE)/element/20nbrick/TwentyNodeBrick.o \
-                  $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o \
-                  $(FE)/element/27nbrick/TwentySevenNodeBrick.o \
-                  $(FE)/element/27nbrick/TclTwentySevenNodeBrickCommand.o \
-                  $(FE)/element/TotalLagrangianFD20NodeBrick/TotalLagrangianFD20NodeBrick.o \
-		  $(FE)/element/TotalLagrangianFD20NodeBrick/TotalLagrangianFD8NodeBrick.o \
-		  $(FE)/element/TotalLagrangianFD20NodeBrick/TclTLFD20NodeBrickCommand.o \
-		  $(FE)/element/upU/EightNodeBrick_u_p_U.o \
-                  $(FE)/element/upU/TwentyNodeBrick_u_p_U.o \
-                  $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
-                  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o \
-		  $(FE)/element/UP_ucdavis/EightNode_LDBrick_u_p.o \
-		  $(FE)/element/UP_ucdavis/EightNode_Brick_u_p.o \
-		  $(FE)/element/UP_ucdavis/TclBrick_u_p.o
-
-
-FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/OgdenWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/SimoPisterWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/FiniteDeformationElastic3D.o \
-                             $(FE)/material/nD/FiniteDeformation/LogWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/MooneyRivlinWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/OgdenSimoWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/MooneyRivlinSimoWEnergy.o \
-			     $(FE)/material/nD/FiniteDeformation/W.o \
-			     $(FE)/material/nD/FiniteDeformation/NeoHookeanCompressible3D.o \
-			     $(FE)/material/nD/FiniteDeformation/FDdecoupledElastic3D.o \
-			     $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationElastic3DCommand.o \
-			     $(FE)/material/nD/FiniteDeformation/FDEPState.o \
-			     $(FE)/material/nD/FiniteDeformation/FiniteDeformationEP3D.o \
-			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_S.o \
-                             $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_SLS.o \
-			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_T.o \
-			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_TL.o \
-                             $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlow.o \
-                             $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlowVM.o \
-			     $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlowDP.o \
-                             $(FE)/material/nD/FiniteDeformation/fdYield/fdYield.o \
-			     $(FE)/material/nD/FiniteDeformation/fdYield/fdYieldVM.o \
-			     $(FE)/material/nD/FiniteDeformation/fdYield/fdYieldDP.o \
-			     $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationEP3DCommand.o
-
 PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
                      $(FE)/material/uniaxial/PY/QzSimple1.o \
                      $(FE)/material/uniaxial/PY/TzSimple1.o \
@@ -422,9 +300,7 @@ ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/element/UP-ucsd/Nine_Four_Node_QuadUP.o \
 	$(FE)/element/UP-ucsd/Twenty_Eight_Node_BrickUP.o \
 	$(FE)/element/UP-ucsd/shp3dv.o \
-	$(FE)/element/UP-ucsd/TclFourNodeQuadUPCommand.o \
-	$(FE)/element/20nbrick/TclTwenty_Node_BrickCommand.o \
-	$(FE)/element/20nbrick/Twenty_Node_Brick.o 
+	$(FE)/element/UP-ucsd/TclFourNodeQuadUPCommand.o 
 
 
 ifeq ($(GRAPHICS), UsingOpenGL)
@@ -570,12 +446,14 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/fourNodeQuad/EnhancedQuad.o \
 	$(FE)/element/fourNodeQuad/NineNodeMixedQuad.o \
 	$(FE)/element/shell/ShellMITC4.o \
+	$(FE)/element/shell/ShellNL.o \
 	$(FE)/element/shell/R3vectors.o \
-	$(FE)/element/shell/TclShellCommand.o \
 	$(FE)/element/brick/Brick.o \
 	$(FE)/element/brick/BbarBrick.o \
 	$(FE)/element/brick/BbarBrickWithSensitivity.o \
 	$(FE)/element/brick/shp3d.o \
+	$(FE)/element/brick/Twenty_Node_Brick.o \
+	$(FE)/element/brick/TclTwenty_Node_BrickCommand.o \
 	$(FE)/element/brick/TclBrickCommand.o \
 	$(FE)/element/generic/GenericClient.o \
 	$(FE)/element/generic/GenericCopy.o \
@@ -703,7 +581,9 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/feap/FeapMaterial03.o \
 	$(FE)/material/nD/feap/matl03.o \
 	$(FE)/material/nD/feap/feapCommon.o \
+	$(FE)/material/nD/PressureDependentElastic3D.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
+	$(FE)/material/nD/ElasticIsotropicThreeDimensional.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
 	$(FE)/material/nD/ElasticIsotropicAxiSymm.o \
@@ -764,6 +644,7 @@ SNAP_LIBS = $(FE)/material/uniaxial/snap/TclSnapMaterialCommand.o \
 	$(FE)/material/uniaxial/snap/Pinching.o \
 	$(FE)/material/uniaxial/snap/Bilinear.o \
 	$(FE)/material/uniaxial/snap/Clough.o \
+	$(FE)/material/uniaxial/snap/CloughHenry.o \
 	$(FE)/material/uniaxial/snap/CloughDamage.o \
 	$(FE)/material/uniaxial/snap/PinchingDamage.o \
 
@@ -1089,7 +970,6 @@ wipe: spotless
 	@$(CD) $(FE)/domain; $(MAKE) wipe;
 	@$(CD) $(FE)/modelbuilder; $(MAKE) wipe;
 	@$(CD) $(FE)/matrix; $(MAKE) wipe;
-	@$(CD) $(FE)/nDarray; $(MAKE) wipe;
 	@$(CD) $(FE)/convergenceTest; $(MAKE) wipe;
 	@$(CD) $(FE)/database; $(MAKE) wipe;
 	@$(CD) $(FE)/recorder; $(MAKE) wipe;

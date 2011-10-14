@@ -40,8 +40,6 @@
 #include <Information.h>
 #include <Parameter.h>
 
-#include <Tensor.h>
-
 class ElasticIsotropicBeamFiber : public ElasticIsotropicMaterial
 {
   public:

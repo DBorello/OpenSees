@@ -103,13 +103,6 @@ class MultiaxialCyclicPlasticityAxiSymm : public MultiaxialCyclicPlasticity {
   const Matrix& getTangent( ) ;
   const Matrix& getInitialTangent( ) ;
 
-  //this is mike's problem
-  int setTrialStrain(const Tensor &v) ;
-  int setTrialStrain(const Tensor &v, const Tensor &r) ;    
-  int setTrialStrainIncr(const Tensor &v) ;
-  int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
-  const Tensor& getTangentTensor( ) ;
- 
   //swap history variables
   //int commitState( ) ; 
   //int revertToLastCommit( ) ;

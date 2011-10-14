@@ -33,6 +33,7 @@
 // What: "@(#) Domain.C, revA"
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <OPS_Globals.h>
 #include <Domain.h>

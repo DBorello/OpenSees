@@ -112,10 +112,6 @@ class J2Plasticity : public NDMaterial {
 
   protected :
 
-  //this is mike's problem
-  static Tensor rank2;
-  static Tensor rank4;
-
   //material parameters
   double bulk ;        //bulk modulus
   double shear ;       //shear modulus

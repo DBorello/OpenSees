@@ -34,7 +34,7 @@
 
 #include <HystereticEnergy.h>
 #include <DamageResponse.h>
-
+#include <math.h>
 
 HystereticEnergy::HystereticEnergy (int tag, double Etot , double Cpow)
 :DamageModel(tag,DMG_TAG_HystereticEnergy),

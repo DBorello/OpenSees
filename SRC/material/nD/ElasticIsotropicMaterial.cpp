@@ -21,10 +21,6 @@
 // $Revision: 1.25 $                                                              
 // $Date: 2009-01-29 00:42:03 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
-                                                                        
-                                                                        
-// File: ~/material/ElasticIsotropicMaterial.C
-//
 // Written: MHS 
 // Created: Feb 2000
 // Revision: A
@@ -40,18 +36,56 @@
 #include <ElasticIsotropicPlaneStress2D.h>
 #include <ElasticIsotropicPlaneStrain2D.h>
 #include <ElasticIsotropicAxiSymm.h>
-#include <ElasticIsotropic3D.h>
-#include <PressureDependentElastic3D.h>
+#include <ElasticIsotropicThreeDimensional.h>
 #include <ElasticIsotropicPlateFiber.h>
 #include <ElasticIsotropicBeamFiber.h>
 #include <ElasticIsotropicBeamFiber2d.h>
 
-#include <Tensor.h>
 #include <Channel.h>
 #include <Information.h>
 #include <Parameter.h>
 
 #include <OPS_Globals.h>
+#include <elementApi.h>
+
+void *
+OPS_NewElasticIsotropicMaterial(void)
+{
+  NDMaterial *theMaterial = 0;
+  
+  int numArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numArgs < 3) {
+    opserr << "Want: nDMaterial ElasticIsotropic $tag $E $V <$rho>" << endln;
+    return 0;	
+  }
+  
+  int iData[1];
+  double dData[3];
+  dData[2] = 0.0;
+  
+  int numData = 1;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer tag: nDMaterial EasticIsotropic \n";
+    return 0;
+  }
+  
+  if (numArgs > 3) 
+    numData = 3;
+  else
+    numData = 2;
+  
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid data: nDMaterial EasticIsotropic : " << iData[0] <<"\n";
+    return 0;
+  }  
+  
+  theMaterial = new ElasticIsotropicMaterial(iData[0], dData[0], dData[1], dData[2]);
+  
+  return theMaterial;
+}
+
+
 
 ElasticIsotropicMaterial::ElasticIsotropicMaterial
 (int tag, int classTag, double e, double nu, double r)
@@ -81,85 +115,51 @@ ElasticIsotropicMaterial::getRho()
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (const char *type)
 {
-    if (strcmp(type,"PlaneStress2D") == 0 || strcmp(type,"PlaneStress") == 0)
-    {
-	ElasticIsotropicPlaneStress2D *theModel;
-	theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
+  if (strcmp(type,"PlaneStress2D") == 0 || strcmp(type,"PlaneStress") == 0) {
+    ElasticIsotropicPlaneStress2D *theModel;
+    theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
+    return theModel;
+  } 
 
-    else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain") == 0)
-    {
-	ElasticIsotropicPlaneStrain2D *theModel;
-	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
-    else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0)
-    {
-	ElasticIsotropicAxiSymm *theModel;
-	theModel = new ElasticIsotropicAxiSymm(this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
-///////////////////////////////
-    else if (strcmp(type,"ThreeDimensional") == 0 || 
-	     strcmp(type,"3D") == 0)
-      {
-	ElasticIsotropic3D *theModel;
-	theModel = new ElasticIsotropic3D (this->getTag(), E, v, rho);
-	// DOES NOT COPY sigma, D, and epsilon ...
-	// This function should only be called during element instantiation, so
-	// no state determination is performed on the material model object
-	// prior to copying the material model (calling this function)
-	return theModel;
-      }
-///////////////////////////////
-    else if (strcmp(type,"PlateFiber") == 0)
-    {
-	ElasticIsotropicPlateFiber *theModel;
-	theModel = new ElasticIsotropicPlateFiber(this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
-    else if (strcmp(type,"BeamFiber") == 0)
-    {
-	ElasticIsotropicBeamFiber *theModel;
-	theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
+  else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain") == 0) {
+    ElasticIsotropicPlaneStrain2D *theModel;
+    theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
+    return theModel;
+  }
 
-    else if (strcmp(type,"BeamFiber2d") == 0)
-    {
-	ElasticIsotropicBeamFiber2d *theModel;
-	theModel = new ElasticIsotropicBeamFiber2d(this->getTag(), E, v, rho);
-		// DOES NOT COPY sigma, D, and epsilon ...
-		// This function should only be called during element instantiation, so
-		// no state determination is performed on the material model object
-		// prior to copying the material model (calling this function)
-	return theModel;
-    }
+  else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0) {
+    ElasticIsotropicAxiSymm *theModel;
+    theModel = new ElasticIsotropicAxiSymm(this->getTag(), E, v, rho);
+    return theModel;
+  }
+  
+  else if (strcmp(type,"ThreeDimensional") == 0 || strcmp(type,"3D") == 0) {
+    ElasticIsotropicThreeDimensional *theModel;
+    theModel = new ElasticIsotropicThreeDimensional (this->getTag(), E, v, rho);
+    return theModel;
+  }
 
-    // Handle other cases
-    else
-      return NDMaterial::getCopy(type);
+  else if (strcmp(type,"PlateFiber") == 0) {
+    ElasticIsotropicPlateFiber *theModel;
+    theModel = new ElasticIsotropicPlateFiber(this->getTag(), E, v, rho);
+    return theModel;
+  }
+  
+  else if (strcmp(type,"BeamFiber") == 0) {
+    ElasticIsotropicBeamFiber *theModel;
+    theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
+    return theModel;
+  }
+
+  else if (strcmp(type,"BeamFiber2d") == 0) {
+    ElasticIsotropicBeamFiber2d *theModel;
+    theModel = new ElasticIsotropicBeamFiber2d(this->getTag(), E, v, rho);
+    return theModel;
+  }
+
+  // Handle other cases
+  else
+    return NDMaterial::getCopy(type);
 }
 
 int
@@ -231,82 +231,6 @@ ElasticIsotropicMaterial::getStrain (void)
   // Just to make it compile
   Vector *ret = new Vector();
   return *ret;
-}
-
-int
-ElasticIsotropicMaterial::setTrialStrain (const Tensor &v)
-{
-    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
-    exit(-1);
-
-    return -1;
-}
-
-int
-ElasticIsotropicMaterial::setTrialStrain (const Tensor &v, const Tensor &r)
-{
-    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
-    exit(-1);
-
-    return -1;
-}
-
-int
-ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v)
-{
-    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
-    exit(-1);
-
-    return -1;
-}
-
-int
-ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v, const Tensor &r)
-{
-    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
-
-    return -1;
-}
-
-const Tensor&
-ElasticIsotropicMaterial::getTangentTensor (void)
-{
-  opserr << "ElasticIsotropicMaterial::getTangentTensor -- subclass responsibility\n";
-  exit(-1);
-  
-  // Just to make it compile
-  Tensor *t = new Tensor;
-  return *t;
-}
-
-const stresstensor& ElasticIsotropicMaterial::getStressTensor (void)
-{
-  opserr << "ElasticIsotropicMaterial::getStressTensor -- subclass responsibility\n";
-  exit(-1);
-
-  // Just to make it compile
-  stresstensor *t = new stresstensor;
-  return *t;
-}
-
-const straintensor& ElasticIsotropicMaterial::getStrainTensor (void)
-{
-  opserr << "ElasticIsotropicMaterial::getStrainTensor -- subclass responsibility\n";
-  exit(-1);
-
-  // Just to make it compile
-  straintensor *t = new straintensor;
-  return *t;
-}
-
-const straintensor& ElasticIsotropicMaterial::getPlasticStrainTensor (void)
-{
-  opserr << "ElasticIsotropicMaterial::getPlasticStrainTensor -- subclass responsibility\n";
-  exit(-1);
-	
-  // Just to make it compile
-  straintensor t;
-  return t;
 }
 
 int
@@ -382,7 +306,7 @@ ElasticIsotropicMaterial::sendSelf (int commitTag, Channel &theChannel)
 
 int
 ElasticIsotropicMaterial::recvSelf (int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker)
+				    FEM_ObjectBroker &theBroker)
 {
   int res = 0;
   

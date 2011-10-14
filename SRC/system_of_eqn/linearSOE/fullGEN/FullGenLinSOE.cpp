@@ -23,8 +23,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/fullGEN/FullGenLinSOE.C
-//
 // Written: fmk 
 // Created: Febuary 1997
 // Revision: A
@@ -33,6 +31,8 @@
 
 
 #include <FullGenLinSOE.h>
+#include <stdlib.h>
+
 #include <FullGenLinSolver.h>
 #include <Matrix.h>
 #include <Graph.h>

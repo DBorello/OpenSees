@@ -974,7 +974,7 @@ CorotCrdTransf2d::getCopy2d(void)
     if (!theCopy)
     {
         opserr << "CorotCrdTransf2d::getCopy() - out of memory creating copy\n";
-        exit(-1);
+	return 0;
     }    
     
     theCopy->nodeIPtr = nodeIPtr;

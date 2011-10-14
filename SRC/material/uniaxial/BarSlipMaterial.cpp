@@ -36,6 +36,8 @@
 // Updates: new damage calculations and user interfaces
 
 
+#define PI (3.141592653589793)
+
 #include <BarSlipMaterial.h>
 #include <math.h>
 #include <float.h>

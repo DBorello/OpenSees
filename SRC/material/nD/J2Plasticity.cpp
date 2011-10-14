@@ -50,12 +50,9 @@
 #include <J2PlateFiber.h>
 #include <J2ThreeDimensional.h> 
 
+#include <string.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
-//this is mike's problem
-Tensor J2Plasticity :: rank2(2, def_dim_2, 0.0 ) ;
-Tensor J2Plasticity :: rank4(2, def_dim_2, 0.0 ) ;
 
 //parameters
 const double J2Plasticity :: one3   = 1.0 / 3.0 ;

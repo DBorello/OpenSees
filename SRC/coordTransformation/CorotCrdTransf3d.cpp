@@ -1873,7 +1873,6 @@ CorotCrdTransf3d::getCopy3d(void)
     if (!theCopy)
     {
         opserr << "CorotCrdTransf3d::getCopy() - out of memory creating copy\n";
-        exit(-1);
         return 0;
     }    
     

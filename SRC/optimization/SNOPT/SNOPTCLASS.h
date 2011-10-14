@@ -27,7 +27,6 @@
 // Written by Quan Gu (qgu@ucsd.edu)    March 2010
 //
 
-
 #ifndef _SNOPTCLASS_
 #define _SNOPTCLASS_
 

@@ -31,9 +31,11 @@
 // stress components which can then be integrated over an area to model a
 // shear flexible 3D beam.
 
+
 #include <BeamFiberMaterial.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <string.h>
 
 Vector BeamFiberMaterial::stress(3);
 Matrix BeamFiberMaterial::tangent(3,3);

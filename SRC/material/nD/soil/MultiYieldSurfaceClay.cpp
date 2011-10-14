@@ -1188,7 +1188,9 @@ void MultiYieldSurfaceClay::setUpSurfaces (double * gredu)
 
 	double  stress1, stress2, strain1, strain2, size, elasto_plast_modul, plast_modul;
 	double pi = 3.14159265358979;
-	double refStrain, peakShear, coneHeight;
+	double refStrain=0;
+	double peakShear=0;
+	double coneHeight=0;
 
 	if (gredu == 0) {  //automatic generation of surfaces
 	  if (frictionAngle > 0) {

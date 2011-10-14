@@ -34,7 +34,6 @@
 class ID;
 class Vector;
 class Matrix;
-class Tensor;
 
 #include <Response.h>
 

@@ -42,7 +42,6 @@
 #include <NDMaterial.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <Tensor.h>
 
 class ContactMaterial3D : public NDMaterial
 {

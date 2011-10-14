@@ -49,6 +49,7 @@
 #include <Node.h>
 #include <DOF_Group.h>
 #include <ID.h>
+#include<stdlib.h>
 
 DisplacementControl::DisplacementControl(int node, int dof, 
 					 double increment, 

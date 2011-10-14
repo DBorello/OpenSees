@@ -13,7 +13,6 @@ all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/sparseSYM; $(MAKE) law;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/umfGEN; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE);
-	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/petsc; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/mumps; $(MAKE);
@@ -37,7 +36,6 @@ spotless: clean
 	@$(CD) $(FE)/system_of_eqn/linearSOE/sparseSYM; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/umfGEN; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE) wipe;
-	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/petsc; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/mumps; $(MAKE) wipe;

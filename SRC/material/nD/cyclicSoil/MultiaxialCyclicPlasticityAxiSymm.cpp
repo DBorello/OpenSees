@@ -268,33 +268,6 @@ const Matrix& MultiaxialCyclicPlasticityAxiSymm :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int MultiaxialCyclicPlasticityAxiSymm :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticityAxiSymm :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticityAxiSymm :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticityAxiSymm :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& MultiaxialCyclicPlasticityAxiSymm :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-
 //swap history variables
 /* 
 int MultiaxialCyclicPlasticityAxiSymm :: commitState( )  

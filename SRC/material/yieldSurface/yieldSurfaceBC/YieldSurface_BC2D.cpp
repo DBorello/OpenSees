@@ -9,6 +9,7 @@
 #define driftDebug  0
 
 #include <MaterialResponse.h>
+#include <math.h>
 
 double YieldSurface_BC2D::error(1.0e-6);
 Vector YieldSurface_BC2D::v6(6);

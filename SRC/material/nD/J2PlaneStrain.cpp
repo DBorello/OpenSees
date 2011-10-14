@@ -243,42 +243,6 @@ const Matrix& J2PlaneStrain :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int J2PlaneStrain :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2PlaneStrain :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int J2PlaneStrain :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2PlaneStrain :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& J2PlaneStrain :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlaneStrain :: getStressTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-//jeremic@ucdavis.edu 22jan2001
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlaneStrain :: getStrainTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-
 int 
 J2PlaneStrain::commitState( ) 
 {

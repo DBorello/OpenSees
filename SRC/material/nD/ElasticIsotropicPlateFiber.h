@@ -42,8 +42,6 @@
 #include <Vector.h>
 #include <ID.h>
 
-#include <Tensor.h>
-
 class ElasticIsotropicPlateFiber : public ElasticIsotropicMaterial
 {
   public:

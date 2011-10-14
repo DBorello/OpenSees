@@ -267,7 +267,7 @@
 #define ND_TAG_ElasticIsotropicPlateFiber		14
 #define ND_TAG_ElasticIsotropicBeamFiber		15
 #define ND_TAG_ElasticIsotropicBeamFiber2d		18
-#define ND_TAG_ElasticIsotropic3D               16
+#define ND_TAG_ElasticIsotropicThreeDimensional         16
 #define ND_TAG_ElasticCrossAnisotropic3D        17
 #define ND_TAG_J2PlaneStrain                  3005
 #define ND_TAG_J2PlaneStress                  3006
@@ -444,6 +444,7 @@
 #define ELE_TAG_BBarBrickUP             7016
 #define ELE_TAG_PlateMITC4      2023
 #define ELE_TAG_ShellMITC4      2024
+#define ELE_TAG_ShellNL         2025 //Tesser
 #define ELE_TAG_Plate1          2022
 #define ELE_TAG_Brick                      3458
 #define ELE_TAG_BbarBrick                  3457

@@ -16,7 +16,6 @@
 #include <NDMaterial.h>
 #include <MultiYieldSurface.h>
 #include <Matrix.h>
-#include <Tensor.h>
 
 class Response;
 

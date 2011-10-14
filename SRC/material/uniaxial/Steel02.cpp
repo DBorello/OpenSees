@@ -35,6 +35,8 @@
 //    by E. Spacone, G. Monti and F.C. Filippou (1994)
 //-----------------------------------------------------------------------
 
+#include <math.h>
+
 #include <stdlib.h>
 #include <Steel02.h>
 #include <OPS_Globals.h>

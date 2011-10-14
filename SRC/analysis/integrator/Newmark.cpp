@@ -41,6 +41,7 @@
 #include <AnalysisModel.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <string.h>
 
 #include <elementAPI.h>
 

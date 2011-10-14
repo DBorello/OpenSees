@@ -311,42 +311,6 @@ const Matrix& J2PlateFiber :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int J2PlateFiber :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2PlateFiber :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int J2PlateFiber :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2PlateFiber :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& J2PlateFiber :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlateFiber :: getStressTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-//jeremic@ucdavis.edu 22jan2001
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlateFiber :: getStrainTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-
 int 
 J2PlateFiber::commitState( ) 
 {

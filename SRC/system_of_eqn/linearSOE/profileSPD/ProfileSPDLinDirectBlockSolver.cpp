@@ -22,9 +22,6 @@
 // $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectBlockSolver.cpp,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/ProfileSPD/ProfileSPDLinDirectBlockSolver.C
-//
 // Written: fmk 
 // Created: Mar 1998
 // Revision: A
@@ -39,6 +36,8 @@
 #include <ProfileSPDLinDirectBlockSolver.h>
 #include <ProfileSPDLinSOE.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 

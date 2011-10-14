@@ -33,7 +33,6 @@
 #include <NDMaterial.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <Tensor.h>
 
 class InitialStateAnalysisWrapper : public NDMaterial
 {
@@ -65,13 +64,6 @@ class InitialStateAnalysisWrapper : public NDMaterial
 		// send back the tangent
 		const Matrix& getTangent();
 		const Matrix& getInitialTangent();
-
-		// unused trialStrain functions
-		int setTrialStrain(const Vector &v, const Vector &r);
-		int setTrialStrain(const Tensor &v);
-		int setTrialStrain(const Tensor &v, const Tensor &r);
-		int setTrialStrainIncr(const Tensor &v);
-		int setTrialStrainIncr(const Tensor &v, const Tensor &r);
 
 		NDMaterial *getCopy(const char *type);
 		NDMaterial *getCopy(void);

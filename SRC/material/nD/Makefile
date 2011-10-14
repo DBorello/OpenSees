@@ -1,5 +1,7 @@
 include ../../../Makefile.def
 
+#	ElasticCrossAnisotropic.o \
+
 OBJS       = NDMaterial.o \
 	BeamFiberMaterial.o \
 	BoundingCamClay3D.o \
@@ -10,8 +12,6 @@ OBJS       = NDMaterial.o \
 	DruckerPrager3D.o \
 	DruckerPrager.o \
 	DruckerPragerPlaneStrain.o \
-	ElasticCrossAnisotropic.o \
-	ElasticIsotropic3D.o \
 	ElasticIsotropicAxiSymm.o\
 	ElasticIsotropicBeamFiber2d.o \
 	ElasticIsotropicBeamFiber.o \
@@ -19,6 +19,8 @@ OBJS       = NDMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o \
 	ElasticIsotropicPlaneStress2D.o \
 	ElasticIsotropicPlateFiber.o \
+	ElasticIsotropicThreeDimensional.o \
+ 	PressureDependentElastic3D.o \
 	FeapMaterial.o \
 	InitialStateAnalysisWrapper.o \
 	J2AxiSymm.o \
@@ -30,7 +32,6 @@ OBJS       = NDMaterial.o \
 	PlaneStrainMaterial.o \
 	PlaneStressMaterial.o \
 	PlateFiberMaterial.o \
-	PressureDependentElastic3D.o \
 	TclModelBuilderNDMaterialCommand.o \
 	WrapperNDMaterial.o
 
@@ -38,9 +39,6 @@ all: $(OBJS)
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
 	@$(CD) $(FE)/material/nD/feap; $(MAKE);
 	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE);
-	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);  
-	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE);
-	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE); 
 	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE); 
 
 # Miscellaneous
@@ -57,9 +55,6 @@ spotless: clean
 	@$(CD) $(FE)/material/nD/soil; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/feap; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE) wipe; 
 
 wipe: spotless

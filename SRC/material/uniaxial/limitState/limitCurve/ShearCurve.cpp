@@ -25,6 +25,8 @@
 // Written: KJE
 // Created: Sept 2002
 
+
+#define PI (3.141592653589793)
 #include <ShearCurve.h>
 #include <G3Globals.h>
 #include <math.h>

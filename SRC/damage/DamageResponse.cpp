@@ -66,12 +66,6 @@ Response(val), theDamage(dmg), responseID(id)
 
 }
 
-DamageResponse::DamageResponse(DamageModel *dmg, int id, const Tensor &val):
-Response(val), theDamage(dmg), responseID(id)
-{
-
-}
-
 DamageResponse::~DamageResponse()
 {
 

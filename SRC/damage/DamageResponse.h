@@ -48,7 +48,6 @@ public:
   DamageResponse(DamageModel *dmg, int id, const ID &val);
   DamageResponse(DamageModel *dmg, int id, const Vector &val);
   DamageResponse(DamageModel *dmg, int id, const Matrix &val);
-  DamageResponse(DamageModel *dmg, int id, const Tensor &val);
   ~DamageResponse();
   
   int getResponse(void);

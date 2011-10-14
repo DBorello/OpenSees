@@ -274,45 +274,4 @@ const Matrix& J2ThreeDimensional :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int J2ThreeDimensional :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2ThreeDimensional :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int J2ThreeDimensional :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2ThreeDimensional :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& J2ThreeDimensional :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStressTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-//jeremic@ucdavis.edu 22jan2001
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStrainTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-
-
-
-
-
-
 

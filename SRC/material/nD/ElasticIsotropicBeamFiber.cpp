@@ -30,7 +30,6 @@
 
 #include <ElasticIsotropicBeamFiber.h>           
 #include <Channel.h>
-#include <Tensor.h>
 
 Vector ElasticIsotropicBeamFiber::sigma(3);
 Matrix ElasticIsotropicBeamFiber::D(3,3);

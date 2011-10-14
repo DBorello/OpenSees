@@ -17,10 +17,6 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 **                                                                    **
-** Additions and changes by:                                          **
-**   Boris Jeremic (@ucdavis.edu)                                     **
-**                                                                    **
-**                                                                    **
 ** ****************************************************************** */
 
 // $Revision: 1.23 $
@@ -43,7 +39,6 @@
 // What: "@(#) NDMaterial.h, revA"
 
 #include <Material.h>
-#include <Tensor.h>
 
 class Matrix;
 class ID;
@@ -70,30 +65,6 @@ class NDMaterial : public Material
 
     virtual const Vector &getStress(void);
     virtual const Vector &getStrain(void);
-
-    // methods to set and retrieve state using the Tensor class
-    virtual int setTrialStrain(const Tensor &v);
-    virtual int setTrialStrain(const Tensor &v, const Tensor &r);
-    virtual int setTrialStrainIncr(const Tensor &v);
-    virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
-    virtual const Tensor& getTangentTensor(void);
-    virtual const stresstensor& getStressTensor(void);
-    virtual const straintensor& getStrainTensor(void);
-
-    //Added Joey Aug. 13, 2001
-    virtual const straintensor& getPlasticStrainTensor(void);
-
-    // added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
-    virtual int setTrialF(const straintensor &f);
-    virtual int setTrialFIncr(const straintensor &df);
-    virtual int setTrialC(const straintensor &c);
-    virtual int setTrialCIncr(const straintensor &dc);
-    virtual const stresstensor& getPK1StressTensor(void);
-    virtual const stresstensor& getCauchyStressTensor(void);
-    virtual const straintensor& getF(void);
-    virtual const straintensor& getC(void);
-    virtual const straintensor& getFp(void);
-    // Only For Large Deformation, END////////////////////////////////////////
 
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
@@ -124,9 +95,6 @@ class NDMaterial : public Material
   private:
     static Matrix errMatrix;
     static Vector errVector;
-    static Tensor errTensor;
-    static stresstensor errstresstensor;
-    static straintensor errstraintensor;
 };
 
 

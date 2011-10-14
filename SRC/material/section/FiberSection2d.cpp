@@ -28,6 +28,8 @@
 // Description: This file contains the class implementation of FiberSection2d.
 
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 #include <Channel.h>
 #include <Vector.h>
@@ -897,7 +899,7 @@ FiberSection2d::setResponse(const char **argv, int argc,
 	int matTag = atoi(argv[3]);
 	double yCoord = atof(argv[1]);
 
-	double closestDist;
+	double closestDist = 0;
 	double ySearch, dy;
 	double distance;
 	int j;
@@ -1046,6 +1048,7 @@ FiberSection2d::getStressResultantSensitivity(int gradIndex, bool conditional)
   ds.Zero();
   
   double y, A, stressGradient, stress, tangent, sig_dAdh;
+  stress = 0.0;
 
   static double fiberLocs[10000];
   static double fiberArea[10000];

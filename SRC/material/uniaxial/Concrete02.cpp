@@ -37,6 +37,8 @@
 
 
 #include <stdlib.h>
+#include <math.h>
+
 #include <Concrete02.h>
 #include <OPS_Globals.h>
 #include <float.h>

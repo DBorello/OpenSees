@@ -38,6 +38,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <stdlib.h>
 
 MinUnbalDispNorm::MinUnbalDispNorm(double lambda1, int specNumIter,
 		     double min, double max, int signFirstStep)

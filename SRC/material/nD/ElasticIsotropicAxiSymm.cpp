@@ -24,7 +24,6 @@
                                                                  
 #include <ElasticIsotropicAxiSymm.h>                                                                        
 #include <Channel.h>
-#include <Tensor.h>
 
 Vector ElasticIsotropicAxiSymm::sigma(4);
 Matrix ElasticIsotropicAxiSymm::D(4,4);

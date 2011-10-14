@@ -28,6 +28,7 @@
 // Description: This file contains the class implementation of FiberSection2d.
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <Channel.h>
 #include <Vector.h>
@@ -702,9 +703,10 @@ FiberSectionGJ::Print(OPS_Stream &s, int flag)
   if (flag == 1) {
     int loc = 0;
     for (int i = 0; i < numFibers; i++) {
-      s << "\nLocation (y, z) = (" << -matData[loc++] << ", " << matData[loc++] << ")";
-      s << "\nArea = " << matData[loc++] << endln;
+      s << "\nLocation (y, z) = (" << -matData[loc] << ", " << matData[loc+1] << ")";
+      s << "\nArea = " << matData[loc+2] << endln;
       theMaterials[i]->Print(s, flag);
+      loc+= 3;
     }
   }
 }
@@ -734,7 +736,7 @@ FiberSectionGJ::setResponse(const char **argv, int argc, OPS_Stream &output)
     int matTag = atoi(argv[3]);
     double yCoord = atof(argv[1]);
     double zCoord = atof(argv[2]);
-    double closestDist;
+    double closestDist = 0.0;
     double ySearch, zSearch, dy, dz;
     double distance;
     int j;

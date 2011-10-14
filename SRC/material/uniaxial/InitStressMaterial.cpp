@@ -26,6 +26,7 @@
 // Created: Sep 2010
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <InitStressMaterial.h>
 #include <ID.h>

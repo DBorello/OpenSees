@@ -32,7 +32,6 @@
 //
 // What: "@(#) FEM_ObjectBrokerAllClasses.C, revA"
 
-
 #ifdef _PARALLEL_PROCESSING
 #include <mpi.h>
 #endif
@@ -124,7 +123,7 @@
 #include <ElasticIsotropicPlaneStress2D.h>
 #include <ElasticIsotropicPlateFiber.h>
 #include <ElasticIsotropicAxiSymm.h>
-#include <ElasticIsotropic3D.h>
+#include <ElasticIsotropicThreeDimensional.h>
 #include <J2PlaneStrain.h>
 #include <J2PlaneStress.h>
 #include <J2PlateFiber.h>
@@ -181,9 +180,6 @@
 #include <BBarFourNodeQuadUP.h>
 #include <Twenty_Eight_Node_BrickUP.h>
 #include <FourNodeQuadUP.h>
-#include <EightNodeBrick_u_p_U.h>
-#include <TwentyNodeBrick_u_p_U.h>
-
 
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
@@ -580,12 +576,6 @@ FEM_ObjectBrokerAllClasses::getNewElement(int classTag)
 	case ELE_TAG_Twenty_Eight_Node_BrickUP:
 	    return new TwentyEightNodeBrickUP();
 
-	case ELE_TAG_EightNodeBrick_u_p_U:
-	    return new EightNodeBrick_u_p_U();
-
-	case ELE_TAG_TwentyNodeBrick_u_p_U:
-	    return new TwentyNodeBrick_u_p_U();
-
 	default:
 	     opserr << "FEM_ObjectBrokerAllClasses::getNewElement - ";
 	     opserr << " - no Element type exists for class tag " ;
@@ -981,8 +971,8 @@ FEM_ObjectBrokerAllClasses::getNewNDMaterial(int classTag)
   case ND_TAG_ElasticIsotropicPlateFiber:
     return new ElasticIsotropicPlateFiber();
     
-  case ND_TAG_ElasticIsotropic3D:
-    return new ElasticIsotropic3D();
+  case ND_TAG_ElasticIsotropicThreeDimensional:
+    return new ElasticIsotropicThreeDimensional();
 		  
   case ND_TAG_J2PlaneStrain:
     return new J2PlaneStrain();

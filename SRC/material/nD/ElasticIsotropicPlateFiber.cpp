@@ -26,7 +26,6 @@
 
 #include <ElasticIsotropicPlateFiber.h>           
 #include <Channel.h>
-#include <Tensor.h>
 
 Vector ElasticIsotropicPlateFiber::sigma(5);
 Matrix ElasticIsotropicPlateFiber::D(5,5);

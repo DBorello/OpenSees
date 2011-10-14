@@ -85,8 +85,10 @@ class ShearCurve : public LimitCurve
     
 	// Associated beam-colum element information
 	int eleTag;			// tag for associated beam column element
-	Element *theElement;// element pointer
+
 	Domain *theDomain;	// needed to retrieve element pointer
+	Element *theElement;// element pointer
+
 
 	int stateFlag;	// state of limitstate material
 					// stateFlag = 0: prior to failure

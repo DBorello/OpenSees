@@ -25,6 +25,8 @@
 // Written: fmk                                                                         
 
 #include <WrapperNDMaterial.h>
+#include <string.h>
+#include <stdlib.h>
 
 extern modelState theModelState;
 

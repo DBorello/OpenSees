@@ -39,6 +39,8 @@
 // Modifications to the code have been added by Kevin Mackie, Ph.D., as
 // shown below.
 
+#include <math.h>
+
 #include <stdlib.h>
 #include <MaterialResponse.h>
 #include <Information.h>

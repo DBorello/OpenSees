@@ -41,8 +41,6 @@
 #include <OPS_Globals.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <stresst.h>
-#include <straint.h>
 #include <MaterialResponse.h>
 
 #include <PlaneStressMaterial.h>
@@ -51,9 +49,6 @@
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
-Tensor NDMaterial::errTensor(2, def_dim_2, 0.0 );
-stresstensor NDMaterial::errstresstensor;
-straintensor NDMaterial::errstraintensor;
 
 NDMaterial::NDMaterial(int tag, int classTag)
 :Material(tag,classTag)
@@ -151,129 +146,6 @@ NDMaterial::getStrain(void)
    opserr << "NDMaterial::getStrain -- subclass responsibility\n";
    return errVector;    
 }
-
-int 
-NDMaterial::setTrialStrain(const Tensor &v)
-{
-   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
-   return -1;    
-}
-
-int 
-NDMaterial::setTrialStrain(const Tensor &v, const Tensor &r)    
-{
-   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
-   return -1;    
-}
-
-int 
-NDMaterial::setTrialStrainIncr(const Tensor &v)
-{
-   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
-   return -1;    
-}
-
-int 
-NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
-{
-   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
-   return -1;    
-}
-
-
-// added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
-
-int
-NDMaterial::setTrialF(const straintensor &f)
-{
-   opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
-   return -1;
-}
-
-int
-NDMaterial::setTrialFIncr(const straintensor &df)
-{
-   opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
-   return -1;
-}
-
-int
-NDMaterial::setTrialC(const straintensor &c)
-{
-   opserr << "NDMaterial::setTrialC -- subclass responsibility\n";
-   return -1;
-}
-
-int
-NDMaterial::setTrialCIncr(const straintensor &c)
-{
-   opserr << "NDMaterial::setTrialC -- subclass responsibility\n";
-   return -1;
-}
-
-const stresstensor& NDMaterial::getPK1StressTensor(void)
-{
-   opserr << "NDMaterial::getPK1StressTensor -- subclass responsibility\n";
-   return errstresstensor;    
-}
-
-const stresstensor& NDMaterial::getCauchyStressTensor(void)
-{
-   opserr << "NDMaterial::getCauchyStressTensor -- subclass responsibility\n";
-   return errstresstensor;    
-}
-
-const straintensor& NDMaterial::getF(void)
-{
-   opserr << "NDMaterial::getF -- subclass responsibility\n";
-   return errstraintensor;    
-}
-
-const straintensor& NDMaterial::getC(void)
-{
-   opserr << "NDMaterial::getF -- subclass responsibility\n";
-   return errstraintensor;    
-}
-
-const straintensor& NDMaterial::getFp(void)
-{
-   opserr << "NDMaterial::getFp -- subclass responsibility\n";
-   return errstraintensor;    
-}
-// Only For Large Deformation, END////////////////////////////
-
-const Tensor &
-NDMaterial::getTangentTensor(void)
-{
-   opserr << "NDMaterial::getTangentTensor -- subclass responsibility\n";
-   return errTensor;    
-}
-
-const stresstensor& NDMaterial::getStressTensor(void)
-{
-   opserr << "NDMaterial::getStressTensor -- subclass responsibility\n";
-   return errstresstensor;    
-}
-
-const straintensor& NDMaterial::getStrainTensor(void)
-{
-   opserr << "NDMaterial::getStrainTensor -- subclass responsibility\n";
-   return errstraintensor;    
-}
-
-const straintensor& NDMaterial::getPlasticStrainTensor(void)
-{
-   opserr << "NDMaterial::getPlasticStrainTensor -- subclass responsibility\n";
-   return errstraintensor;    
-}
-
-
-//const Tensor &
-//NDMaterial::getStrainTensor(void)
-//{
-//   opserr << "NDMaterial::getStrainTensor -- subclass responsibility\n";
-//   return errTensor;    
-//}
 
 Response*
 NDMaterial::setResponse (const char **argv, int argc, 

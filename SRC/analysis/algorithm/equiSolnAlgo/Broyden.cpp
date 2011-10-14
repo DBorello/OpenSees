@@ -41,6 +41,7 @@
 #include <FEM_ObjectBroker.h>
 #include <ConvergenceTest.h>
 #include <ID.h>
+#include <math.h>
 
 // Constructor
 Broyden::Broyden(int theTangentToUse, int n )

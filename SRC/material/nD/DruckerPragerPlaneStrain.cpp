@@ -150,23 +150,3 @@ const Matrix& DruckerPragerPlaneStrain::getInitialTangent()
     return tangent;
 } 
 
-//this is mike's problem
-int DruckerPragerPlaneStrain :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int DruckerPragerPlaneStrain :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int DruckerPragerPlaneStrain :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int DruckerPragerPlaneStrain :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}

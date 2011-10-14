@@ -28,6 +28,7 @@
 // Description: This file contains the class implementation of FiberSection2d.
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <Channel.h>
 #include <Vector.h>
@@ -892,7 +893,7 @@ FiberSection3d::setResponse(const char **argv, int argc, OPS_Stream &output)
 	int matTag = atoi(argv[3]);
 	double yCoord = atof(argv[1]);
 	double zCoord = atof(argv[2]);
-	double closestDist;
+	double closestDist = 0.0;
 	double ySearch, zSearch, dy, dz;
 	double distance;
 	int j;

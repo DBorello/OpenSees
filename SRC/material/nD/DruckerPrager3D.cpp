@@ -114,23 +114,3 @@ const Matrix& DruckerPrager3D :: getInitialTangent( )
   return mCe ;
 } 
 
-//this is mike's problem
-int DruckerPrager3D :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int DruckerPrager3D :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int DruckerPrager3D :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int DruckerPrager3D :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}

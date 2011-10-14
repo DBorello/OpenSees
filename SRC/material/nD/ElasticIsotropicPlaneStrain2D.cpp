@@ -25,24 +25,24 @@
                                                                         
 #include <ElasticIsotropicPlaneStrain2D.h>                                                                        
 #include <Channel.h>
-#include <Tensor.h>
-
 Vector ElasticIsotropicPlaneStrain2D::sigma(3);
 Matrix ElasticIsotropicPlaneStrain2D::D(3,3);
 
 ElasticIsotropicPlaneStrain2D::ElasticIsotropicPlaneStrain2D
 (int tag, double E, double nu, double rho) :
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlaneStrain2d, E, nu, rho),
- epsilon(3)
+ epsilon(3), Cepsilon(3)
 {
-
+  epsilon.Zero();
+  Cepsilon.Zero();
 }
 
 ElasticIsotropicPlaneStrain2D::ElasticIsotropicPlaneStrain2D():
  ElasticIsotropicMaterial (0, ND_TAG_ElasticIsotropicPlaneStrain2d, 0.0, 0.0),
- epsilon(3)
+ epsilon(3), Cepsilon(3)
 {
-
+  epsilon.Zero();
+  Cepsilon.Zero();
 }
 
 ElasticIsotropicPlaneStrain2D::~ElasticIsotropicPlaneStrain2D ()
@@ -81,29 +81,30 @@ ElasticIsotropicPlaneStrain2D::setTrialStrainIncr (const Vector &strain, const V
 const Matrix&
 ElasticIsotropicPlaneStrain2D::getTangent (void)
 {
-	double mu2 = E/(1.0+v);
-	double lam = v*mu2/(1.0-2.0*v);
-	double mu = 0.50*mu2;
-
-	D(0,0) = D(1,1) = mu2+lam;
-	D(0,1) = D(1,0) = lam;
-	D(2,2) = mu;
-
-	return D;
+  double mu2 = E/(1.0+v);
+  double lam = v*mu2/(1.0-2.0*v);
+  double mu = 0.50*mu2;
+  mu2 += lam;
+  
+  D(0,0) = D(1,1) = mu2;
+  D(0,1) = D(1,0) = lam;
+  D(2,2) = mu;
+  
+  return D;
 }
 
 const Matrix&
 ElasticIsotropicPlaneStrain2D::getInitialTangent (void)
 {
-	double mu2 = E/(1.0+v);
-	double lam = v*mu2/(1.0-2.0*v);
-	double mu = 0.50*mu2;
-
-	D(0,0) = D(1,1) = mu2+lam;
-	D(0,1) = D(1,0) = lam;
-	D(2,2) = mu;
-
-	return D;
+  double mu2 = E/(1.0+v);
+  double lam = v*mu2/(1.0-2.0*v);
+  double mu = 0.50*mu2;
+  
+  D(0,0) = D(1,1) = mu2+lam;
+  D(0,1) = D(1,0) = lam;
+  D(2,2) = mu;
+  
+  return D;
 }
 
 const Vector&
@@ -135,12 +136,14 @@ ElasticIsotropicPlaneStrain2D::getStrain (void)
 int
 ElasticIsotropicPlaneStrain2D::commitState (void)
 {
+  Cepsilon=epsilon;
   return 0;
 }
 
 int
 ElasticIsotropicPlaneStrain2D::revertToLastCommit (void)
 {
+  epsilon=Cepsilon;
   return 0;
 }
 
@@ -148,29 +151,76 @@ int
 ElasticIsotropicPlaneStrain2D::revertToStart (void)
 {
   epsilon.Zero();
+  Cepsilon.Zero();
   return 0;
 }
 
 NDMaterial*
 ElasticIsotropicPlaneStrain2D::getCopy (void)
 {
-	ElasticIsotropicPlaneStrain2D *theCopy =
-		new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
-
-	theCopy->epsilon = epsilon;
-
-	return theCopy;
+  ElasticIsotropicPlaneStrain2D *theCopy =
+    new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
+  
+  theCopy->epsilon = epsilon;
+  theCopy->Cepsilon = Cepsilon;
+  return theCopy;
 }
 
 const char*
 ElasticIsotropicPlaneStrain2D::getType (void) const
 {
-	return "PlaneStrain";
+  return "PlaneStrain";
 }
 
 int
 ElasticIsotropicPlaneStrain2D::getOrder (void) const
 {
-	return 3;
+  return 3;
 }
 
+int 
+ElasticIsotropicPlaneStrain2D::sendSelf(int commitTag, Channel &theChannel)
+{
+  
+  static Vector data(7);
+  
+  data(0) = this->getTag();
+  data(1) = E;
+  data(2) = v;
+  data(3) = rho;
+  data(4) = Cepsilon(0);
+  data(5) = Cepsilon(1);
+  data(6) = Cepsilon(2);
+  
+  int res = theChannel.sendVector(this->getDbTag(), commitTag, data);
+  if (res < 0) {
+    opserr << "ElasticIsotropicPlaneStrain2D::sendSelf -- could not send Vector\n";
+    return res;
+  }
+  
+  return res;
+}
+
+int 
+ElasticIsotropicPlaneStrain2D::recvSelf(int commitTag, Channel &theChannel, 
+					FEM_ObjectBroker &theBroker)
+{
+  static Vector data(7);
+  
+  int res = theChannel.recvVector(this->getDbTag(), commitTag, data);
+  if (res < 0) {
+    opserr << "ElasticIsotropicPlaneStrain2D::sendSelf -- could not send Vector\n";
+    return res;
+  }
+
+  this->setTag((int)data(0));
+  E = data(1);
+  v = data(2);
+  rho = data(3);
+  epsilon(0)=data(4);
+  epsilon(1)=data(5);
+  epsilon(2)=data(6);
+  Cepsilon = epsilon;
+
+  return res;
+}

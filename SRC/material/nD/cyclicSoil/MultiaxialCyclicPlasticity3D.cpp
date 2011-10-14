@@ -266,44 +266,6 @@ const Matrix& MultiaxialCyclicPlasticity3D :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int MultiaxialCyclicPlasticity3D :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticity3D :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticity3D :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int MultiaxialCyclicPlasticity3D :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& MultiaxialCyclicPlasticity3D :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStressTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-//jeremic@ucdavis.edu 22jan2001
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStrainTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-
-
-
 
 
 

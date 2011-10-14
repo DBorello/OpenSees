@@ -16,12 +16,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <Tensor.h>
-
-//Vector FAPrestressedConcretePlaneStress :: strain_vec(3);
-//Vector FAPrestressedConcretePlaneStress :: stress_vec(3);
-//Matrix FAPrestressedConcretePlaneStress :: tangent_matrix(3,3);
-
 #include <DummyStream.h>
 #include <MaterialResponse.h>
 #include <elementAPI.h>

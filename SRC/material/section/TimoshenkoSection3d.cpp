@@ -28,6 +28,7 @@
 // Description: This file contains the class implementation of TimoshenkoSection2d.
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <Channel.h>
 #include <Vector.h>
@@ -650,8 +651,9 @@ TimoshenkoSection3d::Print(OPS_Stream &s, int flag)
   if (flag == 2) {
     int loc = 0;
     for (int i = 0; i < numFibers; i++) {
-      s << -matData[loc++] << " "  << matData[loc++] << " "  << matData[loc++] << " " ;
+      s << -matData[loc] << " "  << matData[loc+1] << " "  << matData[loc+2] << " " ;
       s << theMaterials[i]->getStress() << " "  << theMaterials[i]->getStrain() << endln;
+      loc += 3;
     } 
   } else {
     s << "\nTimoshenkoSection3d, tag: " << this->getTag() << endln;
@@ -662,9 +664,10 @@ TimoshenkoSection3d::Print(OPS_Stream &s, int flag)
     if (flag == 1) {
       int loc = 0;
       for (int i = 0; i < numFibers; i++) {
-	s << "\nLocation (y, z) = (" << -matData[loc++] << ", " << matData[loc++] << ")";
-	s << "\nArea = " << matData[loc++] << endln;
-      theMaterials[i]->Print(s, flag);
+	s << "\nLocation (y, z) = (" << -matData[loc] << ", " << matData[loc+1] << ")";
+	s << "\nArea = " << matData[loc+2] << endln;
+	loc+= 3;
+	theMaterials[i]->Print(s, flag);
       }
     }
   }
@@ -700,7 +703,7 @@ TimoshenkoSection3d::setResponse(const char **argv, int argc,
       int matTag = atoi(argv[3]);
       double yCoord = atof(argv[1]);
       double zCoord = atof(argv[2]);
-      double closestDist;
+      double closestDist = 0.0;
       double ySearch, zSearch, dy, dz;
       double distance;
       int j;

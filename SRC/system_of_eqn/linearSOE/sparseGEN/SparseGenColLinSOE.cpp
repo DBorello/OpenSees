@@ -29,6 +29,9 @@
 //
 // Description: This file contains the implementation for SparseGenColLinSOE
 
+
+
+#include <stdlib.h>
 #include <SparseGenColLinSOE.h>
 #include <SparseGenColLinSolver.h>
 #include <Matrix.h>

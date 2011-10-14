@@ -45,6 +45,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <stdlib.h>
 
 ArcLength1::ArcLength1(double arcLength, double alpha)
 :StaticIntegrator(INTEGRATOR_TAGS_ArcLength1),

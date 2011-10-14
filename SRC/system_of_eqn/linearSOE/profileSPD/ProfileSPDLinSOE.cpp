@@ -28,7 +28,7 @@
 //
 // Description: This file contains the implementation for ProfileSPDLinSOE
 
-
+#include <stdlib.h>
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinSolver.h>
 #include <Matrix.h>

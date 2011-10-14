@@ -31,6 +31,8 @@
 #include <TrilinearBackbone.h>
 #include <Vector.h>
 #include <Channel.h>
+#include <string.h>
+
 
 TrilinearBackbone::TrilinearBackbone (int tag, double x1, double y1, 
 				      double x2, double y2, double x3, double y3):

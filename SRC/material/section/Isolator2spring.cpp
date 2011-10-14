@@ -33,6 +33,8 @@
 // strength degradation.
 
 #include <Isolator2spring.h>           
+#include <math.h>
+
 #include <Channel.h>
 #include <Matrix.h>
 #include <Vector.h>

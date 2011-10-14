@@ -1,3 +1,4 @@
+
 //===============================================================================
 //# COPYRIGHT (C): Woody's license (by BJ):
 //                 ``This    source  code is Copyrighted in
@@ -21,19 +22,19 @@
 //#
 //# DATE:              07July2001
 //# UPDATE HISTORY:    22Nov2002 small fixes, formating...
+//                     10/11 fmk removed tensor class references & fixed error
 //#
 //#
 //===============================================================================
 
 
-
 #include <PressureDependentElastic3D.h>
+#include <math.h>
+#include <string.h>
 
 Matrix PressureDependentElastic3D::D(6,6);
 Vector PressureDependentElastic3D::sigma(6);
 
-Tensor PressureDependentElastic3D::Dt(4, def_dim_4, 0.0 );
-stresstensor PressureDependentElastic3D::Stress;
 
 PressureDependentElastic3D::PressureDependentElastic3D
 (int tag, double E, double nu, double rhop, double expp, double pr, double pop):
@@ -171,55 +172,10 @@ PressureDependentElastic3D::getStrain (void)
   return epsilon;
 }
 
-int PressureDependentElastic3D::setTrialStrain (const Tensor &v)
-{
-    Strain = v;
-    return 0;
-}
-
-int PressureDependentElastic3D::setTrialStrain (const Tensor &v, const Tensor &r)
-{
-    Strain = v;
-    return 0;
-}
-
-int PressureDependentElastic3D::setTrialStrainIncr (const Tensor &v)
-{
-    Strain += v;
-    return 0;
-}
-
-int PressureDependentElastic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
-{
-    Strain += v;
-    return 0;
-}
-
-const Tensor& PressureDependentElastic3D::getTangentTensor (void)
-{
-    return  ComputeElasticStiffness();
-}
-
-const stresstensor& PressureDependentElastic3D::getStressTensor (void)
-{
-    tensor Dt0 = this->getTangentTensor();
-	straintensor Da = Strain - CStrain;
-	stresstensor De = Dt0("ijkl") * Da("kl");
-		De.null_indices();
-	Stress = CStress + De;
-	
-    return Stress;
-}
-
-const straintensor& PressureDependentElastic3D::getStrainTensor (void)
-{
-    return Strain;
-}
 
 int PressureDependentElastic3D::commitState (void)
 {
-  CStress = Stress;
-  CStrain = Strain;
+  Cepsilon = epsilon;
 
   p_n = p_n1;
 
@@ -228,8 +184,7 @@ int PressureDependentElastic3D::commitState (void)
 
 int PressureDependentElastic3D::revertToLastCommit (void)
 {
-  Stress = CStress;
-  Strain = CStrain;
+  epsilon = Cepsilon;
 
   return 0;
 }
@@ -241,9 +196,7 @@ int PressureDependentElastic3D::revertToStart (void)
 	// do nothing, keep state variables from last step
   } else {
 	// normal call for revertToStart (not initialStateAnalysis)
-	Stress = Stress*0.0;
-    Strain = Strain*0.0;
-
+    epsilon = 0;
     p_n = 0.0;
   }
 
@@ -347,33 +300,4 @@ void PressureDependentElastic3D::Print(OPS_Stream &s, int flag)
     s << "p_cutoff: " << p_cutoff << "\n";
 }
 
-
-//================================================================================
-const Tensor& PressureDependentElastic3D::ComputeElasticStiffness(void)
-{
-    tensor I21("I", 2, def_dim_2);
-    tensor I22("I", 2, def_dim_2);
-    tensor I_ijkl = I21("ij")*I22("kl");
-      I_ijkl.null_indices();
-    tensor I_ikjl = I_ijkl.transpose0110();
-    tensor I_iljk = I_ijkl.transpose0111();
-    tensor I4s = (I_ikjl+I_iljk)*0.5;
-   
-	double p = CStress.p_hydrostatic();
-    if (p <= p_cutoff)
-		p = p_cutoff;
-    double Eo = E * pow(p/p_ref, exp0);
-
-    Dt = I_ijkl*( Eo*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Eo / (1.0 + v) );
-    
-	return Dt;
-}
-
-//================================================================================
-int PressureDependentElastic3D::setStressTensor(const Tensor& stressIn)
-{
-	CStress = stressIn;
-
-	return 0;
-}
 

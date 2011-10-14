@@ -37,6 +37,7 @@
 
 #include <ID.h>
 #include <Channel.h>
+#include <math.h>
 
 KrylovAccelerator::KrylovAccelerator(int max, int tangent)
   :Accelerator(ACCELERATOR_TAGS_Krylov),

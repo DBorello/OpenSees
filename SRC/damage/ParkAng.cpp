@@ -33,16 +33,16 @@
 
 #include <ParkAng.h>
 #include <DamageResponse.h>
-
+#include <math.h>
 
 ParkAng::ParkAng (int tag, double deltaU , double beta , double sigmaY )
 :DamageModel(tag,DMG_TAG_ParkAng),
 DeltaU( deltaU ) , Beta( beta ) , SigmaY( sigmaY )
 {
-	if ( DeltaU <= 0 || Beta <= 0 , SigmaY <= 0 )
-		opserr << "ParkAng::ParkAng : Incorrect arguments for the damage model"<<endln;
-
-	this->revertToStart();
+  if ( DeltaU <= 0 || Beta <= 0 , SigmaY <= 0 )
+    opserr << "ParkAng::ParkAng : Incorrect arguments for the damage model"<<endln;
+  
+  this->revertToStart();
 }
 
 

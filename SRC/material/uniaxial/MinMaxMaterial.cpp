@@ -30,6 +30,7 @@
 // and imposes min and max strain limits.
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <MinMaxMaterial.h>
 #include <ID.h>

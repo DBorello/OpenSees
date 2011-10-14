@@ -23,8 +23,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
-// File: ~/material/ENTMaterial.C
-//
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -39,6 +37,8 @@
 #include <Channel.h>
 #include <Information.h>
 #include <Parameter.h>
+
+#include <math.h>
 
 ENTMaterial::ENTMaterial(int tag, double e, double A, double B)
   :UniaxialMaterial(tag,MAT_TAG_ENTMaterial),

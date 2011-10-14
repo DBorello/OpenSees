@@ -25,6 +25,7 @@
 // Written: fmk                                                                         
 
 #include <WrapperUniaxialMaterial.h>
+#include <string.h>
 
 extern modelState theModelState;
 

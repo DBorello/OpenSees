@@ -31,7 +31,7 @@
 
 #include <Kratzig.h>
 #include <DamageResponse.h>
-
+#include <math.h>
 
 Kratzig::Kratzig( int tag, double ultimatePosVal ,  double ultimateNegVal )
 :DamageModel(tag,DMG_TAG_Kratzig),
@@ -80,8 +80,8 @@ Kratzig::setTrial ( const Vector & trialVector )
 	double	CDamage			= CommitInfo[9];
 
 	if ( trialVector.Size() < 3 ) {
-		opserr << "WARNING: Kratzig::setTrial Wrong vector size for trial data" << endln;
-		return -1;
+	  opserr << "WARNING: Kratzig::setTrial Wrong vector size for trial data" << endln;
+	  return -1;
 	}
 		
 	TDefo		= trialVector(0);
@@ -89,93 +89,93 @@ Kratzig::setTrial ( const Vector & trialVector )
 	TKunload	= trialVector(2);
 
 	if ( TDefo > 0.0 ) {
-		if ( CDefo < 0.0 ) {
-			
-			double ZeroDispForce;
-			if ( fabs ( TDefo - CDefo ) > 1.0e-6 ) {
-				ZeroDispForce = CForce - (TForce - CForce) * CDefo / (TDefo - CDefo );
-			} else {
-				ZeroDispForce = 0.5*( CForce + TForce );
-			}
-			
-			TSumNegFHC = CSumNegFHC + 0.5*( ZeroDispForce + CForce )*( 0.0 - CDefo );
-			
-			if ( TDefo <= CMaxPosDefo ) {
-				TSumPosFHC = CSumPosFHC + 0.5*( TForce + ZeroDispForce )*( TDefo - 0.0);
-				TPosPHC = CPosPHC;
-			} else
-			{
-				TMaxPosDefo = TDefo;
-				double MaxDispForce = CForce +(TForce - CForce ) * ( TMaxPosDefo - CDefo)/( TDefo - CDefo );
-				TPosPHC = CPosPHC + 0.5*( TForce + MaxDispForce )*( TDefo - TMaxPosDefo);
-				TSumPosFHC = CSumPosFHC + 0.5*( MaxDispForce + CForce )*( TMaxPosDefo - CDefo);
-			}
-
-		} else {
-	
-			if ( TDefo <= CMaxPosDefo ) {
-				TSumPosFHC = CSumPosFHC + 0.5*( TForce + CDefo )*( TDefo - CDefo );
-				TPosPHC = CPosPHC;
-			} else
-			{
-				double MaxDispForce = CForce +(TForce - CForce ) * ( CMaxPosDefo - CDefo)/( TDefo - CDefo );
-				TPosPHC = CPosPHC + 0.5*( TForce + MaxDispForce )*( TDefo - CMaxPosDefo);
-				TSumPosFHC = CSumPosFHC + 0.5*( MaxDispForce + CForce )*( CMaxPosDefo - CDefo);
-				TMaxPosDefo = TDefo;
-			}			
-		}
-		
+	  if ( CDefo < 0.0 ) {
+	    
+	    double ZeroDispForce;
+	    if ( fabs ( TDefo - CDefo ) > 1.0e-6 ) {
+	      ZeroDispForce = CForce - (TForce - CForce) * CDefo / (TDefo - CDefo );
+	    } else {
+	      ZeroDispForce = 0.5*( CForce + TForce );
+	    }
+	    
+	    TSumNegFHC = CSumNegFHC + 0.5*( ZeroDispForce + CForce )*( 0.0 - CDefo );
+	    
+	    if ( TDefo <= CMaxPosDefo ) {
+	      TSumPosFHC = CSumPosFHC + 0.5*( TForce + ZeroDispForce )*( TDefo - 0.0);
+	      TPosPHC = CPosPHC;
+	    } else
+	      {
+		TMaxPosDefo = TDefo;
+		double MaxDispForce = CForce +(TForce - CForce ) * ( TMaxPosDefo - CDefo)/( TDefo - CDefo );
+		TPosPHC = CPosPHC + 0.5*( TForce + MaxDispForce )*( TDefo - TMaxPosDefo);
+		TSumPosFHC = CSumPosFHC + 0.5*( MaxDispForce + CForce )*( TMaxPosDefo - CDefo);
+	      }
+	    
+	  } else {
+	    
+	    if ( TDefo <= CMaxPosDefo ) {
+	      TSumPosFHC = CSumPosFHC + 0.5*( TForce + CDefo )*( TDefo - CDefo );
+	      TPosPHC = CPosPHC;
+	    } else
+	      {
+		double MaxDispForce = CForce +(TForce - CForce ) * ( CMaxPosDefo - CDefo)/( TDefo - CDefo );
+		TPosPHC = CPosPHC + 0.5*( TForce + MaxDispForce )*( TDefo - CMaxPosDefo);
+		TSumPosFHC = CSumPosFHC + 0.5*( MaxDispForce + CForce )*( CMaxPosDefo - CDefo);
+		TMaxPosDefo = TDefo;
+	      }			
+	  }
+	  
 	} else if (TDefo < 0.0 ) {
-
-		if ( CDefo > 0.0 ) {
-			
-			double ZeroDispForce;
-			if ( fabs( TDefo - CDefo ) > 1.0e-6 ) {
-				ZeroDispForce = CForce - (TForce - CForce) * CDefo / (TDefo - CDefo );
-			} else {
-				ZeroDispForce = 0.5*( CForce + TForce );
-			}
-			
-			TSumPosFHC = CSumPosFHC + 0.5*( ZeroDispForce + CForce )*( 0.0 - CDefo );
-			
-			if ( TDefo >= CMinNegDefo ) {
-				TSumNegFHC = CSumNegFHC + 0.5*( TForce + ZeroDispForce )*( TDefo - 0.0);
-				TNegPHC = CNegPHC;
-			} else
-			{
-				TMinNegDefo = TDefo;
-				double MinDispForce = CForce +(TForce - CForce ) * ( TMinNegDefo - CDefo)/( TDefo - CDefo );
-				TNegPHC = CNegPHC + 0.5*( TForce + MinDispForce )*( TDefo - TMinNegDefo);
-				TSumNegFHC = CSumNegFHC + 0.5*( MinDispForce + CForce )*( TMinNegDefo - CDefo);
-			}
-
-		} else {
-			
-			if ( TDefo >= CMinNegDefo ) {
-				TSumNegFHC = CSumNegFHC + 0.5*( TForce + CDefo )*( TDefo - CDefo );
-				TNegPHC = CNegPHC;
-			} else
-			{
-				double MinDispForce = CForce +(TForce - CForce ) * ( CMinNegDefo - CDefo)/( TDefo - CDefo );
-				TNegPHC = CNegPHC + 0.5*( TForce + MinDispForce )*( TDefo - CMinNegDefo);
-				TSumNegFHC = CSumNegFHC + 0.5*( MinDispForce + CForce )*( CMinNegDefo - CDefo);
-				TMinNegDefo = TDefo;
-			}
-		}
-			
+	  
+	  if ( CDefo > 0.0 ) {
+	    
+	    double ZeroDispForce;
+	    if ( fabs( TDefo - CDefo ) > 1.0e-6 ) {
+	      ZeroDispForce = CForce - (TForce - CForce) * CDefo / (TDefo - CDefo );
+	    } else {
+	      ZeroDispForce = 0.5*( CForce + TForce );
+	    }
+	    
+	    TSumPosFHC = CSumPosFHC + 0.5*( ZeroDispForce + CForce )*( 0.0 - CDefo );
+	    
+	    if ( TDefo >= CMinNegDefo ) {
+	      TSumNegFHC = CSumNegFHC + 0.5*( TForce + ZeroDispForce )*( TDefo - 0.0);
+	      TNegPHC = CNegPHC;
+	    } else
+	      {
+		TMinNegDefo = TDefo;
+		double MinDispForce = CForce +(TForce - CForce ) * ( TMinNegDefo - CDefo)/( TDefo - CDefo );
+		TNegPHC = CNegPHC + 0.5*( TForce + MinDispForce )*( TDefo - TMinNegDefo);
+		TSumNegFHC = CSumNegFHC + 0.5*( MinDispForce + CForce )*( TMinNegDefo - CDefo);
+	      }
+	    
+	  } else {
+	    
+	    if ( TDefo >= CMinNegDefo ) {
+	      TSumNegFHC = CSumNegFHC + 0.5*( TForce + CDefo )*( TDefo - CDefo );
+	      TNegPHC = CNegPHC;
+	    } else
+	      {
+		double MinDispForce = CForce +(TForce - CForce ) * ( CMinNegDefo - CDefo)/( TDefo - CDefo );
+		TNegPHC = CNegPHC + 0.5*( TForce + MinDispForce )*( TDefo - CMinNegDefo);
+		TSumNegFHC = CSumNegFHC + 0.5*( MinDispForce + CForce )*( CMinNegDefo - CDefo);
+		TMinNegDefo = TDefo;
+	      }
+	  }
+	  
 	} else { 
-		// TDefo = 0.0
-		if ( CDefo < 0.0 ) {
-			
-			TSumNegFHC = CSumNegFHC + 0.5*( TForce + CForce )*( TDefo - CDefo );
-		} else if ( CDefo > 0.0 ) {
-			TSumPosFHC = CSumPosFHC + 0.5*( TForce + CForce )*( TDefo - CDefo );
-		} else TSumPosFHC = CSumPosFHC;
+	  // TDefo = 0.0
+	  if ( CDefo < 0.0 ) {
+	    
+	    TSumNegFHC = CSumNegFHC + 0.5*( TForce + CForce )*( TDefo - CDefo );
+	  } else if ( CDefo > 0.0 ) {
+	    TSumPosFHC = CSumPosFHC + 0.5*( TForce + CForce )*( TDefo - CDefo );
+	  } else TSumPosFHC = CSumPosFHC;
 	}
-
+	
 	double PosDamage , NegDamage;
 	PosDamage = ( TPosPHC + TSumPosFHC ) / ( UltimatePosValue + TSumPosFHC ) ;
-
+	
 	NegDamage = ( TNegPHC + TSumNegFHC ) / ( UltimateNegValue + TSumNegFHC ) ;
 	
 	TDamage = PosDamage + NegDamage - PosDamage * NegDamage;

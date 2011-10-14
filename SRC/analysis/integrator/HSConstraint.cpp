@@ -33,6 +33,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <stdlib.h>
 
 HSConstraint::HSConstraint(double arcLength, double psi_u, double psi_f, double u_ref)
 :StaticIntegrator(INTEGRATOR_TAGS_HSConstraint),

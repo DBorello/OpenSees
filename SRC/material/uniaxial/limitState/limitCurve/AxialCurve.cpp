@@ -38,7 +38,7 @@
 #include <tcl.h>
 
 #include <DummyStream.h>
-
+#define PI (3.141592653589793)
 #include <fstream>
 #include <iomanip>
 #include <iostream>

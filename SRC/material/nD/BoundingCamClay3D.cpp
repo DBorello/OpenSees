@@ -106,23 +106,3 @@ const Matrix& BoundingCamClay3D::getInitialTangent()
     return mCep;
 } 
 
-//this is mike's problem
-int BoundingCamClay3D :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int BoundingCamClay3D :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int BoundingCamClay3D :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int BoundingCamClay3D :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}

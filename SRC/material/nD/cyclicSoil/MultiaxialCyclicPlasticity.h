@@ -146,10 +146,6 @@ class MultiaxialCyclicPlasticity : public NDMaterial {
   protected :
 
 
-  //this is mike's problem
-  static Tensor rank2;
-  static Tensor rank4;
-
   // Material parameter used for K0 condition
   double K0;           //lateral earth pressure coefficient           
   double bulk_K0;

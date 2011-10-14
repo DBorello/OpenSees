@@ -41,8 +41,6 @@
 #include <Vector.h>
 #include <ID.h>
 
-#include <Tensor.h>
-
 class ElasticIsotropicAxiSymm : public ElasticIsotropicMaterial
 {
   public:

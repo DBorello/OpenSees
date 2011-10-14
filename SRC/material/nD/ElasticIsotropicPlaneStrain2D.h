@@ -40,8 +40,6 @@
 #include <Vector.h>
 #include <ID.h>
 
-#include <Tensor.h>
-
 class ElasticIsotropicPlaneStrain2D : public ElasticIsotropicMaterial
 {
   public:
@@ -69,12 +67,17 @@ class ElasticIsotropicPlaneStrain2D : public ElasticIsotropicMaterial
     const char *getType (void) const;
     int getOrder (void) const;
 
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);    
+
   protected:
 
   private:
     static Vector sigma;        // Stress vector ... class-wide for returns
     static Matrix D;	        // Elastic constants
     Vector epsilon;	        // Trial strains
+    Vector Cepsilon;	        // Committed strains
 };
 
 

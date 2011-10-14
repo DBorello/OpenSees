@@ -37,6 +37,8 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 

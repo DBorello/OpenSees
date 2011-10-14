@@ -32,7 +32,7 @@
 #include <NormalizedPeak.h>
 #include <DamageResponse.h>
 #include <Element.h>
-
+#include <math.h>
 
 NormalizedPeak::NormalizedPeak(int tag, double maxVal, double minVal , const char *argv)
 :DamageModel(tag,DMG_TAG_NormalizedPeak), damagetype( NotSpecified ), 

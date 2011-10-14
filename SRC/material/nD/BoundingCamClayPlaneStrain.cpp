@@ -148,23 +148,3 @@ const Matrix& BoundingCamClayPlaneStrain::getInitialTangent()
     return tangent;
 } 
 
-//this is mike's problem
-int BoundingCamClayPlaneStrain :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int BoundingCamClayPlaneStrain :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int BoundingCamClayPlaneStrain :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int BoundingCamClayPlaneStrain :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}

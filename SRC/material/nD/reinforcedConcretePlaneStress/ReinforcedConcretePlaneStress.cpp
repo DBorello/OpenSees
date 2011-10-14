@@ -16,12 +16,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <Tensor.h>
-
-//Vector ReinforcedConcretePlaneStress :: strain_vec(3);
-//Vector ReinforcedConcretePlaneStress :: stress_vec(3);
-//Matrix ReinforcedConcretePlaneStress :: tangent_matrix(3,3);
-
 #include <MaterialResponse.h>
 #include <DummyStream.h>
 #include <elementAPI.h>

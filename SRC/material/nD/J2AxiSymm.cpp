@@ -244,42 +244,6 @@ const Matrix& J2AxiSymm :: getInitialTangent( )
   return tangent_matrix ;
 } 
 
-//this is mike's problem
-int J2AxiSymm :: setTrialStrain(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2AxiSymm :: setTrialStrain(const Tensor &v, const Tensor &r)     
-{
-  return -1 ;
-}
-
-int J2AxiSymm :: setTrialStrainIncr(const Tensor &v) 
-{
-  return -1 ;
-}
-
-int J2AxiSymm :: setTrialStrainIncr(const Tensor &v, const Tensor &r) 
-{
-  return -1 ;
-}
-
-const Tensor& J2AxiSymm :: getTangentTensor( ) 
-{
-  return rank4 ;
-}
-
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2AxiSymm :: getStressTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-//jeremic@ucdavis.edu 22jan2001
-//jeremic@ucdavis.edu 22jan2001const Tensor& J2AxiSymm :: getStrainTensor( ) 
-//jeremic@ucdavis.edu 22jan2001{
-//jeremic@ucdavis.edu 22jan2001  return rank2 ;
-//jeremic@ucdavis.edu 22jan2001}
-
 //swap history variables
 int J2AxiSymm :: commitState( )  
 {

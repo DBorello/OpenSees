@@ -28,6 +28,7 @@
 
 // Description: This file contains the implementation for BandSPDLinSOE
 
+#include <stdlib.h>
 
 #include <BandSPDLinSOE.h>
 #include <BandSPDLinSolver.h>
