@@ -203,9 +203,7 @@ C
             EprM(K)   = Epr(M)
             If ((Epo(2)-Epo(1)).LT.(EpSh-Epy)) then    ! Between Yield Plateaus
               Power(K) = 0.35
-            Else                                       ! Bauschinger Curve
-              BFlag(K) = 1
-C Changes were made on 10/05/11 by JR to the way Omega is computedC   Tests on high elongation stainless steel shows Omega is not a 
+            Else                                       ! Bauschinger Curve              BFlag(K) = 1              C Changes were made on 10/05/11 by JR to the way Omega is computedC   Tests on high elongation stainless steel shows Omega is not a 
 C    function of EpsuC   Values of Omega/OmegFac are limited to the 0.05 to 0.085 range                            Fpt      = Fpsu*(2-EpsuSh(1)+EpsuSh(2))
               Fpp      = Fpsu*(s*1.-EpsuSh(K)+Epa(M)) - Fpa(M)
 C              Epp      = Abs((Epsush(K) - Epa(M))/Epsu) ! ORIGINAL
