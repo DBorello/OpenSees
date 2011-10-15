@@ -804,6 +804,7 @@ Domain::clearAll(void) {
   theMPs->clearAll();
   theLoadPatterns->clearAll();
   theParameters->clearAll();
+  numParameters = 0;
 
   // remove the recorders
   int i;
