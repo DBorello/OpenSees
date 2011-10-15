@@ -34,7 +34,7 @@
 
 #define DESIGN_VARIABLE 10007567
 
- 
+#include <math.h>
 
 DesignVariable::DesignVariable(int passedTag, 
 			 char *passedName,

@@ -39,7 +39,7 @@
 #include <RandomNumberGenerator.h>
 #include <classTags.h>
 //#include <fstream>
-
+#include <math.h>
 
 SimulatedRandomProcessSeries::SimulatedRandomProcessSeries(int tag,
 							   RandomNumberGenerator *theRandNumGenerator,

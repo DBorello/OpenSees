@@ -39,6 +39,7 @@
 #include <Filter.h>
 #include <classTags.h>
 #include <Parameter.h>
+#include <math.h>
 
 DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int tag,
 							       int num, 
