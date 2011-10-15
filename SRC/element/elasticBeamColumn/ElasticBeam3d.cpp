@@ -39,6 +39,7 @@
 
 #include <CrdTransf.h>
 #include <Information.h>
+#include <Parameter.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 #include <Renderer.h>
@@ -967,3 +968,67 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
     return -1;
   }
 }
+
+
+int
+ElasticBeam3d::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  // E of the beam interior
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
+
+  // A of the beam interior
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(2, this);
+  
+  // Iz of the beam interior
+  if (strcmp(argv[0],"Iz") == 0)
+    return param.addObject(3, this);
+  
+  // Iy of the beam interior
+  if (strcmp(argv[0],"Iy") == 0)
+    return param.addObject(4, this);
+
+  // G of the beam interior
+  if (strcmp(argv[0],"G") == 0)
+    return param.addObject(5, this);
+
+  // J of the beam interior
+  if (strcmp(argv[0],"J") == 0)
+    return param.addObject(6, this);
+
+  return -1;
+}
+
+int
+ElasticBeam3d::updateParameter (int parameterID, Information &info)
+{
+	switch (parameterID) {
+	case -1:
+		return -1;
+	case 1:
+		E = info.theDouble;
+		return 0;
+	case 2:
+		A = info.theDouble;
+		return 0;
+	case 3:
+		Iz = info.theDouble;
+		return 0;
+	case 4:
+		Iy = info.theDouble;
+		return 0;
+	case 5:
+		G = info.theDouble;
+		return 0;
+	case 6:
+		Jx = info.theDouble;
+		return 0;
+	default:
+		return -1;
+	}
+}
+

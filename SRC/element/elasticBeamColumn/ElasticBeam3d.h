@@ -91,6 +91,9 @@ class ElasticBeam3d : public Element
     Response *setResponse (const char **argv, int argc, OPS_Stream &s);
     int getResponse (int responseID, Information &info);
  
+    int setParameter (const char **argv, int argc, Parameter &param);
+    int updateParameter (int parameterID, Information &info);
+
   private:
     double A,E,G,Jx,Iy,Iz;
 
