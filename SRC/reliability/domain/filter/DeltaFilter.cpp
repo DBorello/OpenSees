@@ -32,6 +32,8 @@
 #include <DeltaFilter.h>
 #include <Filter.h>
 #include <classTags.h>
+#include <math.h>
+
 #define FILTER_DELTA  9877101
 
 DeltaFilter::DeltaFilter(int tag)
