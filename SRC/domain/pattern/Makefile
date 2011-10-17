@@ -13,7 +13,6 @@ endif
 
 OBJS       = $(RELIABILITY_OBJS) \
 	EarthquakePattern.o \
-	PBowlLoading.o \
 	LinearSeries.o \
 	LoadPattern.o \
 	LoadPatternIter.o \
