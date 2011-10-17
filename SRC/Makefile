@@ -828,8 +828,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/subdomain/ShadowSubdomain.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
 	$(FE)/domain/subdomain/SubdomainNodIter.o \
-	$(FE)/analysis/analysis/DomainUser.o \
-	$(FE)/domain/pattern/PBowlLoading.o
+	$(FE)/analysis/analysis/DomainUser.o
 
 ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/analysis/StaticAnalysis.o \
