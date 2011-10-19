@@ -37,6 +37,7 @@
 #include <ElasticSection3d.h>
 #include <ElasticShearSection2d.h>
 #include <ElasticShearSection3d.h>
+#include <ElasticTubeSection3d.h>
 #include <GenericSection1d.h>
 //#include <GenericSectionNd.h>
 #include <SectionAggregator.h>
@@ -194,6 +195,49 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	}
     }	
 	
+    // Check argv[1] for section type
+    else if (strcmp(argv[1],"ElasticTube") == 0) {
+      if (argc < 7) {
+	opserr << "WARNING insufficient arguments\n";
+	opserr << "Want: section ElasticTube tag? E? d? tw? G?" << endln;
+	return TCL_ERROR;
+      }
+	
+	int tag;
+	double E, d, tw, G;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    opserr << "WARNING invalid section Elastic tag" << endln;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
+	    opserr << "WARNING invalid E" << endln;
+	    opserr << "ElasticTube section: " << tag << endln;	    
+	    return TCL_ERROR;
+	}	
+
+	if (Tcl_GetDouble (interp, argv[4], &d) != TCL_OK) {
+	    opserr << "WARNING invalid d" << endln;
+	    opserr << "ElasticTube section: " << tag << endln;	    
+	    return TCL_ERROR;
+	}	
+	
+	if (Tcl_GetDouble (interp, argv[5], &tw) != TCL_OK) {
+	    opserr << "WARNING invalid tw" << endln;
+	    opserr << "ElasticTube section: " << tag << endln;	    	    
+	    return TCL_ERROR;
+	}	
+
+	if (Tcl_GetDouble (interp, argv[6], &G) != TCL_OK) {
+	    opserr << "WARNING invalid G" << endln;
+	    opserr << "ElasticTube section: " << tag << endln;	    	    
+	    return TCL_ERROR;
+	}
+
+	theSection = new ElasticTubeSection3d(tag, E, d, tw, G);	
+    }
+
     else if (strcmp(argv[1],"Generic1D") == 0 ||
 	     strcmp(argv[1],"Generic1d") == 0 ||
 	     strcmp(argv[1],"Uniaxial") == 0) {

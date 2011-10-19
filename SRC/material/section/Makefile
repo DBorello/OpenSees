@@ -4,6 +4,7 @@ OBJS       = SectionForceDeformation.o \
 	ElasticSection2d.o ElasticSection3d.o \
 	ElasticShearSection2d.o ElasticShearSection3d.o \
 	ElasticBDShearSection2d.o \
+	ElasticTubeSection3d.o \
 	GenericSection1d.o \
 	SectionAggregator.o \
 	ElasticPlateSection.o \
