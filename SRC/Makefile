@@ -131,7 +131,7 @@ metis:
 
 FMK_LIBS = $(FE)/database/FE_Datastore.o \
 	$(FE)/api/packages.o \
-	$(FE)/api/elementAPI.o
+	$(FE)/api/elementAPI_TCL.o
 
 KJE_LIBS = $(FE)/material/uniaxial/limitState/LimitStateMaterial.o \
 	$(FE)/material/uniaxial/limitState/TclLimitState.o \
