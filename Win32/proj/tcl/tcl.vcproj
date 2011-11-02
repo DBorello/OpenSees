@@ -124,6 +124,9 @@
 				RelativePath="..\..\..\SRC\tcl\commands.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\api\elementAPI_TCL.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\modelbuilder\tcl\myCommands.cpp">
 			</File>
 		</Filter>

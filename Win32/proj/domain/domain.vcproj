@@ -384,12 +384,6 @@
 				RelativePath="..\..\..\SRC\domain\pattern\MultiSupportPattern.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\domain\pattern\PBowlLoading.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\domain\pattern\PBowlLoading.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\domain\pattern\PeerNGAMotion.cpp">
 			</File>
 			<File

@@ -105,15 +105,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\..\..\Src\nDarray\BJmatrix.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\BJtensor.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\BJvector.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\matrix\ID.cpp">
 			</File>
 			<File
@@ -122,31 +113,10 @@
 			<File
 				RelativePath="..\..\..\SRC\matrix\Vector.cpp">
 			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\basics.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\nDarray.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\straint.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\stresst.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
-			<File
-				RelativePath="..\..\..\Src\nDarray\BJmatrix.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\BJtensor.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\BJvector.h">
-			</File>
 			<File
 				RelativePath="..\..\..\SRC\matrix\ID.h">
 			</File>
@@ -154,22 +124,7 @@
 				RelativePath="..\..\..\SRC\matrix\Matrix.h">
 			</File>
 			<File
-				RelativePath="..\..\..\Src\nDarray\Tensor.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\matrix\Vector.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\basics.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\nDarray.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\straint.h">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\nDarray\stresst.h">
 			</File>
 		</Filter>
 	</Files>

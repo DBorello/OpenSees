@@ -26,20 +26,19 @@
 ** Written: fmk 
 */
 
-#include <elementAPI.h>
+#include "elementAPI.h"
 #include <stdlib.h>
-#include <packages.h>
-#include <OPS_Globals.h>
+//#include <packages.h>
 #include <Domain.h>
 #include <Node.h>
-#include <TclModelBuilder.h>
-#include <WrapperElement.h>
+//#include <TclModelBuilder.h>
+//#include <WrapperElement.h>
 
 #include <map>
 #include <UniaxialMaterial.h>
 #include <NDMaterial.h>
-#include <WrapperUniaxialMaterial.h>
-#include <WrapperNDMaterial.h>
+//#include <WrapperUniaxialMaterial.h>
+//#include <WrapperNDMaterial.h>
 
 #include <OPS_Globals.h>
 
@@ -284,30 +283,7 @@ eleObj *OPS_GetElementType(char *type, int sizeType) {
   
   eleFunct eleFunctPtr;
   void *libHandle;
-  
-  int res = getLibraryFunction(type, type, &libHandle, (void **)&eleFunctPtr);
-  
-  if (res == 0) {
-    
-    // add the routine to the list of possible elements
-    
-    char *funcName = new char[strlen(type)+1];
-    strcpy(funcName, type);
-    eleFunction = new ElementFunction;
-    eleFunction->theFunct = eleFunctPtr;
-    eleFunction->funcName = funcName;	
-    eleFunction->next = theElementFunctions;
-    theElementFunctions = eleFunction;
-    
-    // create a new eleObject, set the function ptr &  return it
-    
-    eleObj *theEleObject = new eleObj;      
-    //eleObj *theEleObject = (eleObj *)malloc(sizeof( eleObj));;      
 
-    theEleObject->eleFunctPtr = eleFunction->theFunct;
-
-    return theEleObject;
-  }
   return 0;
 }
 
@@ -335,31 +311,7 @@ matObj *OPS_GetMaterialType(char *type, int sizeType) {
   matFunct matFunctPtr;
   void *libHandle;
   
-  int res = getLibraryFunction(type, type, &libHandle, (void **)&matFunctPtr);
   
-  if (res == 0) {
-
-    // add the routine to the list of possible elements
-    
-    char *funcName = new char[strlen(type)+1];
-    strcpy(funcName, type);
-    matFunction = new MaterialFunction;
-    matFunction->theFunct = matFunctPtr;
-    matFunction->funcName = funcName;	
-    matFunction->next = theMaterialFunctions;
-    theMaterialFunctions = matFunction;
-
-    // create a new eleObject, set the function ptr &  return it
-    
-    matObj *theMatObject = new matObj;      
-    //eleObj *theEleObject = (eleObj *)malloc(sizeof( eleObj));;      
-
-    theMatObject->matFunctPtr = matFunction->theFunct;
-
-    //    fprintf(stderr,"getMaterial Address %p\n",theMatObject);
-
-    return theMatObject;
-  }
 
   return 0;
 }
@@ -571,7 +523,7 @@ OPS_InvokeMaterialDirectly(matObject **theMat, modelState *model, double *strain
 extern "C" int        
 OPS_InvokeMaterialDirectly2(matObject *theMat, modelState *model, double *strain, double *stress, double *tang, int *isw)
 {
-  return 0;
+		return -1;
 }
 
 
@@ -600,24 +552,13 @@ OPS_GetSectionForceDeformation(int matTag)
 
 
 int
-OPS_ResetInput(ClientData clientData, 
-	       Tcl_Interp *interp,  
-	       int cArg, 
-	       int mArg, 
-	       TCL_Char **argv, 
-	       Domain *domain,
-	       TclModelBuilder *builder)
+OPS_ResetInput(Domain *domain)
 {
   return 0;
 }
 
 int
-OPS_ResetInputNoBuilder(ClientData clientData, 
-			Tcl_Interp *interp,  
-			int cArg, 
-			int mArg, 
-			TCL_Char **argv, 
-			Domain *domain)
+OPS_ResetInputNoBuilder(Domain *domain)
 {
   return 0;
 }
@@ -637,7 +578,7 @@ OPS_GetNDM()
 
 FE_Datastore *OPS_GetFEDatastore()
 {
-  return 0;
+	return 0;
 }
 
 const char *OPS_GetInterpPWD()

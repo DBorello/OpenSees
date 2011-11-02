@@ -121,9 +121,6 @@
 			<File
 				RelativePath="..\..\..\SRC\element\WrapperElement.cpp">
 			</File>
-			<File
-				RelativePath="..\..\..\SRC\api\elementAPI.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -374,7 +371,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="eightNodeBrick"
+			Name="brick"
 			Filter="">
 			<File
 				RelativePath="..\..\..\SRC\element\brick\BbarBrick.cpp">
@@ -395,39 +392,20 @@
 				RelativePath="..\..\..\SRC\element\brick\Brick.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\element\8nbrick\EightNodeBrick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\8nbrick\EightNodeBrick.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\element\brick\TclBrickCommand.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\element\8nbrick\TclEightNodeBrickCommand.cpp">
+				RelativePath="..\..\..\SRC\element\brick\TclTwenty_Node_BrickCommand.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\brick\Twenty_Node_Brick.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\brick\Twenty_Node_Brick.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\brick\shp3d.cpp">
 			</File>
-			<Filter
-				Name="shell"
-				Filter="">
-				<File
-					RelativePath="..\..\..\SRC\element\shell\R3vectors.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\shell\R3vectors.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\shell\ShellMITC4.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\shell\ShellMITC4.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\shell\TclShellCommand.cpp">
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="dispBeamColumn"
@@ -449,50 +427,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3dWithSensitivity.cpp">
-			</File>
-		</Filter>
-		<Filter
-			Name="twentyNodeBrick"
-			Filter="">
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\TclTwentyNodeBrickCommand.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\TclTwenty_Node_BrickCommand.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\TwentyNodeBrick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\TwentyNodeBrick.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.h">
-			</File>
-		</Filter>
-		<Filter
-			Name="upU"
-			Filter="">
-			<File
-				RelativePath="..\..\..\Src\element\upU\EightNodeBrick_u_p_U.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\element\upU\EightNodeBrick_u_p_U.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\TclEightNodeBrick_u_p_U.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\TclTwentyNodeBrick_u_p_U.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.h">
 			</File>
 		</Filter>
 		<Filter
@@ -767,38 +701,6 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="twentySevenNodeBrick"
-			Filter="">
-			<File
-				RelativePath="..\..\..\SRC\element\27nbrick\TclTwentySevenNodeBrickCommand.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\27nbrick\TwentySevenNodeBrick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\27nbrick\TwentySevenNodeBrick.h">
-			</File>
-		</Filter>
-		<Filter
-			Name="TotalLangrangianFD20NodeBrick"
-			Filter="">
-			<File
-				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TclTLFD20NodeBrickCommand.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TotalLagrangianFD20NodeBrick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TotalLagrangianFD20NodeBrick.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TotalLagrangianFD8NodeBrick.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TotalLagrangianFD8NodeBrick.h">
-			</File>
-		</Filter>
-		<Filter
 			Name="up"
 			Filter="">
 			<File
@@ -818,18 +720,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\UP-ucsd\BrickUP.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\UP_ucdavis\EightNode_Brick_u_p.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\UP_ucdavis\EightNode_Brick_u_p.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\UP_ucdavis\EightNode_LDBrick_u_p.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\UP_ucdavis\EightNode_LDBrick_u_p.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\UP-ucsd\FourNodeQuadUP.cpp">
@@ -854,9 +744,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\UP-ucsd\Nine_Four_Node_QuadUP.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\UP_ucdavis\TclBrick_u_p.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\UP-ucsd\TclFourNodeQuadUPCommand.cpp">
@@ -1148,6 +1035,28 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\triangle\Tri31.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="shell"
+			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\element\shell\R3vectors.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\shell\R3vectors.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\shell\ShellMITC4.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\shell\ShellMITC4.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\shell\ShellNL.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\shell\ShellNL.h">
 			</File>
 		</Filter>
 		<File
