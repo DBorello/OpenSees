@@ -101,6 +101,8 @@ extern void *OPS_FourNodeQuad3d(void);
 extern void *OPS_Tri31(void);
 extern void *OPS_SSPquad(void);
 extern void *OPS_SSPquadUP(void);
+extern void *OPS_SSPbrick(void);
+extern void *OPS_SSPbrickUP(void);
 extern void *OPS_NewShellMITC4(void);
 extern void *OPS_NewShellNL(void);
 
@@ -508,6 +510,26 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"SSPquadUP") == 0) || (strcmp(argv[1],"SSPQuadUP") == 0)) {
     
     void *theEle = OPS_SSPquadUP();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"SSPbrick") == 0) || (strcmp(argv[1],"SSPBrick") == 0)) {
+    
+    void *theEle = OPS_SSPbrick();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"SSPbrickUP") == 0) || (strcmp(argv[1],"SSPBrickUP") == 0)) {
+    
+    void *theEle = OPS_SSPbrickUP();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {

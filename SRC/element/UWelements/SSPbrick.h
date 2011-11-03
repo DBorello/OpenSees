@@ -18,19 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                        
-#ifndef SSPquadUP_h
-#define SSPquadUP_h
+#ifndef SSPbrick_h
+#define SSPbrick_h
 
-// Created: C.McGann, UW, 05.2011
+// Created: C.McGann, UW, 10.2011
 //
-// Description: This file contains the class definition for SSPquadUP
-//                Stabilized Single-Point Quad element with a u-p formulation 
-//                for plane strain analysis of saturated porous media
-//
-// Reference:   Zienkiewicz, O.C. and Shiomi, T. (1984). "Dynamic behavior of 
-//                saturated porous media; the generalized Biot formulation and 
-//                its numerical solution." International Journal for Numerical 
-//                Methods in Geomechanics, 8, 71-96.
+// Description: This file contains the class definition for SSPbrick (Stabilized Single-Point Brick)
 
 #include <Element.h>
 #include <Node.h>
@@ -39,11 +32,11 @@
 #include <ID.h>
 
 // number of nodes per element
-#define SQUP_NUM_NODE 4
+#define SSPB_NUM_NODE 8
 // number of dimensions
-#define SQUP_NUM_DIM  2
+#define SSPB_NUM_DIM  3
 // degrees of freedom per element
-#define SQUP_NUM_DOF  12
+#define SSPB_NUM_DOF  24
 
 class Domain;
 class Node;
@@ -52,14 +45,13 @@ class NDMaterial;
 class FEM_ObjectBroker;
 class Response;
 
-class SSPquadUP : public Element
+class SSPbrick : public Element
 {
   public:
-    SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &theMat,
-                       double thick, double Kf, double Rf, double k1, double k2,
-	                   double eVoid, double alpha, double b1 = 0.0, double b2 = 0.0);
-    SSPquadUP();
-    ~SSPquadUP();
+    SSPbrick(int tag, int Nd1, int Nd2, int Nd3, int Nd4, int Nd5, int Nd6, int Nd7, int Nd8,
+                      NDMaterial &theMat, double b1 = 0.0, double b2 = 0.0, double b3 = 0.0);
+    SSPbrick();
+    ~SSPbrick();
 
     // public methods to obtain information about dof and connectivity
     int getNumExternalNodes(void) const; 
@@ -77,7 +69,6 @@ class SSPquadUP : public Element
 	// public methods to obtain stiffness, mass, damping, and residual info
 	const Matrix &getTangentStiff(void);
 	const Matrix &getInitialStiff(void);
-	const Matrix &getDamp(void);
 	const Matrix &getMass(void);
 
 	void zeroLoad(void);
@@ -104,11 +95,8 @@ class SSPquadUP : public Element
   private:
 
     // member functions
-	Matrix DyadicProd(Vector v1, Vector v2);            // dyadic product for two 2x1 vectors
 	void GetStab(void);                                 // compute stabilization stiffness matrix
-	void GetSolidStiffness(void);                       // compute solid phase stiffness matrix
-	void GetSolidMass(void);                            // compute solid phase mass matrix
-	void GetPermeabilityMatrix(void);                   // compute permeability matrix
+	Vector CrossProduct(Vector v1, Vector v2);          // cross product for two 3x1 vectors
 
 	// objects
 	NDMaterial *theMaterial;                            // pointer to NDMaterial object
@@ -116,38 +104,32 @@ class SSPquadUP : public Element
 	Matrix mTangentStiffness;                           // tangent stiffness matrix
 	Vector mInternalForces;                             // vector of internal forces
 	Vector Q;                                           // vector of applied nodal forces
-	Matrix mDamp;                                       // damping matrix
 	Matrix mMass;                                       // mass matrix
 
-	Node *theNodes[4];
+	Node *theNodes[8];
 
 	// input quantities
-	double mThickness;                                  // thickness of element
-	double fBulk;                                       // bulk modulus of pore fluid
-	double fDens;                                       // pore fluid mass density
-	double eVoid;                                       // voids ratio for solid phase
-	double perm[2];                                     // horiz and vertical permeability
-	double b[2];                                        // body forces acting on element
+	double b[3];                                        // body forces acting on element
 
 	// load pattern variables
-	double appliedB[2];                                 // body forces applied with load pattern
-	int    applyLoad;                                   // flag for body force in load pattern
+	double appliedB[3];                                 // body forces applied with load pattern
+	int applyLoad;                                      // flag for body force in load pattern
 
 	// calculation variables
-	double J0;                                          // constant portion of jacobian
-	double J1;                                          // linear (xi) portion of jacobian
-	double J2;                                          // linear (eta) portion of jacobian
-	double mPorosity;                                   // porosity of solid phase n = e/(1+e)
-	double mAlpha;
+	double J[20];                                       // jacobian determinant terms
+	double mVol;                                        // element volume
 	
-	Matrix Mmem;                                        // mapping matrix for membrane modes
+	Matrix Bnot;                                        // mapping matrix for membrane modes
 	Matrix Kstab;                                       // stabilization stiffness matrix
 	Matrix mNodeCrd;                                    // nodal coordinate array
-	Matrix dN;                                          // array of shape function derivatives
-
-	Matrix mSolidK;                                     // stiffness matrix for solid phase
-	Matrix mSolidM;                                     // mass matrix for solid phase
-	Matrix mPerm;                                       // permeability matrix H
+	
+	Vector xi;                                          // xi evaluated at the nodes
+	Vector et;                                          // eta evaluated at the nodes
+	Vector ze;                                          // zeta evaluated at the nodes
+	Vector hut;                                         // zeta*eta evaluated at the nodes
+	Vector hus;                                         // zeta*xi evaluated at the nodes
+	Vector hst;                                         // xi*eta evaluated at the nodes
+	Vector hstu;                                        // xi*eta*zeta evaluated at the nodes
 };
 
 #endif

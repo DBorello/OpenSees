@@ -128,10 +128,7 @@ SSPquad::SSPquad(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &theMat
 	Q(SSPQ_NUM_DOF),
 	mMass(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	mNodeCrd(2,4),
-	mStrain(3),
-	mStress(3),
 	Mmem(3,SSPQ_NUM_DOF),
-	Kmem(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	Kstab(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	mThickness(thick),
 	applyLoad(0)
@@ -180,10 +177,7 @@ SSPquad::SSPquad()
 	Q(SSPQ_NUM_DOF),
 	mMass(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	mNodeCrd(2,4),
-	mStrain(3),
-	mStress(3),
 	Mmem(3,SSPQ_NUM_DOF),
-	Kmem(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	Kstab(SSPQ_NUM_DOF,SSPQ_NUM_DOF),
 	mThickness(0),
 	applyLoad(0)
@@ -314,9 +308,6 @@ SSPquad::update(void)
 	strain = Mmem*u;
 	theMaterial->setTrialStrain(strain);
 
-	// strain for recorders
-	mStrain = strain;
-
 	return 0;
 }
 
@@ -345,10 +336,9 @@ const Matrix &
 SSPquad::getMass(void)
 {
 	mMass.Zero();
-	double density;
 
 	// get mass density from the material
-	density = theMaterial->getRho();
+	double density = theMaterial->getRho();
 
 	// return zero matrix if density is zero
 	if (density == 0.0) {
@@ -448,7 +438,7 @@ SSPquad::getResistingForce(void)
 // this function computes the resisting force vector for the element
 {
 	// get stress from the material
-	mStress = theMaterial->getStress();
+	Vector mStress = theMaterial->getStress();
 
 	// get trial displacement
 	const Vector &mDisp_1 = theNodes[0]->getTrialDisp();
@@ -702,18 +692,14 @@ SSPquad::setParameter(const char **argv, int argc, Parameter &param)
 	if (argc < 1) {
 		return -1;
 	}
-
 	int res = -1;
-
 	if (strcmp(argv[0],"materialState") == 0) {
 		return param.addObject(5,this);
 	}
-
 	// quad pressure loading
   	if (strcmp(argv[0],"pressure") == 0) {
     	return param.addObject(2, this);
 	}
-
   	// a material parameter
   	else if (strstr(argv[0],"material") != 0) {
 
@@ -728,10 +714,8 @@ SSPquad::setParameter(const char **argv, int argc, Parameter &param)
       		return -1;
 		}
   	}
-
   	// otherwise it could be just a forall material parameter
   	else {
-
     	int matRes = res;
       	matRes =  theMaterial->setParameter(argv, argc, param);
 
@@ -751,19 +735,16 @@ SSPquad::updateParameter(int parameterID, Information &info)
   	switch (parameterID) {
     	case -1:
       		return -1;
-
 		case 1:
 			matRes = theMaterial->updateParameter(parameterID, info);
 			if (matRes != -1) {
 				res = matRes;
 			}
 			return res;
-      
 		case 2:
 			//pressure = info.theDouble;
 			//this->setPressureLoadAtNodes();	// update consistent nodal loads
 			return 0;
-
 		case 5:
 			matRes = theMaterial->updateParameter(parameterID, info);
 			if (matRes != -1) {

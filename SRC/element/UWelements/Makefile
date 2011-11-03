@@ -1,7 +1,9 @@
 include ../../../Makefile.def
 
 OBJS       = SSPquad.o \
-	SSPquadUP.o
+	         SSPquadUP.o \
+			 SSPbrick.o \
+			 SSPbrickUP.o
 
 all:         $(OBJS)
 

@@ -122,12 +122,8 @@ class SSPquad : public Element
 	double J2;                                          // linear (eta) portion of jacobian
 	
 	Matrix Mmem;                                        // mapping matrix for membrane modes
-	Matrix Kmem;                                        // membrane stiffness matrix
 	Matrix Kstab;                                       // stabilization stiffness matrix
 	Matrix mNodeCrd;                                    // nodal coordinate array
-
-	Vector mStrain;                                     // strain to the material
-	Vector mStress;                                     // stress from the material
 };
 
 #endif

@@ -488,7 +488,9 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/twoNodeLink/TclTwoNodeLinkCommand.o \
 	$(FE)/element/triangle/Tri31.o \
 	$(FE)/element/UWelements/SSPquad.o \
-	$(FE)/element/UWelements/SSPquadUP.o
+	$(FE)/element/UWelements/SSPquadUP.o \
+	$(FE)/element/UWelements/SSPbrick.o \
+	$(FE)/element/UWelements/SSPbrickUP.o
 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \

@@ -206,7 +206,7 @@ extern TransientIntegrator *OPS_NewGeneralizedAlpha(void);
 
 #include <ConjugateGradientSolver.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
 #include <ItpackLinSOE.h>
 #include <ItpackLinSolver.h>
 #endif
@@ -2533,7 +2533,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
     theSOE = new UmfpackGenLinSOE(*theSolver, factLVALUE);      
   }	  
-#ifndef _WIN32
+#ifdef _WIN32
   else if (strcmp(argv[1],"Itpack") == 0) {
     
     // now must determine the type of solver to create from rest of args

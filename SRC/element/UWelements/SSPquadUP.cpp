@@ -69,7 +69,7 @@ OPS_SSPquadUP(void)
   	int numRemainingInputArgs = OPS_GetNumRemainingInputArgs();
 
   	if (numRemainingInputArgs < 13) {
-    	opserr << "Invalid #args, want: element SSPquadUP eleTag? iNode? jNode? kNode? lNode? matTag? t? fBulk? fDen? k1? k2? e? <b1? b2?>?\n";
+    	opserr << "Invalid #args, want: element SSPquadUP eleTag? iNode? jNode? kNode? lNode? matTag? t? fBulk? fDen? k1? k2? e? alpha? <b1? b2?>?\n";
 		return 0;
   	}
 
@@ -133,7 +133,6 @@ SSPquadUP::SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &th
 	mNodeCrd(2,4),
 	dN(4,2),
 	Mmem(3,8),
-	Kmem(8,8),
 	Kstab(8,8),
 	mSolidK(8,8),
 	mSolidM(8,8),
@@ -196,7 +195,6 @@ SSPquadUP::SSPquadUP()
 	mNodeCrd(2,4),
 	dN(4,2),
 	Mmem(3,8),
-	Kmem(8,8),
 	Kstab(8,8),
 	mSolidK(8,8),
 	mSolidM(8,8),
@@ -440,7 +438,6 @@ SSPquadUP::getDamp(void)
 
 			// contribution of permeability matrix
 			mDamp(IIp2,JJp2) = -mPerm(i,j);
-			//mDamp(IIp2,JJp2) = mPerm(i,j);
 		}
 	}
 
@@ -496,7 +493,6 @@ SSPquadUP::getMass(void)
 			mMass(II,JJp1)   = mSolidM(I,Jp1);
 
 			// contribution of compressibility matrix
-			//mMass(IIp2,JJp2) = oneOverQ;
 			mMass(IIp2,JJp2) = Kp(i,j) + oneOverQ;
 		}
 	}
@@ -552,7 +548,7 @@ SSPquadUP::addInertiaLoadToUnbalance(const Vector &accel)
 	const Vector &Raccel4 = theNodes[3]->getRV(accel);
 
 	if (3 != Raccel1.Size() || 3 != Raccel2.Size() || 3 != Raccel3.Size() || 3 != Raccel4.Size()) {
-    	opserr << "FourNodeQuad::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
+    	opserr << "SSPquadUP::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
     	return -1;
 	}
 
@@ -614,11 +610,6 @@ SSPquadUP::getResistingForce(void)
 	f1.addMatrixTransposeVector(1.0, Mmem, mStress, 4.0*mThickness*J0);
 
 	// get mass density from the material
-	//double sDens = theMaterial->getRho();
-
-	// compute mass density of the mixture
-	//double density = (1.0 - mPorosity)*sDens + mPorosity*fDens;
-
 	double density = theMaterial->getRho();
 
 	// subtract body forces from internal force vector 
@@ -639,18 +630,6 @@ SSPquadUP::getResistingForce(void)
 		}
 	}
 
-	/*// add the pressure loading to the resisting force
-	Vector Couple(8);
-	Vector press(8);
-	for (int i = 0; i < 4; i++) {
-		Couple(2*i)   = -Mmem(0,2*i)*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
-		Couple(2*i+1) = -Mmem(1,2*i+1)*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
-	}
-	for (int i = 0; i < 8; i++) {
-		press(i) = Couple(i)*(mDisp_1(2)+mDisp_2(2)+mDisp_3(2)+mDisp_4(2));
-	}
-	f1.addVector(1.0, press, 1.0);*/
-
 	// account for fluid body forces
 	Matrix k(2,2);
 	Vector body(2);
@@ -666,18 +645,6 @@ SSPquadUP::getResistingForce(void)
 		body(1) = appliedB[1];
 	}
 	f2 = 4.0*J0*mThickness*fDens*dN*k*body;
-
-	/*// add permeability load to resisting force vector
-	Vector thePressure(4);
-	Vector permLoad(4);
-	thePressure(0) = mDisp_1(2);
-	thePressure(1) = mDisp_2(2);
-	thePressure(2) = mDisp_3(2);
-	thePressure(3) = mDisp_4(2);
-
-	permLoad = mPerm*thePressure;
-
-	f2.addVector(1.0, permLoad, 1.0);*/
 
 	// assemble full internal force vector for the element
 	mInternalForces(0)  = f1(0);
@@ -708,29 +675,11 @@ SSPquadUP::getResistingForceIncInertia()
 	const Vector &accel3 = theNodes[2]->getTrialAccel();
 	const Vector &accel4 = theNodes[3]->getTrialAccel();
 	
-	/*static double a[12];
-	a[0]  = accel1(0);
-	a[1]  = accel1(1);
-	a[2]  = accel1(2);
-	a[3]  = accel2(0);
-	a[4]  = accel2(1);
-	a[5]  = accel2(2);
-	a[6]  = accel3(0);
-	a[7]  = accel3(1);
-	a[8]  = accel3(2);
-	a[9]  = accel4(0);
-	a[10] = accel4(1);
-	a[11] = accel4(2);*/
-
 	// compute current resisting force
 	this->getResistingForce();
 
 	// compute mass matrix
 	this->getMass();
-
-	//for (int i = 0; i < 12; i++) {
-	//	mInternalForces(i) += mMass(i,i)*a[i];
-	//}
 
 	Vector a(12);
 	a(0)  = accel1(0);
@@ -1182,23 +1131,6 @@ SSPquadUP::GetPermeabilityMatrix(void)
 
 	// compute permeability matrix
 	mPerm.addMatrixTripleProduct(1.0, dNp, k, 4.0*J0*mThickness);
-
-	/*// compute stabilization matrix for incompressible problems
-	Matrix Kp(4,4);
-
-	// compute element size h
-	//double diag1 = (mNodeCrd(0,2)-mNodeCrd(0,0))*(mNodeCrd(0,2)-mNodeCrd(0,0))+(mNodeCrd(1,2)-mNodeCrd(1,0))*(mNodeCrd(1,2)-mNodeCrd(1,0));
-	//double diag2 = (mNodeCrd(0,3)-mNodeCrd(0,1))*(mNodeCrd(0,3)-mNodeCrd(0,1))+(mNodeCrd(1,3)-mNodeCrd(1,1))*(mNodeCrd(1,3)-mNodeCrd(1,1));
-	//double he;
-	//if (diag1 >= diag2) {
-	//	he = diag1;
-	//} else {
-	//	he = diag2;
-	//}
-	
-	Kp = 4.0*mAlpha*J0*mThickness*dN*dNp;
-
-	mPerm = Kp - mPerm;*/
 
 	return;
 }
