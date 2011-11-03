@@ -175,7 +175,9 @@ Dodd_Restrepo::getCopy(void)
 
 #ifdef _WIN32
 
-extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
+#define steel_ STEEL
+
+extern "C" int  steel_ (double *Es, double *EpsLast, double *FpsLast, double *YpTanLast, 
 		       double *EpsOld, double *Fy, double *Epy, double * EpSH, double *Epsu, 
 		       double *Fpsu, double *Youngs, double *SHPower, double *Epr, double *Fpr, 
 		       double *Epa, double *Fpa, double *Epo, double *EpoMax, double *EpsuSh, 
@@ -184,7 +186,7 @@ extern "C" int  Steel (double *Es, double *EpsLast, double *FpsLast, double *YpT
 		       double * Eps, double *Fps, double *Fs, double *YpTan, double *YTan, double *OmegFac);
 
 // Add more declarations as needed
-#define steel_	STEEL
+
 
 #else
 
