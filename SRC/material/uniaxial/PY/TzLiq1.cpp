@@ -27,8 +27,10 @@
 #include <Channel.h>
 #include <math.h>
 #include <Parameter.h>
+#include <stdlib.h>
+#include <string.h>
 
-// Controls on internal iteration between spring components
+// Control on internal iteration between spring components
 const int TZmaxIterations = 20;
 const double TZtolerance = 1.0e-12;
 

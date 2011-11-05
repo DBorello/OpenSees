@@ -38,6 +38,7 @@
 #include <Information.h>
 #include <Parameter.h>
 
+#include <string.h>
 #include <math.h>
 
 ENTMaterial::ENTMaterial(int tag, double e, double A, double B)

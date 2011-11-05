@@ -20,6 +20,7 @@
                                                                         
 
 #include <math.h>
+#include <string.h>
 
 #include <Bilin.h>
 #include <elementAPI.h>
@@ -31,14 +32,12 @@
 
 static int numBilinMaterials = 0;
 
-#define OPS_Export
-
-OPS_Export void *
+void *
 OPS_NewBilinMaterial()
 {
   if (numBilinMaterials == 0) {
     numBilinMaterials++;
-    OPS_Error("Modified Ibarra-Krawinkler Model with Bilinear Hysteretic Response\n", 1);
+    opserr << "Modified Ibarra-Krawinkler Model with Bilinear Hysteretic Response\n";
   }
 
   // Pointer to a uniaxial material that will be returned

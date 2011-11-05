@@ -26,6 +26,8 @@
 #include <Parameter.h>
 #include <ID.h>
 #include <MaterialResponse.h>
+#include <string.h>
+
 
 Matrix MultiYieldSurfaceClay::theTangent(6,6);
 Matrix MultiYieldSurfaceClay::dTrialStressdStrain(6,6);    //classwide matrix

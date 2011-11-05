@@ -37,6 +37,7 @@
 #include <Information.h>
 #include <MaterialResponse.h>
 #include <Parameter.h>
+#include <string.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -46,12 +47,12 @@
 static int numContactMaterial2DMaterials = 0;
 int ContactMaterial2D::mFrictFlag = 1;
 
-OPS_Export void *
+void *
 OPS_NewContactMaterial2DMaterial(void)
 {
   if (numContactMaterial2DMaterials == 0) {
     numContactMaterial2DMaterials++;
-    OPS_Error("ContactMaterial2D nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
+    opserr << "ContactMaterial2D nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n";
   }
 
   // Pointer to a nDmaterial that will be returned

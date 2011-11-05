@@ -30,6 +30,7 @@
 #include <MatrixUtil.h>
 #include <Parameter.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <classTags.h>
 

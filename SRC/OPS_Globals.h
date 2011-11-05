@@ -40,6 +40,10 @@ extern OPS_Stream *opserrPtr;
 #define opserr (*opserrPtr)
 #define endln "\n"
 
+
+#include <string.h>
+#include <stdlib.h>
+
 // #define _USING_STL_STREAMS
 // #include <iostream>
 // using std::cerr;

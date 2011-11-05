@@ -1,5 +1,3 @@
-# Makefile for fe objects
-
 include ../../../../Makefile.def
 
 PROGRAM = test

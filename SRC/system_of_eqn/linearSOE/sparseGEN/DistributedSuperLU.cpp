@@ -39,6 +39,8 @@
 
 #include <superlu_ddefs.h>
 
+
+
 superlu_options_t options;
 SuperLUStat_t stat;
 SuperMatrix A;

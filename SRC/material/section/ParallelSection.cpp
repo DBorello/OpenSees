@@ -32,6 +32,7 @@
 // Purpose: This file contains the implementation for the ParallelSection class. 
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

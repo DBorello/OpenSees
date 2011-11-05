@@ -40,6 +40,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <string.h>
+
 #include <UniaxialMaterial.h>
 #include <UniaxialFiber3d.h>
 #include <Vector.h>

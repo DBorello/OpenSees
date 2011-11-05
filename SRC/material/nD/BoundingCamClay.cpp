@@ -35,6 +35,7 @@
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <string.h>
 
 const double BoundingCamClay::one3   = 1.0/3.0 ;
 const double BoundingCamClay::two3   = 2.0/3.0;
@@ -43,16 +44,15 @@ const double BoundingCamClay::root23 = sqrt(2.0/3.0);
 double BoundingCamClay::mElastFlag = 1;
 
 #include <elementAPI.h>
-#define OPS_Export 
 
 static int numBoundingCamClayMaterials = 0;
 
-OPS_Export void *
+void *
 OPS_NewBoundingCamClayMaterial(void)
 {
   if (numBoundingCamClayMaterials == 0) {
     numBoundingCamClayMaterials++;
-    OPS_Error("BoundingCamClay nDmaterial - Written: C.McGann, K.Petek, P.Arduino, U.Washington\n", 1);
+    opserr << "BoundingCamClay nDmaterial - Written: C.McGann, K.Petek, P.Arduino, U.Washington\n";
   }
 
   NDMaterial *theMaterial = 0;

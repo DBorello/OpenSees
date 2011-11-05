@@ -46,6 +46,7 @@
 #include <classTags.h>
 
 #include <string.h>
+#include <stdlib.h>
 
 Vector GenericSection1d::s(1);
 Matrix GenericSection1d::ks(1,1);

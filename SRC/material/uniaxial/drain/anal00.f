@@ -55,14 +55,14 @@ c  ARGUMENT TYPES
       
 c ---------------------------------------------------------------------
 c     LABELLED COMMONS
-      real*8		E,sigY,Hiso,Hkin
-      real*8		ep,alpha,kappa
-      real*8		epsP,sigP,tangP
-      real*8		tang
-      include		'infel00.h'
+      real*8 E,sigY,Hiso,Hkin
+      real*8 ep,alpha,kappa
+      real*8 epsP,sigP,tangP
+      real*8 tang
+      include 'infel00.h'
       
       integer sgn
-      real*8	eps,sig,xsi,f,dGamma
+      real*8 eps,sig,xsi,f,dGamma
       
 c     Current strain
       eps = dise(2)-dise(1)    
@@ -164,11 +164,11 @@ c  ARGUMENT TYPES
 
 c ---------------------------------------------------------------------
 c  LABELLED COMMONS
-      real*8		E,sigY,Hiso,Hkin
-      real*8		ep,alpha,kappa
-      real*8		epsP,sigP,tangP
-      real*8		tang
-      include		'infel00.h'
+      real*8 E,sigY,Hiso,Hkin
+      real*8 ep,alpha,kappa
+      real*8 epsP,sigP,tangP
+      real*8 tang
+      include 'infel00.h'
 
 c
 c TOTAL STIFFNESS MATRIX

@@ -43,6 +43,8 @@
 #include <MaterialResponse.h>
 #include <ID.h>
 
+#include <string.h>
+
 #include <classTags.h>
 
 #define maxOrder 10

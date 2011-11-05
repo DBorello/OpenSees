@@ -42,6 +42,8 @@
 #include <FEM_ObjectBroker.h>
 
 #include <string.h>
+#include <stdlib.h>
+
 
 NodeRecorder::NodeRecorder()
 :Recorder(RECORDER_TAGS_NodeRecorder),

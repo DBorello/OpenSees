@@ -44,6 +44,8 @@ ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 
 tcl: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;
+	@$(CD) $(FE)/system_of_eqn/diagonal; $(MAKE) mpi;
+	@$(CD) $(FE)/actor/channel; $(MAKE) mpi;
 	$(ECHO)	$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_MPI_PARAMETERS) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \

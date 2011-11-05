@@ -38,6 +38,7 @@
 #include <Matrix.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <string.h>
 
 BoucWenMaterial::BoucWenMaterial(int tag, 
 					double p_alpha,

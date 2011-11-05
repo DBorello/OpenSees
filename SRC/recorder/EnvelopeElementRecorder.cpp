@@ -44,6 +44,7 @@
 #include <Message.h>
 #include <FEM_ObjectBroker.h>
 #include <math.h>
+#include <stdlib.h>
 
 EnvelopeElementRecorder::EnvelopeElementRecorder()
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),

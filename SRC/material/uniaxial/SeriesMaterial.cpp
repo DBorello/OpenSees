@@ -41,6 +41,8 @@
 #include <math.h>
 #include <float.h>
 
+#include <string.h>
+
 #include <OPS_Globals.h>
 
 SeriesMaterial::SeriesMaterial(int tag, int num,

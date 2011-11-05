@@ -1488,13 +1488,14 @@ TclCommand_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // get the current pattern tag if no tag given in i/p
-  if (userSpecifiedPattern == false)
+  if (userSpecifiedPattern == false) {
     if (theTclLoadPattern == 0) {
 	opserr << "WARNING no current load pattern - load " << nodeId;
 	opserr << " " << ndf << " forces\n";
 	return TCL_ERROR;
     } else 
 	loadPatternTag = theTclLoadPattern->getTag();
+  }
 
   // create the load
   theLoad = new NodalLoad(nodeLoadTag, nodeId, forces, isLoadConst);

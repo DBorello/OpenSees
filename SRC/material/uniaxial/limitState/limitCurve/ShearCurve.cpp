@@ -37,6 +37,7 @@
 #include <Vector.h>
 #include <Parameter.h>
 
+#include <string.h>
 #include <float.h>
 
 #include <DummyStream.h>

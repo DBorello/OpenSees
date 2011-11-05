@@ -40,6 +40,7 @@
 #include <classTags.h>
 #include <Parameter.h>
 #include <math.h>
+#include <stdlib.h>
 
 DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int tag,
 							       int num, 

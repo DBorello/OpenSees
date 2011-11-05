@@ -15,6 +15,7 @@
 #include <Information.h>
 #include <math.h>
 #include <float.h>
+#include <string.h>
 
 #include <elementAPI.h>
 #define OPS_Export 

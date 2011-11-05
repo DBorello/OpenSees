@@ -27,7 +27,11 @@
 */
 
 #include "elementAPI.h"
+
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 //#include <packages.h>
 #include <Domain.h>
 #include <Node.h>

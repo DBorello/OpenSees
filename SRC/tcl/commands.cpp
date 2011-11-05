@@ -5669,7 +5669,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	ProfileSPDLinDirectSolver *theLinSolver = new ProfileSPDLinDirectSolver(); 	
 	LinearSOE *theLinSOE = 0;
 #ifdef _PARALLEL_PROCESSING
-	theLinSOE  = new DistributedProfileSPDLinSOE(*theSolver);
+	theLinSOE  = new DistributedProfileSPDLinSOE(*theLinSolver);
 #else
 	theLinSOE = new ProfileSPDLinSOE(*theLinSolver);      
 #endif

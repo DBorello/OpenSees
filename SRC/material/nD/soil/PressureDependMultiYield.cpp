@@ -17,6 +17,7 @@
 #include <ID.h>
 #include <MaterialResponse.h>
 #include <Parameter.h>
+#include <string.h>
 
 int PressureDependMultiYield::matCount=0;
 int* PressureDependMultiYield::loadStagex = 0;  //=0 if elastic; =1 if plastic

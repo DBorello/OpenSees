@@ -24,7 +24,6 @@
 // Written: MHS 
 // Created: Feb 2000
 // Revision: A
-// Boris Jeremic (@ucdavis.edu) 19June2002 added getE, getnu
 //
 // Description: This file contains the class implementation for ElasticIsotropicMaterial.
 //
@@ -47,6 +46,9 @@
 
 #include <OPS_Globals.h>
 #include <elementAPI.h>
+#include <string.h>
+#include <stdlib.h>
+
 
 void *
 OPS_NewElasticIsotropicMaterial(void)

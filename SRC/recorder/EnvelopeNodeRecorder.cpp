@@ -32,6 +32,7 @@
 // What: "@(#) EnvelopeNodeRecorder.C, revA"
 
 #include <math.h>
+#include <stdlib.h>
 
 #include <EnvelopeNodeRecorder.h>
 #include <Domain.h>

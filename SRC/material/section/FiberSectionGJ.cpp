@@ -43,6 +43,8 @@
 #include <MaterialResponse.h>
 #include <UniaxialMaterial.h>
 
+#include <string.h>
+
 ID FiberSectionGJ::code(4);
 Vector FiberSectionGJ::s(4);
 Matrix FiberSectionGJ::ks(4,4);

@@ -15,7 +15,9 @@
 #include <Information.h>
 #include <ID.h>
 #include <MaterialResponse.h>
- #include <Parameter.h>
+#include <Parameter.h>
+#include <string.h>
+
 
 Matrix PressureIndependMultiYield::theTangent(6,6);
 T2Vector PressureIndependMultiYield::subStrainRate;

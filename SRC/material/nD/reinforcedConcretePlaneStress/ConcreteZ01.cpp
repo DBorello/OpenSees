@@ -20,6 +20,8 @@
 #include <elementAPI.h>
 #define OPS_Export 
 
+#include <string.h>
+
 OPS_Export void *
 OPS_NewConcreteZ01Material(void)
 {

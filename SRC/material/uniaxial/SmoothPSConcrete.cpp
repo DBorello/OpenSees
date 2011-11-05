@@ -40,6 +40,8 @@
 #include <Information.h>
 #include <Parameter.h>
 #include <math.h>
+#include <string.h>
+
 #include <float.h>
 #include <MaterialResponse.h>
 # define MAT_TAG_SmoothPSConcrete 35457
@@ -886,7 +888,7 @@ SmoothPSConcrete::getStressSensitivity(int gradNumber, bool conditional){
 						if (fabs(epsr)< eps0)	epsp = -(fabs(epsr) - fabs(sigr)/Ec);
 						else  epsp = -(eps0 - fc/Ec);
                       
-						Eur = abs(sigr/(epsr-epsp));
+						Eur = fabs(sigr/(epsr-epsp));
                         depsrdh = depsdhp;
                         dsigrdh = dsigdhp;
                         depspdh = Compute_depspdh(epsr,sigr,depsrdh,dsigrdh,deps0dh,dfcdh,dEcdh);
@@ -1218,7 +1220,7 @@ SmoothPSConcrete::commitSensitivity(double TstrainSensitivity, int gradNumber, i
 						if (fabs(epsr)< eps0)	epsp = -(fabs(epsr) - fabs(sigr)/Ec);
 						else  epsp = -(eps0 - fc/Ec);
                       
-						Eur = abs(sigr/(epsr-epsp));
+						Eur = fabs(sigr/(epsr-epsp));
                         depsrdh = depsdhp;
                         dsigrdh = dsigdhp;
                         depspdh = Compute_depspdh(epsr,sigr,depsrdh,dsigrdh,deps0dh,dfcdh,dEcdh);

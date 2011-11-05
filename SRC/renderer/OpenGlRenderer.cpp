@@ -39,6 +39,8 @@
 #include <iomanip>
 using std::ios;
 
+#include <string.h>
+
 #ifdef _WGL
 #include <windows.h>
 //#include <GL/glaux.h>

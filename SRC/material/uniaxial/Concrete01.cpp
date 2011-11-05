@@ -38,6 +38,7 @@
 #include <Channel.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <string.h>
 
 #include <math.h>
 #include <float.h>

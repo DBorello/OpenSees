@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <string.h>
 
 #include <classTags.h>
 

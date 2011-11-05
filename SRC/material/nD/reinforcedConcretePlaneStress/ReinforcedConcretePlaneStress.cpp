@@ -15,7 +15,7 @@
 #include <float.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
+#include <stdlib.h>
 #include <MaterialResponse.h>
 #include <DummyStream.h>
 #include <elementAPI.h>
@@ -28,7 +28,7 @@ OPS_NewReinforcedConcretePlaneStressMaterial()
 {
   if (numReinforcedConcretePlaneStressMaterials == 0) {
     numReinforcedConcretePlaneStressMaterials++;
-    OPS_Error("ReinforcedConcretePlaneStress unaxial material - Written by J.Zhong, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n", 1);
+    opserr << "ReinforcedConcretePlaneStress unaxial material - Written by J.Zhong, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n";
   }
 
   // Pointer to a uniaxial material that will be returned

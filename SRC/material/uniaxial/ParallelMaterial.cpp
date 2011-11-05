@@ -41,6 +41,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <stdlib.h>
+#include <string.h>
 #include <MaterialResponse.h>
 
 ParallelMaterial::ParallelMaterial(

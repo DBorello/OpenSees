@@ -32,6 +32,7 @@
 #include <Parameter.h>
 #include <math.h>
 #include <float.h>
+#include <string.h>
 
 SteelMP::SteelMP
 (int tag, double FY, double E, double B, double R,  double CR1, double CR2, double A1, double A2):

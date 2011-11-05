@@ -34,6 +34,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <Parameter.h>
+#include <string.h>
 
 #include <OPS_Globals.h>
 

@@ -42,6 +42,7 @@
 #include <MaterialResponse.h>
 #include <Parameter.h>
 
+#include <string.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
@@ -68,7 +69,7 @@ OPS_NewDruckerPragerMaterial(void)
 {
   if (numDruckerPragerMaterials == 0) {
     numDruckerPragerMaterials++;
-    OPS_Error("DruckerPrager nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
+    opserr << "DruckerPrager nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n";
   }
 
   // Pointer to a uniaxial material that will be returned

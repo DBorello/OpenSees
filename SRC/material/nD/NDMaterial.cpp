@@ -17,8 +17,6 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 **                                                                    **
-** Additions and changes by:                                          **
-**   Boris Jeremic (@ucdavis.edu)                                     **
 **                                                                    **
 ** ****************************************************************** */
                                                                         
@@ -46,6 +44,7 @@
 #include <PlaneStressMaterial.h>
 #include <BeamFiberMaterial.h>
 #include <PlateFiberMaterial.h>
+#include <string.h>
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);

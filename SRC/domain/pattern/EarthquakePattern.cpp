@@ -40,6 +40,9 @@
 #include <Channel.h>
 #include <ErrorHandler.h>
 
+#include <string.h>
+#include <stdlib.h>
+
 EarthquakePattern::EarthquakePattern(int tag, int _classTag)
   :LoadPattern(tag, _classTag), theMotions(0), numMotions(0), uDotG(0), uDotDotG(0), currentTime(0.0), parameterID(0)
 {

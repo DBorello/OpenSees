@@ -40,6 +40,7 @@
 #include <Information.h>
 #include <Parameter.h>
 
+#include <string.h>
 #include <OPS_Globals.h>
 
 ElasticBDMaterial::ElasticBDMaterial(int tag, double e, double bb, double dd, double aa, double et)

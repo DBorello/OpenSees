@@ -16,6 +16,8 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+#include <stdlib.h>
+
 #include <DummyStream.h>
 #include <MaterialResponse.h>
 #include <elementAPI.h>
@@ -28,7 +30,7 @@ OPS_NewFAFourSteelPCPlaneStressMaterial()
 {
   if (numFAFourSteelPCPlaneStressMaterials == 0) {
     numFAFourSteelPCPlaneStressMaterials++;
-    OPS_Error("FAFourSteelPCPlaneStress unaxial material - Written by A.Laskar, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n", 1);
+    opserr << "FAFourSteelPCPlaneStress unaxial material - Written by A.Laskar, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n";
   }
 
   // Pointer to a uniaxial material that will be returned

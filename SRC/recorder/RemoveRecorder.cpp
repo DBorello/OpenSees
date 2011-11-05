@@ -28,7 +28,11 @@
 //
 // Description: This file contains the class implementatation of ElementRecorder.
 //
+
 // What: "@(#) RemoveRecorder.C, revA"
+
+#include <stdlib.h>
+
 #include <stdio.h>
 #include <RemoveRecorder.h>
 #include <Domain.h>

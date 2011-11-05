@@ -43,6 +43,8 @@
 #include <MaterialResponse.h>
 #include <UniaxialMaterial.h>
 
+#include <string.h>
+
 ID FiberSection3d::code(3);
 
 // constructors:

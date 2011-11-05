@@ -7,7 +7,7 @@
 // entitled "Unified Theory of Concrete Structures,"
 // by Thomas T.C. Hsu and Y.L. Mo, John Wiley & Sons, April 2010.
 
-#include "FAFourSteelRCPlaneStress.h"a
+#include "FAFourSteelRCPlaneStress.h"
 #include <UniaxialMaterial.h>
 #include <Vector.h>
 #include <Matrix.h>
@@ -15,6 +15,7 @@
 #include <float.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <stdlib.h>
 
 #include <DummyStream.h>
 #include <MaterialResponse.h>
@@ -28,7 +29,7 @@ OPS_NewFAFourSteelRCPlaneStressMaterial()
 {
   if (numFAFourSteelRCPPlaneStressMaterials == 0) {
     numFAFourSteelRCPPlaneStressMaterials++;
-    OPS_Error("FAFourSteelRCPPlaneStress unaxial material - Written by J.Zhong, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n", 1);
+    opserr << "FAFourSteelRCPPlaneStress unaxial material - Written by J.Zhong, Thomas T.C. Hsu and Y.L. Mo - Copyright@2009\n";
   }
 
   // Pointer to a uniaxial material that will be returned

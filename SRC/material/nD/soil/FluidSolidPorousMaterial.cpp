@@ -17,6 +17,8 @@
 #include <FEM_ObjectBroker.h>
 #include <Parameter.h>
 
+#include <string.h>
+
 int* FluidSolidPorousMaterial::loadStagex = 0;
 int* FluidSolidPorousMaterial::ndmx = 0;
 double* FluidSolidPorousMaterial::combinedBulkModulusx = 0;

@@ -28,6 +28,9 @@
 // Description: This file contains the class definition for PatternRecorder.
 // A PatternRecorder is used to record the load values from a pattern.
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <PatternRecorder.h>
 #include <Domain.h>
 #include <LoadPattern.h>

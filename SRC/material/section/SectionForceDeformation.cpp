@@ -37,6 +37,7 @@
 #include <Vector.h>
 #include <MaterialResponse.h>
 
+#include <stdlib.h>
 #include <string.h>
 
 double invert2by2Matrix(const Matrix &a, Matrix &b);

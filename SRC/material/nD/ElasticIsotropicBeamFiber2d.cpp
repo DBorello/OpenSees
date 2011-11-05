@@ -30,6 +30,7 @@
 
 #include <ElasticIsotropicBeamFiber2d.h>           
 #include <Channel.h>
+#include <string.h>
 
 Vector ElasticIsotropicBeamFiber2d::sigma(2);
 Matrix ElasticIsotropicBeamFiber2d::D(2,2);

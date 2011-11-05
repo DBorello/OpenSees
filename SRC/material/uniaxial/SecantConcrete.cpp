@@ -35,6 +35,7 @@
 #include <Information.h>
 #include <Parameter.h>
 #include <math.h>
+#include <string.h>
 
 SecantConcrete::SecantConcrete(int tag, double f, double ec, double eu)
   :UniaxialMaterial(tag,MAT_TAG_SecantConcrete),

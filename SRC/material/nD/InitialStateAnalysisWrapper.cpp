@@ -32,6 +32,7 @@
 #include <Parameter.h>
 #include <ID.h>
 
+#include <string.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
@@ -45,7 +46,7 @@ OPS_NewInitialStateAnalysisWrapperMaterial(void)
 {
 	if (numInitialStateAnalysisWrapperMaterials == 0) {
 		numInitialStateAnalysisWrapperMaterials++;
-    	OPS_Error("InitialStateAnalysisWrapper nDmaterial - Written: C.McGann, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
+		opserr << "InitialStateAnalysisWrapper nDmaterial - Written: C.McGann, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n";
   	}
 
   	NDMaterial *theMaterial = 0;

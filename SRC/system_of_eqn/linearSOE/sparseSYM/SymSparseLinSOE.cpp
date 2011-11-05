@@ -1,5 +1,3 @@
-// File: ~/system_of_eqn/linearSOE/symLinSolver/SymSparseLinSOE.CPP
-//
 // Written: Jun Peng  (junpeng@stanford.edu)
 //          Advisor: Prof. Kincho H. Law
 //          Stanford University
@@ -16,6 +14,7 @@
 
 #include <fstream>
 #include <stdlib.h>
+#include <string.h>
 
 #include <SymSparseLinSOE.h>
 #include <SymSparseLinSolver.h>

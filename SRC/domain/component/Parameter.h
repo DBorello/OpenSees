@@ -27,6 +27,7 @@
 
 #include <Information.h>
 #include <TaggedObject.h>
+#include <string.h>
 
 class DomainComponent;
 class MovableObject;

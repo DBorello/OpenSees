@@ -44,7 +44,7 @@ class OptimizationDomain;
 class OptimizationDomainComponent: public TaggedObject, public MovableObject
 {
 //
-   #pragma message("OptimizationDomainComponent is included")
+//   #pragma message("OptimizationDomainComponent is included")
 //
 public:
     virtual ~OptimizationDomainComponent();

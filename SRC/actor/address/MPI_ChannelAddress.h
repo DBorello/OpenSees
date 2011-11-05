@@ -36,6 +36,15 @@
 #ifndef MPI_ChannelAddress_h
 #define MPI_ChannelAddress_h
 
+#ifdef _PARALLEL_PROCESSING
+#define MPI_TYPE 2
+#endif
+
+#ifdef _PARALLEL_INTERPRETERS
+#define MPI_TYPE 2
+#endif
+
+
 #include <ChannelAddress.h>
 #include <mpi.h>
 

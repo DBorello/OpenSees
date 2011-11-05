@@ -82,6 +82,7 @@
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <string.h>
 
 //parameters
 const double MultiaxialCyclicPlasticity :: one3   = 1.0 / 3.0 ;

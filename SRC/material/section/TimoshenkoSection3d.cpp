@@ -42,6 +42,7 @@
 #include <Information.h>
 #include <MaterialResponse.h>
 #include <NDMaterial.h>
+#include <string.h>
 
 #define SEC_TAG_TimoshenkoSection3d 1976
 

@@ -39,6 +39,7 @@
 #include <Channel.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <string.h>
 
 #include <OPS_Globals.h>
 
