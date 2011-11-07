@@ -433,10 +433,10 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
     dh += d[i];
   }
   
-  R[0] = (Ri[0]*Ri[2])/(Ri[2]+fabs(v[2])*Ri[0]);
-  R[1]=(Ri[1]*Ri[3])/(Ri[3]+fabs(v[3])*Ri[1]);
-  R[4]=(Ri[4]*Ri[6])/(Ri[6]+fabs(v[4])*Ri[6]);
-  R[5]=(Ri[5]*Ri[7])/(Ri[7]+fabs(v[5])*Ri[7]);
+  //  R[0] = (Ri[0]*Ri[2])/(Ri[2]+fabs(v[2])*Ri[0]);
+  //  R[1]=(Ri[1]*Ri[3])/(Ri[3]+fabs(v[3])*Ri[1]);
+  //  R[4]=(Ri[4]*Ri[6])/(Ri[6]+fabs(v[4])*Ri[6]);
+  //  R[5]=(Ri[5]*Ri[7])/(Ri[7]+fabs(v[5])*Ri[7]);
 
   double PNorm = 0.0;
   for (int i=0; i<4; i++) {
@@ -552,6 +552,10 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
 
   KsPlusKsrest = ks;
   KsPlusKsrest += ksrest;
+  KsPlusKsrest(0,2) = KsPlusKsrest(0,2) + N[0]/R[2];
+  KsPlusKsrest(1,3) = KsPlusKsrest(1,3) + N[1]/R[5];
+  KsPlusKsrest(4,6) = KsPlusKsrest(4,6) + N[4]/R[6];
+  KsPlusKsrest(5,7) = KsPlusKsrest(5,7) + N[5]/R[7];
     
   kt.addMatrixTripleProduct(0.0, Af, KsPlusKsrest,1.0);
 

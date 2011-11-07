@@ -7395,7 +7395,7 @@ setPrecision(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
     return TCL_ERROR;
   }
   int precision;
-  if (Tcl_GetInt(interp, argv[2], &precision) != TCL_OK) {
+  if (Tcl_GetInt(interp, argv[1], &precision) != TCL_OK) {
     opserr << "WARNING setPrecision precision? - error reading precision value supplied\n";
     return TCL_ERROR;
   }
