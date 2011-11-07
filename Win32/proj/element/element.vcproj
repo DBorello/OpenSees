@@ -1026,6 +1026,12 @@
 			<File
 				RelativePath="..\..\..\SRC\element\UWelements\SSPquadUP.h">
 			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrick.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrickUP.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="triangle"
