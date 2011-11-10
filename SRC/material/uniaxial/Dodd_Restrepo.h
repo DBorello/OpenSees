@@ -144,7 +144,8 @@
    double cFpaM[2]  ; // Major reversal Fpa
    double cYpTanM[2]; // tangential modulus at major reversals (1=tens, 2=comp)
    double cPowerM[2]; // Major reversal Power
-   
+
+   int myTag;
 };
 
 #endif

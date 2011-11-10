@@ -102,10 +102,13 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
    Fy(fy), Fsu(fsu), ESH(eSH), ESU(eSU), Youngs(youngs), 
    ESHI(eSHI), FSHI(fSHI), Conv(conv), OmegaFac(omegaFac)
 {
+  numDoddRestrepo++;
+  myTag = numDoddRestrepo;
+
   if (OmegaFac < 0.75) OmegaFac = 0.75;
   if (OmegaFac > 1.15) OmegaFac = 1.15;
   
-  double C1       ; // Temporary constant
+  double C1       ; // Temporary constant 
   double EpSHI    ; // Intermediate strain hardening curve natural strain
   double FpSH     ; // True stress at initiation of strain hardening curve
   double FpSHI    ; // Intermediate strain hardening curve true stress
@@ -163,6 +166,14 @@ Dodd_Restrepo::Dodd_Restrepo(int tag,
   tStrain = 0.0;
   tTangent = Youngs;
   tStress = 0.0;
+
+  Eps = 0.0;
+  EpsOld = 0.0;
+  EpsLast = 0.0;
+  Fps = 0.0;
+  FpsLast = 0.0;
+  YpTan = Youngs;
+  YpTanLast = Youngs;
     
   this->commitState();
 }
@@ -242,6 +253,7 @@ int
 Dodd_Restrepo::setTrial(double strain, double &stress, double &stiff, double strainRate)
 {
   if (fabs(strain-tStrain) > DBL_EPSILON) {
+
     // Store the strain
     tStrain = strain;
 
@@ -275,8 +287,57 @@ Dodd_Restrepo::setTrial(double strain, double &stress, double &stiff, double str
     tTangent = YTan;
   }
   
+  /*
+  if (myTag == 41 || myTag == 59) {
+    this->Print(opserr);
+    opserr << tStrain << endln;
+    opserr << EpsLast << endln;
+    opserr << FpsLast << endln;
+    opserr << "YpTanLast: " << YpTanLast << endln;
+    opserr << EpsOld << endln;
+    opserr << Fy << endln;
+    opserr << Epy<< endln;
+    opserr << EpSH << endln;
+    opserr << Epsu<< endln;
+    opserr << Fpsu << endln;
+    opserr << Youngs << endln;
+    opserr << SHPower << endln;
+    opserr << Epr[1]<< " " << cEpr[1] << " " <<     
+    Epr[0]<< " " << cEpr[0] << endln;   
+    opserr << Fpr[1]<< " " << cFpr[1] << " " <<     
+    Fpr[0]<< " " << cFpr[0] << endln;
+    opserr << Epa[1]<< " " << cEpa[1] << " " <<  
+    Epa[0]<< " " << cEpa[0] << endln;
+    opserr << Fpa[1]<< " " << cFpa[1] << " " <<  
+    Fpa[0]<< " " << cFpa[0] << endln;
+    opserr << Epo[1]<< " " << cEpo[1] << " " <<
+    Epo[0]<< " " << cEpo[0];   
+    opserr << EpoMax  << " " << cEpoMax << endln;
+    opserr << EpsuSh[1]<< " " << cEpsuSh[1] << " " <<
+    EpsuSh[0]<< " " << cEpsuSh[0] << endln;
+    opserr << YoungsUn << " " << cYoungsUn;
+    opserr << Power[1]<< " " << cPower[1] << " " << 
+    Power[0]<< " " << cPower[0] << endln;
+    opserr << BFlag[1]<< " " << cBFlag[1] << " " << 
+    BFlag[0]<< " " << cBFlag[0] << endln;
+    opserr << LMR << " " << cLMR;
+    opserr << EprM[1]<< " " << cEprM[1] << " " <<
+    EprM[0]<< " " << cEprM[0] << endln;
+    opserr << FprM[1]<< " " << cFprM[1] << " " <<  
+    FprM[0]<< " " << cFprM[0] << endln;
+    opserr << EpaM[1]<< " " << cEpaM[1] << " " <<  
+    EpaM[0]<< " " << cEpaM[0] << endln;
+    opserr << FpaM[1]<< " " << cFpaM[1] << " " << FpaM[0]<< " " << cFpaM[0] << endln;
+    opserr << YpTanM[1]<< " " << cYpTanM[1] << " " << YpTanM[0]<< " " << cYpTanM[0] << endln;
+    opserr << PowerM[1]<< " " << cPowerM[1] <<  " " << PowerM[0] << endln;
+    opserr << "Fs: " << Fs << " Ytan: " << YTan << endln;
+  }
+  */
+    
   stress = tStress;
   stiff = tTangent;
+
+
   
   return 0;
 }
