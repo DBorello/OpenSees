@@ -1582,7 +1582,7 @@ SSPbrick::GetStab(void)
     FCF(2,7) = C2*IssZY + C3*IssYZ;
     FCF(2,8) = C1*IssZZ + C3*(IssYY + IssXX);
 
-    // block14
+    /*// block14
     FCF(0,9)  = C1*IstXX + C3*(IstYY + IstZZ);
     FCF(0,10) = C2*IstYX + C3*IstXY;
     FCF(0,11) = C2*IstZX + C3*IstXZ;
@@ -1591,7 +1591,18 @@ SSPbrick::GetStab(void)
     FCF(1,11) = C2*IstZY + C3*IstYZ;
     FCF(2,9)  = C2*IstXZ + C3*IstZX;
     FCF(2,10) = C2*IstYZ + C3*IstZY;
-    FCF(2,11) = C1*IstZZ + C3*(IstYY + IstXX);
+    FCF(2,11) = C1*IstZZ + C3*(IstYY + IstXX);*/
+
+	// block14
+    FCF(0,9)  = C3*(IstYY + IstZZ);
+    FCF(0,10) = C3*IstXY;
+    FCF(0,11) = C3*IstXZ;
+    FCF(1,9)  = C3*IstYX;
+    FCF(1,10) = C3*(IstXX + IstZZ);
+    FCF(1,11) = C3*IstYZ;
+    FCF(2,9)  = C3*IstZX;
+    FCF(2,10) = C3*IstZY;
+    FCF(2,11) = C3*(IstYY + IstXX);
 
     // block21
     FCF(3,0) = C1*IttXX + C3*(IttYY + IttZZ);
@@ -1626,7 +1637,7 @@ SSPbrick::GetStab(void)
     FCF(5,7) = C2*IuuZY + C3*IuuYZ;
     FCF(5,8) = C1*IuuZZ + C3*(IuuYY + IuuXX);
 
-    // block24
+    /*// block24
     FCF(3,9)  = C1*IutXX + C3*(IutYY + IutZZ);
     FCF(3,10) = C2*IutYX + C3*IutXY;
     FCF(3,11) = C2*IutZX + C3*IutXZ;
@@ -1635,7 +1646,18 @@ SSPbrick::GetStab(void)
     FCF(4,11) = C2*IutZY + C3*IutYZ;
     FCF(5,9)  = C2*IutXZ + C3*IutZX;
     FCF(5,10) = C2*IutYZ + C3*IutZY;
-    FCF(5,11) = C1*IutZZ + C3*(IutYY + IutXX);
+    FCF(5,11) = C1*IutZZ + C3*(IutYY + IutXX);*/
+
+	// block24
+    FCF(3,9)  = C3*(IutYY + IutZZ);
+    FCF(3,10) = C3*IutXY;
+    FCF(3,11) = C3*IutXZ;
+    FCF(4,9)  = C3*IutYX;
+    FCF(4,10) = C3*(IutXX + IutZZ);
+    FCF(4,11) = C3*IutYZ;
+    FCF(5,9)  = C3*IutZX;
+    FCF(5,10) = C3*IutZY;
+    FCF(5,11) = C3*(IutYY + IutXX);
 
     // block31
     FCF(6,0) = C1*IssXX + C3*(IssYY + IssZZ);
@@ -1670,7 +1692,7 @@ SSPbrick::GetStab(void)
     FCF(8,7) = (C2 + C3)*HusYZ;
     FCF(8,8) = C1*HusZZ + C3*(HusYY + HusXX);
 
-    // block34
+    /*// block34
     FCF(6,9)  = C1*IusXX + C3*(IusYY + IusZZ);
     FCF(6,10) = C2*IusYX + C3*IusXY;
     FCF(6,11) = C2*IusZX + C3*IusXZ;
@@ -1679,9 +1701,20 @@ SSPbrick::GetStab(void)
     FCF(7,11) = C2*IusZY + C3*IusYZ;
     FCF(8,9)  = C2*IusXZ + C3*IusZX;
     FCF(8,10) = C2*IusYZ + C3*IusZY;
-    FCF(8,11) = C1*IusZZ + C3*(IusYY + IusXX);
+    FCF(8,11) = C1*IusZZ + C3*(IusYY + IusXX);*/
 
-    // block41
+	// block34
+    FCF(6,9)  = C3*(IusYY + IusZZ);
+    FCF(6,10) = C3*IusXY;
+    FCF(6,11) = C3*IusXZ;
+    FCF(7,9)  = C3*IusYX;
+    FCF(7,10) = C3*(IusXX + IusZZ);
+    FCF(7,11) = C3*IusYZ;
+    FCF(8,9)  = C3*IusZX;
+    FCF(8,10) = C3*IusZY;
+    FCF(8,11) = C3*(IusYY + IusXX);
+
+    /*// block41
     FCF(9,0)  = C1*IstXX + C3*(IstYY + IstZZ);
     FCF(9,1)  = C2*IstXY + C3*IstYX;
     FCF(9,2)  = C2*IstXZ + C3*IstZX;
@@ -1712,7 +1745,40 @@ SSPbrick::GetStab(void)
     FCF(10,8) = C2*IusYZ + C3*IusZY;
     FCF(11,6) = C2*IusZX + C3*IusXZ;
     FCF(11,7) = C2*IusZY + C3*IusYZ;
-    FCF(11,8) = C1*IusZZ + C3*(IusYY + IusXX);
+    FCF(11,8) = C1*IusZZ + C3*(IusYY + IusXX);*/
+
+	// block41
+    FCF(9,0)  = C3*(IstYY + IstZZ);
+    FCF(9,1)  = C3*IstYX;
+    FCF(9,2)  = C3*IstZX;
+    FCF(10,0) = C3*IstXY;
+    FCF(10,1) = C3*(IstXX + IstZZ);
+    FCF(10,2) = C3*IstZY;
+    FCF(11,0) = C3*IstXZ;
+    FCF(11,1) = C3*IstYZ;
+    FCF(11,2) = C3*(IstYY + IstXX);
+
+    // block42
+    FCF(9,3)  = C3*(IutYY + IutZZ);
+    FCF(9,4)  = C3*IutYX;
+    FCF(9,5)  = C3*IutZX;
+    FCF(10,3) = C3*IutXY;
+    FCF(10,4) = C3*(IutXX + IutZZ);
+    FCF(10,5) = C3*IutZY;
+    FCF(11,3) = C3*IutXZ;
+    FCF(11,4) = C3*IutYZ;
+    FCF(11,5) = C3*(IutYY + IutXX);
+
+    // block43
+    FCF(9,6)  = C3*(IusYY + IusZZ);
+    FCF(9,7)  = C3*IusYX;
+    FCF(9,8)  = C3*IusZX;
+    FCF(10,6) = C3*IusXY;
+    FCF(10,7) = C3*(IusXX + IusZZ);
+    FCF(10,8) = C3*IusZY;
+    FCF(11,6) = C3*IusXZ;
+    FCF(11,7) = C3*IusYZ;
+    FCF(11,8) = C3*(IusYY + IusXX);
 
     // block44
     FCF(9,9)   = C1*HstuXX + C3*(HstuYY + HstuZZ);
