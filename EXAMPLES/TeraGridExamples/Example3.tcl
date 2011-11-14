@@ -1,11 +1,11 @@
 
 set pid [getPID]
-set np  [getNP]
+set numP  [getNP]
 set recordsFileID [open "peerRecords.txt" r]
 set count 0;
 
 foreach gMotion [split [read $recordsFileID] \n] {
-    if {[expr $count % $np] == $pid}  {
+    if {[expr $count % $numP] == $pid}  {
 
 	source model.tcl
 	source analysis.tcl
