@@ -27,6 +27,17 @@ C
 C  Upgraded by J. Restrepo 2011:
 C                               Changed the way OMEGA is calculated.
 C
+C  Upgraded by M. Schoettler 2011:
+C                               Accounted for true stress in the yield
+C                                     plateau in compression
+C                               Corrected strain hardening curve's calculation
+C                                     of FpSH.
+C                               Corrected a Major Reversal's call to Bausch. when
+C                                     within the yield plateau to use Fy*(1+Es),
+C                                     instead of Fy.
+C                               Corrected a small reversal to follow "reversal
+C                                     to strain hardening" instead of "Elastic".
+C
 C  This subroutine determines the cyclic stress history of reinforcing steel 
 C  given the tensile skeleton curve properties and the strain history as 
 C  described by Chapter 2 of this thesis.
@@ -343,9 +354,13 @@ C
       Else If (s*(Eps-Epo(M)-s*Fy/YoungsUn).GE.-1.E-5) Then
         If (s*(Eps-Epo(K)-s*Epy).LE.(EpSH-Epy)) then
           Fps   = Fy*s*(1+Es)                        ! Yield Plateau
-          YpTan = Fy
+          If (s.LT.0.0) then                         ! MODIFIED BY M. SCHOETTLER 11/8/11
+             Fps = -Fy*(1.0/(1+Es))
+          End If
+          YpTan = Fy*exp(s*Eps)                      ! MODIFIED BY M. SCHOETTLER 11/8/11
         Else
-          FpSH  = Fy*(1+Epsh)                          ! Strain Hardening
+C MODIFIED BY M. SCHOETTLER 11-9-11 FpSH computed incorrectly as Fy*(1+Epsh)
+          FpSH  = Fy*exp(Epsh)                          ! Strain Hardening
           C1    = FpSH - Fpsu + Fpsu*(Epsu-EpSH)
           C2    = (Epsu-s*(Eps-Epo(K)))/(Epsu-EpSH)
           Fps   = s*C1*C2**SHPower - Fpsu*(s*Epsu-(Eps-Epo(K))) + s*Fpsu
@@ -378,8 +393,9 @@ C
 C  MAJOR BAUSCHINGER CURVE moving toward yield plateau point
 C
 C    Updated 10-5-11:  Epa(M) and Fpa(M) to EpaM(M) and FpaM(M)
-      Call Bausch1 (Eps,EpaM(M),FpaM(M),Epo(M)+s*Fy/YoungsUn,Fy*s,       ! Input
-     +             YoungsUn,Fy,Power(K),                               ! Input
+C    MODIFIED BY M. SCHOETTLER 11-9-11:  Fy*s was updated to Fy*s*(1+Es)
+      Call Bausch1 (Eps,EpaM(M),FpaM(M),Epo(M)+s*Fy/YoungsUn,          ! Input
+     +             Fy*s*(1+Es),YoungsUn,Fy,Power(K),                   ! Input
      +             Fps,YpTan)                                          ! Output
           Else
 C
