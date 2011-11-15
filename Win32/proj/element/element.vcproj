@@ -1015,6 +1015,18 @@
 			Name="UWelements"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrick.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrick.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UWelements\SSPbrickUP.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\UWelements\SSPquad.cpp">
 			</File>
 			<File
