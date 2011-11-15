@@ -443,11 +443,13 @@ ArpackSolver::myMv(int n, double *v, double *result)
     int Msize = theArpackSOE->Msize;
     double *M = theArpackSOE->M;
 
+    /* for output
     DataFileStream dataStream("M.txt");
     dataStream.open();
     for (int i=0; i<n; i++)
       dataStream << M[i] << endln;
     dataStream.close();
+    */
 
     if (n <= Msize) {
       for (int i=0; i<n; i++)

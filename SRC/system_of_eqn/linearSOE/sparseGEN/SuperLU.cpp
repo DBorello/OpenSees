@@ -147,6 +147,7 @@ SuperLU::solve(void)
 	return -1;
     }
 
+    /*
     DataFileStream dataStream("K.txt");
     dataStream.open();
     dataStream << n << " " << theSOE->nnz-n << endln;
@@ -170,9 +171,8 @@ SuperLU::solve(void)
       for (int j=theSOE->colStartA[i]; j<theSOE->colStartA[i+1]; j++)
 	if (theSOE->rowA[j] != i)
 	  dataStream << theSOE->A[j] << endln;
-
-    dataStream << endln;
     dataStream.close();
+    */
 
     // first copy B into X
     double *Xptr = theSOE->X;
