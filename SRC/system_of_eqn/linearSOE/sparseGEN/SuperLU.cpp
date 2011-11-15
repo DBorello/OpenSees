@@ -37,7 +37,7 @@
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
+#include <DataFileStream.h>
 
 SuperLU::SuperLU(int perm, 
 		 double drop_tolerance, 
@@ -73,7 +73,6 @@ SuperLU::SuperLU(int perm,
 
 SuperLU::~SuperLU()
 {
-
   if (perm_r != 0)
     delete [] perm_r;
   if (perm_c != 0)
@@ -147,6 +146,33 @@ SuperLU::solve(void)
 	opserr << " size for row and col permutations 0 - has setSize() been called?\n";
 	return -1;
     }
+
+    DataFileStream dataStream("K.txt");
+    dataStream.open();
+    dataStream << n << " " << theSOE->nnz-n << endln;
+
+    // output diagonal entries
+    for (int i=0; i<n; i++) 
+      for (int j=theSOE->colStartA[i]; j<theSOE->colStartA[i+1]; j++)
+	if (theSOE->rowA[j] == i)
+	  dataStream << theSOE->A[j] << endln;
+
+    // rowA - diagonals
+    for (int i=0; i<=n; i++) 
+      dataStream << theSOE->colStartA[i]-i+1 << endln; 
+
+    for (int i=0; i<n; i++) 
+      for (int j=theSOE->colStartA[i]; j<theSOE->colStartA[i+1]; j++)
+	if (theSOE->rowA[j] != i)
+	  dataStream << theSOE->rowA[j]+1 << endln;
+
+    for (int i=0; i<n; i++) 
+      for (int j=theSOE->colStartA[i]; j<theSOE->colStartA[i+1]; j++)
+	if (theSOE->rowA[j] != i)
+	  dataStream << theSOE->A[j] << endln;
+
+    dataStream << endln;
+    dataStream.close();
 
     // first copy B into X
     double *Xptr = theSOE->X;

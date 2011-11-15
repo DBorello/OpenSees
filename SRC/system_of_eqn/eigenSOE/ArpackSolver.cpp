@@ -17,7 +17,7 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
 // $Revision: 1.5 $
 // $Date: 2010-02-16 18:51:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSolver.cpp,v $
@@ -40,7 +40,7 @@
 // It is based on previous work of Jun Peng(Stanford)
 //
 
-
+#include <DataFileStream.h>
 #include <ArpackSolver.h>
 #include <ArpackSOE.h>
 #include <LinearSOE.h>
@@ -441,8 +441,14 @@ ArpackSolver::myMv(int n, double *v, double *result)
   if (mDiagonal == true) {
 
     int Msize = theArpackSOE->Msize;
-
     double *M = theArpackSOE->M;
+
+    DataFileStream dataStream("M.txt");
+    dataStream.open();
+    for (int i=0; i<n; i++)
+      dataStream << M[i] << endln;
+    dataStream.close();
+
     if (n <= Msize) {
       for (int i=0; i<n; i++)
 	result[i] = M[i]*v[i];
